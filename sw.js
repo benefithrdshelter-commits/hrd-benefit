@@ -1,10 +1,10 @@
 // Service worker HRD Benefit: menyimpan "cangkang" aplikasi supaya cepat dibuka
 // dan bisa di-install. Data & halaman Apps Script tetap selalu diambil online.
-const CACHE = 'hrd-benefit-v1';
+const CACHE = 'hrd-benefit-v2';
 const FILE_CANGKANG = [
   './', './index.html', './manifest.webmanifest',
-  './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png',
-  './icons/apple-touch-icon.png', './icons/favicon-32.png', './icons/logo-launcher.png'
+  './icon-192.png', './icon-512.png', './maskable-512.png',
+  './apple-touch-icon.png', './favicon-32.png', './logo-launcher.png'
 ];
 
 self.addEventListener('install', (e) => {
