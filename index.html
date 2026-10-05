@@ -357,7 +357,13 @@ window.addEventListener('message', (e) => {
   const asal = String(e.origin || '');
   const asalSah = asal === 'https://script.google.com' || /\.googleusercontent\.com$/.test(asal);
   const d = e.data;
-  if(!asalSah || !d || d.type !== 'shelter-nav' || typeof d.url !== 'string') return;
+  if(!asalSah || !d) return;
+  // Halaman Apps Script bertanya "apakah aku di dalam aplikasi?" -> jawab ya
+  if(d.type === 'shelter-ping'){
+    try { e.source && e.source.postMessage({ type: 'shelter-pong' }, asal); } catch(err){}
+    return;
+  }
+  if(d.type !== 'shelter-nav' || typeof d.url !== 'string') return;
   if(d.url.indexOf(EXEC_URL) !== 0) return;
   try { e.source && e.source.postMessage({ type: 'shelter-nav-ok' }, asal); } catch(err){}
   bingkai.src = d.url;
