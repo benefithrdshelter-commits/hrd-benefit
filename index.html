@@ -194,6 +194,128 @@
     .toast{bottom:30px;}
   }
 
+
+  /* ================= RIWAYAT ================= */
+  .rw-head{display:flex; align-items:center; gap:12px; margin:2px 0 16px;}
+  .rw-head .tx{flex:1; min-width:0;}
+  .rw-head b{display:block; font-size:19px; font-weight:800; line-height:1.25;}
+  .rw-head small{display:block; font-size:13px; color:var(--muted); margin-top:2px;}
+  .rw-head .icb.putar svg{animation:putar .8s linear infinite;}
+  .rw{background:#fff; border:1px solid var(--line); border-radius:22px; padding:16px; margin-bottom:12px; box-shadow:0 6px 18px rgba(16,26,46,.05);}
+  .rw-top{display:flex; align-items:flex-start; gap:10px; justify-content:space-between;}
+  .rw-top b{font-size:16px; font-weight:800; line-height:1.3;}
+  .rw-date{font-size:13px; color:var(--muted); margin-top:3px;}
+  .bd{flex:none; display:inline-flex; align-items:center; gap:5px; padding:6px 11px; border-radius:99px; font-size:12.5px; font-weight:800; white-space:nowrap;}
+  .bd-diajukan{background:var(--blue-tint); color:var(--blue);}
+  .bd-diproses{background:#FDF3E2; color:#B7791F;}
+  .bd-selesai{background:#E8F8F0; color:#1E9E6B;}
+  .rw-steps{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:14px 0 4px;}
+  .rw-steps i{height:6px; border-radius:99px; background:#E6ECF5;}
+  .rw-steps i.ok{background:linear-gradient(90deg,var(--blue-2),var(--blue));}
+  .rw-steps.selesai i.ok{background:linear-gradient(90deg,#2BB57E,#1E9E6B);}
+  .rw-stepl{display:grid; grid-template-columns:repeat(3,1fr); font-size:11.5px; color:var(--muted); font-weight:700;}
+  .rw-stepl span:nth-child(2){text-align:center;} .rw-stepl span:nth-child(3){text-align:right;}
+  .rw-info{margin-top:12px; padding-top:12px; border-top:1px solid #EEF2F8; display:grid; gap:8px;}
+  .rw-info .k{font-size:12.5px; color:var(--muted); font-weight:600;}
+  .rw-info .v{font-size:14.5px; font-weight:700; margin-top:1px; word-break:break-word;}
+  .rw-info .v small{color:var(--muted); font-weight:600;}
+  .rw-pdf{display:flex; align-items:center; justify-content:center; gap:8px; margin-top:12px; padding:12px; border-radius:14px; background:var(--blue-tint); color:var(--blue); font-weight:800; font-size:14.5px;}
+  .rw-nopdf{margin-top:12px; font-size:13px; color:#98A3B8; text-align:center;}
+  .rw-empty{text-align:center; padding:36px 18px; background:#fff; border:1px dashed #D5DEEC; border-radius:22px; color:var(--muted); font-size:14.5px; line-height:1.6;}
+  .rw-empty b{display:block; color:var(--ink); font-size:16px; margin-bottom:4px;}
+  .rw-sk{height:118px; border-radius:22px; margin-bottom:12px; background:linear-gradient(90deg,#E9EEF6 0%,#F5F8FC 50%,#E9EEF6 100%); background-size:200% 100%; animation:kilau 1.2s ease-in-out infinite;}
+  @keyframes kilau{from{background-position:200% 0;} to{background-position:-200% 0;}}
+  .rw-baru{width:100%; margin-top:6px; padding:16px;}
+  @media (min-width:900px){
+    .screen[data-screen="riwayat"]{max-width:860px;}
+    #rwList{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+    #rwList .rw, #rwList .rw-sk{margin:0;}
+    #rwList .rw-empty{grid-column:1 / -1;}
+    .rw-baru{width:auto; padding:14px 26px; margin-top:18px;}
+  }
+
+
+  /* ================= FORMULIR PENGAJUAN ================= */
+  .fm-sec{background:#fff; border:1px solid var(--line); border-radius:22px; padding:18px 16px; margin-bottom:14px; box-shadow:0 6px 18px rgba(16,26,46,.05);}
+  .fm-sec h3{display:flex; align-items:center; gap:10px; font-size:16.5px; font-weight:800; margin:0;}
+  .fm-sec h3 i{width:28px; height:28px; border-radius:9px; background:var(--blue-tint); color:var(--blue); font-style:normal; font-size:13.5px; display:flex; align-items:center; justify-content:center; flex:none;}
+  .fm-sec .ds{font-size:13.5px; color:var(--muted); line-height:1.5; margin:8px 0 0;}
+  .fi{margin-top:14px;}
+  .fi > label{display:block; font-size:14px; font-weight:700; margin-bottom:7px;}
+  .fi > label em{color:#D9382B; font-style:normal;}
+  .fi > label small{font-weight:600; color:var(--muted); font-size:12.5px;}
+  .fi input:not([type=checkbox]):not([type=radio]):not([type=file]), .fi select, .fi textarea, .riw-r input, .kes-r .kb input{width:100%; font:inherit; font-size:16px; padding:13px 14px; border-radius:14px; border:1.5px solid #E3E9F2; background:#F7F9FC; color:var(--ink); outline:none; -webkit-appearance:none; appearance:none;}
+  .fi input:focus, .fi select:focus, .fi textarea:focus, .riw-r input:focus, .kes-r .kb input:focus{border-color:var(--blue); background:#fff; box-shadow:0 0 0 4px rgba(30,91,214,.1);}
+  .fi select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236B7890'%3E%3Cpath d='M5.2 7.2a.75.75 0 011.1 0L10 11.2l3.7-4a.75.75 0 111.1 1l-4.25 4.5a.75.75 0 01-1.1 0L5.2 8.3a.75.75 0 010-1.1z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; background-size:18px; padding-right:42px !important;}
+  .fi textarea{resize:vertical; line-height:1.55; min-height:150px;}
+  .fi .cnt{display:flex; justify-content:space-between; font-size:12.5px; color:var(--muted); margin-top:6px;}
+  .g2{display:grid; grid-template-columns:1fr 1fr; column-gap:12px;}
+  @media (max-width:560px){ .g2{grid-template-columns:1fr;} }
+  .chips{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip-o{position:relative; cursor:pointer;}
+  .chip-o input{position:absolute; opacity:0; pointer-events:none;}
+  .chip-o span{display:block; padding:11px 15px; border-radius:13px; border:1.5px solid #E3E9F2; background:#F7F9FC; font-weight:700; font-size:14.5px;}
+  .chip-o input:checked + span{border-color:var(--blue); background:var(--blue-tint); color:var(--blue);}
+  .chip-o input:checked + span::before{content:"\2713  ";}
+  .ket{margin-top:12px; padding:12px 14px; border-radius:13px; background:var(--blue-tint); color:var(--blue); font-size:13.5px; font-weight:800;}
+  .fi .up-box{display:flex; align-items:center; gap:12px; border:1.5px dashed #C9D4E5; border-radius:16px; padding:13px 14px; background:#FAFBFE; cursor:pointer; color:var(--muted); font-size:14px; font-weight:600; margin:0;}
+  .up-box i{width:42px; height:42px; border-radius:13px; background:var(--blue-tint); color:var(--blue); display:flex; align-items:center; justify-content:center; flex:none; font-style:normal;}
+  .up-box input{display:none;}
+  .up.ok .up-box{border-style:solid; border-color:#9ED9BF; background:#F0FAF5; color:#1E7F58;}
+  .up.ok .up-box i{background:#DDF3E8; color:#1E9E6B;}
+  .up.proses .up-box{opacity:.6; pointer-events:none;}
+  .up-list{display:grid; grid-template-columns:repeat(auto-fill,minmax(86px,1fr)); gap:8px; margin-top:10px;}
+  .up-list:empty{display:none;}
+  .up-th{position:relative; border-radius:12px; overflow:hidden; aspect-ratio:1/1; background:#EEF2F8;}
+  .up-th img{width:100%; height:100%; object-fit:cover; display:block;}
+  .up-th button{position:absolute; top:5px; right:5px; width:28px; height:28px; border-radius:50%; border:none; background:rgba(16,26,46,.75); color:#fff; font-size:13px; font-weight:800; cursor:pointer;}
+  .riw-r{display:flex; gap:8px; margin-top:10px;}
+  .riw-r button, .riw-x{flex:none; width:48px; border:none; border-radius:14px; background:#FDECEC; color:#B23A3A; font-size:15px; font-weight:800; cursor:pointer;}
+  .btn-add{margin-top:12px; border:1.5px dashed #C9D4E5; background:#fff; color:var(--blue); border-radius:14px; padding:12px 14px; font:inherit; font-size:14px; font-weight:800; cursor:pointer; width:100%;}
+  .kes-r{border:1.5px solid #E3E9F2; border-radius:14px; margin-top:8px; background:#F7F9FC; transition:background .15s, border-color .15s;}
+  .kes-r > label{display:flex; gap:10px; align-items:center; padding:13px 14px; font-weight:700; font-size:14.5px; cursor:pointer; margin:0;}
+  .kes-r input[type=checkbox]{width:20px; height:20px; accent-color:var(--blue); flex:none;}
+  .kes-r .kb{display:none; padding:0 12px 12px; gap:8px; grid-template-columns:1fr 1fr;}
+  .kes-r.on{border-color:var(--blue); background:#fff;}
+  .kes-r.on .kb{display:grid;}
+  .kes-r .kb input{font-size:15px; padding:11px 12px;}
+  @media (max-width:480px){ .kes-r .kb{grid-template-columns:1fr;} }
+  .fm-send{width:100%; padding:17px; font-size:16px; margin-top:4px;}
+  .fm-send:disabled{opacity:.75;}
+  .fm-done{text-align:center; background:#fff; border:1px solid var(--line); border-radius:24px; padding:34px 20px 24px; box-shadow:0 6px 18px rgba(16,26,46,.05);}
+  .fm-done h3{font-size:20px; font-weight:800; margin:0 0 8px;}
+  .fm-done p{color:var(--muted); font-size:14.5px; line-height:1.55; margin:0 auto 22px; max-width:420px;}
+  .fm-done .btn{width:100%; margin-top:10px;}
+  .ok-ic{width:68px; height:68px; border-radius:50%; background:#E8F8F0; color:#1E9E6B; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:30px; font-weight:900;}
+
+  /* ================= REQUEST & QUESTION ================= */
+  .ch-prof{display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--line); border-radius:18px; padding:11px 12px 11px 16px; margin-bottom:12px;}
+  .ch-prof .tx{flex:1; min-width:0; font-size:12.5px; color:var(--muted); font-weight:600;}
+  .ch-prof b{display:block; color:var(--ink); font-size:14.5px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .ch-list{display:flex; flex-direction:column; gap:6px; padding-bottom:10px; min-height:38vh;}
+  .ch-sep{align-self:center; font-size:12px; font-weight:800; color:var(--muted); background:#E6ECF5; border-radius:99px; padding:4px 12px; margin:10px 0 4px;}
+  .bb{max-width:84%; padding:10px 13px; border-radius:18px; font-size:15px; line-height:1.45; white-space:pre-wrap; word-break:break-word;}
+  .bb.a{align-self:flex-start; background:#fff; border:1px solid var(--line); border-bottom-left-radius:6px;}
+  .bb.k{align-self:flex-end; background:linear-gradient(135deg,var(--blue-2),var(--blue)); color:#fff; border-bottom-right-radius:6px;}
+  .bb .who{display:block; font-size:12px; font-weight:800; color:var(--blue); margin-bottom:2px;}
+  .bb .tt{display:block; font-size:11px; opacity:.7; text-align:right; margin-top:3px;}
+  .bb.kirim{opacity:.6;}
+  .ch-comp{position:sticky; z-index:5; bottom:calc(90px + env(safe-area-inset-bottom,0px)); display:flex; gap:8px; align-items:flex-end; background:var(--bg); padding:8px 0 6px;}
+  .ch-comp textarea{flex:1; font:inherit; font-size:16px; line-height:1.4; padding:13px 16px; border-radius:24px; border:1.5px solid #E3E9F2; background:#fff; color:var(--ink); resize:none; max-height:130px; outline:none;}
+  .ch-comp textarea:focus{border-color:var(--blue);}
+  .ch-comp button{width:50px; height:50px; border-radius:50%; flex:none; border:none; cursor:pointer; color:#fff; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--blue-2),var(--blue)); box-shadow:0 8px 18px rgba(30,91,214,.28);}
+  .ch-comp button:disabled{opacity:.5;}
+
+  /* ================= KRITIK & SARAN ================= */
+  .anon{display:flex; gap:12px; align-items:flex-start; background:var(--blue-tint); color:#1E3E7A; border-radius:18px; padding:14px 16px; font-size:14px; line-height:1.55; margin-bottom:14px;}
+  .anon i{flex:none; color:var(--blue); display:flex; margin-top:1px;}
+  .anon i svg{width:22px; height:22px;}
+
+  @media (min-width:900px){
+    .screen[data-screen="form"], .screen[data-screen="pesan"], .screen[data-screen="kritik"]{max-width:780px;}
+    .ch-comp{bottom:14px;}
+  }
+
   @media (prefers-reduced-motion:reduce){ .screen.on, .lg-sheet{animation:none;} .seg .thumb{transition:none;} }
 </style>
 </head>
@@ -252,7 +374,7 @@
   <header class="bar">
     <div class="av" data-f="inisial"></div>
     <div class="tx"><small id="barSmall"></small><b id="barTitle"></b></div>
-    <button class="icb" data-web="pesan" aria-label="Pesan dari admin"><span data-ic="bell"></span></button>
+    <button class="icb" data-go="pesan" aria-label="Pesan dari admin"><span data-ic="bell"></span></button>
   </header>
 
   <section class="screen" data-screen="beranda" data-title="">
@@ -265,27 +387,27 @@
     </div>
     <div class="h2">Menu</div>
     <div class="quick">
-      <button class="q" data-web="saldo-baru"><i class="c-blue" data-ic="saldo"></i>Gabung Saldo</button>
-      <button class="q" data-web="koreksi-baru"><i class="c-teal" data-ic="koreksi"></i>Koreksi Data</button>
-      <button class="q" data-web="keluarga-baru"><i class="c-violet" data-ic="keluarga"></i>Keluarga</button>
+      <button class="q" data-form="saldo"><i class="c-blue" data-ic="saldo"></i>Gabung Saldo</button>
+      <button class="q" data-form="koreksi"><i class="c-teal" data-ic="koreksi"></i>Koreksi Data</button>
+      <button class="q" data-form="keluarga"><i class="c-violet" data-ic="keluarga"></i>Keluarga</button>
       <button class="q" data-go="identitas"><i class="c-orange" data-ic="user"></i>Identitas</button>
     </div>
     <div class="h2">Pengajuan saya <button data-go="pengajuan">Lihat semua</button></div>
-    <button class="tile" data-web="saldo"><i class="c-blue" data-ic="saldo"></i><div class="t"><b>Penggabungan Saldo</b><span>Cek status pengajuan saldo Anda</span></div><span class="go" data-ic="go"></span></button>
-    <button class="tile" data-web="koreksi"><i class="c-teal" data-ic="koreksi"></i><div class="t"><b>Koreksi Data</b><span>Cek status koreksi data tenaga kerja</span></div><span class="go" data-ic="go"></span></button>
-    <button class="tile" data-web="keluarga"><i class="c-violet" data-ic="keluarga"></i><div class="t"><b>Penggabungan Keluarga</b><span>Cek status data keluarga</span></div><span class="go" data-ic="go"></span></button>
+    <button class="tile" data-riwayat="saldo"><i class="c-blue" data-ic="saldo"></i><div class="t"><b>Penggabungan Saldo</b><span data-ringkas="saldo">Cek status pengajuan saldo Anda</span></div><span class="go" data-ic="go"></span></button>
+    <button class="tile" data-riwayat="koreksi"><i class="c-teal" data-ic="koreksi"></i><div class="t"><b>Koreksi Data</b><span data-ringkas="koreksi">Cek status koreksi data tenaga kerja</span></div><span class="go" data-ic="go"></span></button>
+    <button class="tile" data-riwayat="keluarga"><i class="c-violet" data-ic="keluarga"></i><div class="t"><b>Penggabungan Keluarga</b><span data-ringkas="keluarga">Cek status data keluarga</span></div><span class="go" data-ic="go"></span></button>
     <div class="h2">Butuh bantuan?</div>
-    <button class="help" data-web="pesan"><i data-ic="chat"></i><div><b>Tanya Admin HRD</b><span>Kirim pertanyaan atau permintaan, admin akan membalas.</span></div></button>
+    <button class="help" data-go="pesan"><i data-ic="chat"></i><div><b>Tanya Admin HRD</b><span>Kirim pertanyaan atau permintaan, admin akan membalas.</span></div></button>
   </section>
 
   <section class="screen" data-screen="pengajuan" data-title="Pengajuan">
     <p class="note" style="text-align:left; margin:2px 4px 16px;">Ajukan layanan baru atau lihat riwayat dan status pengajuan Anda.</p>
     <div class="svc"><div class="hd"><i class="c-blue" data-ic="saldo"></i><div><b>Penggabungan Saldo</b><span>Gabungkan saldo BPJS dari kepesertaan lama ke kepesertaan baru.</span></div></div>
-      <div class="act"><button class="btn btn-p" data-web="saldo-baru">Ajukan</button><button class="btn btn-s" data-web="saldo">Riwayat</button></div></div>
+      <div class="act"><button class="btn btn-p" data-form="saldo">Ajukan</button><button class="btn btn-s" data-riwayat="saldo">Riwayat</button></div></div>
     <div class="svc"><div class="hd"><i class="c-teal" data-ic="koreksi"></i><div><b>Koreksi Data Tenaga Kerja</b><span>Perbaiki data diri yang salah di kepesertaan BPJS.</span></div></div>
-      <div class="act"><button class="btn btn-p" data-web="koreksi-baru">Ajukan</button><button class="btn btn-s" data-web="koreksi">Riwayat</button></div></div>
+      <div class="act"><button class="btn btn-p" data-form="koreksi">Ajukan</button><button class="btn btn-s" data-riwayat="koreksi">Riwayat</button></div></div>
     <div class="svc"><div class="hd"><i class="c-violet" data-ic="keluarga"></i><div><b>Penggabungan Keluarga</b><span>Tambahkan atau gabungkan data anggota keluarga.</span></div></div>
-      <div class="act"><button class="btn btn-p" data-web="keluarga-baru">Ajukan</button><button class="btn btn-s" data-web="keluarga">Riwayat</button></div></div>
+      <div class="act"><button class="btn btn-p" data-form="keluarga">Ajukan</button><button class="btn btn-s" data-riwayat="keluarga">Riwayat</button></div></div>
   </section>
 
   <section class="screen" data-screen="identitas" data-title="Identitas">
@@ -301,16 +423,93 @@
       <div class="fld"><div class="c"><div class="k">Agama</div><div class="v" data-f="agama"></div></div></div>
       <div class="fld"><div class="c"><div class="k">Alamat</div><div class="v" data-f="alamat"></div></div></div>
     </div>
-    <p class="note">Ada data yang salah? <button data-web="koreksi-baru">Ajukan koreksi data</button></p>
+    <p class="note">Ada data yang salah? <button data-form="koreksi">Ajukan koreksi data</button></p>
   </section>
 
   <section class="screen" data-screen="lainnya" data-title="Lainnya">
     <button class="tile" data-go="identitas"><i class="c-blue" data-ic="user"></i><div class="t"><b data-f="nama"></b><span>Lihat identitas &amp; kepesertaan</span></div><span class="go" data-ic="go"></span></button>
     <div class="h2">Layanan</div>
-    <button class="tile" data-web="pesan"><i class="c-teal" data-ic="chat"></i><div class="t"><b>Request &amp; Question</b><span>Tanya atau minta bantuan ke admin</span></div><span class="go" data-ic="go"></span></button>
-    <button class="tile" data-web="kritik"><i class="c-orange" data-ic="lock"></i><div class="t"><b>Kritik &amp; Saran</b><span>Kirim masukan secara anonim</span></div><span class="go" data-ic="go"></span></button>
+    <button class="tile" data-go="pesan"><i class="c-teal" data-ic="chat"></i><div class="t"><b>Request &amp; Question</b><span>Tanya atau minta bantuan ke admin</span></div><span class="go" data-ic="go"></span></button>
+    <button class="tile" data-go="kritik"><i class="c-orange" data-ic="lock"></i><div class="t"><b>Kritik &amp; Saran</b><span>Kirim masukan secara anonim</span></div><span class="go" data-ic="go"></span></button>
     <div class="h2">Akun</div>
     <button class="tile" id="btnKeluar" style="background:var(--red-tint); border-color:#FADAD6;"><i class="c-red" data-ic="out"></i><div class="t"><b style="color:var(--red)">Keluar</b><span>Kembali ke halaman masuk</span></div></button>
+  </section>
+
+  <section class="screen" data-screen="riwayat" data-title="Pengajuan">
+    <div class="rw-head">
+      <button class="icb" id="rwBack" aria-label="Kembali"><span data-ic="back"></span></button>
+      <div class="tx"><b id="rwJudul"></b><small id="rwInfo"></small></div>
+      <button class="icb" id="rwRefresh" aria-label="Perbarui"><span data-ic="refresh"></span></button>
+    </div>
+    <div id="rwList"></div>
+    <button class="btn btn-p rw-baru" id="rwBaru" data-form="saldo">+ Ajukan baru</button>
+  </section>
+
+  <section class="screen" data-screen="form" data-title="Pengajuan">
+    <div class="rw-head">
+      <button class="icb" id="fmBack" aria-label="Kembali"><span data-ic="back"></span></button>
+      <div class="tx"><b id="fmJudul"></b><small id="fmSub"></small></div>
+    </div>
+    <form class="fm" id="fm-saldo" data-jenis="saldo" novalidate hidden><div class="fm-sec"><h3><i>1</i>Data Diri Tenaga Kerja</h3><div class="fi"><label>Nama Tenaga Kerja <em>*</em></label><input data-k="namaTk" type="text" required></div><div class="g2"><div class="fi"><label>Tempat, Tanggal Lahir <em>*</em></label><input data-k="ttl" type="text" required placeholder="Contoh: Malang, 04/08/1988"></div><div class="fi"><label>NIK <em>*</em></label><input data-k="nik" type="text" required placeholder="16 digit sesuai KTP" inputmode="numeric" maxlength="16"></div></div><div class="fi"><label>Nomor Kartu Keluarga (KK) <em>*</em></label><input data-k="noKK" type="text" required placeholder="16 digit sesuai Kartu Keluarga" inputmode="numeric" maxlength="16"></div><div class="g2"><div class="fi"><label>Email <em>*</em></label><input data-k="email" type="email" required placeholder="nama@email.com"></div><div class="fi"><label>No. WhatsApp Aktif <em>*</em></label><input data-k="noWhatsapp" type="tel" required placeholder="08xxxxxxxxxx" inputmode="tel"></div></div></div><div class="fm-sec"><h3><i>2</i>Data Perusahaan &amp; Penempatan</h3><div class="fi"><label>Nama Site Penempatan <em>*</em> <small>(aktif saat ini)</small></label><input data-k="namaSite" type="text" required placeholder="Contoh: PT Kobin Keramik Industri"></div><div class="fi" data-radio="posisi"><label>Posisi Bidang Jasa <em>*</em></label><div class="chips"><label class="chip-o"><input type="radio" name="s_posisi" value="Security"><span>Security</span></label><label class="chip-o"><input type="radio" name="s_posisi" value="Non Security"><span>Non Security</span></label></div></div><div data-lain hidden><div class="fi"><label>Sebutkan Posisi Non Security</label><input data-k="posisiLain" type="text" placeholder="Contoh: Kurir, Cleaning Service, Driver, dst."></div></div></div><div class="fm-sec"><h3><i>3</i>Data Kartu Peserta</h3><div class="fi"><label>No Kartu Peserta Lama <small>(isi SEMUA nomor, pisah koma)</small></label><input data-k="noLama" type="text" placeholder="Contoh: 12000386602, 13000123456"></div><div class="fi"><label>No Kartu Peserta Baru <small>(kosongkan jika belum ada)</small></label><input data-k="noBaru" type="text" placeholder="Contoh: 24173771676"></div></div><div class="fm-sec"><h3><i>4</i>Riwayat Pekerjaan Sebelumnya</h3><p class="ds">Opsional. Riwayat di posisi/site saat ini dicatat otomatis oleh admin. Isi hanya kalau pernah bekerja di tempat lain sebelumnya.</p><div data-riwayat-list></div><button type="button" class="btn-add" data-tambah-riwayat>+ Tambah riwayat pekerjaan sebelumnya</button></div><div class="fm-sec"><h3><i>5</i>Upload Dokumen</h3><div class="fi up" data-up="kartuLama" data-multi data-kosong="Ketuk untuk pilih satu atau beberapa foto"><label>Foto Kartu Lama <em>*</em> <small>(upload SEMUA kartu lama yang pernah dipakai)</small></label><label class="up-box"><i data-ic="cam"></i><span class="up-t">Ketuk untuk pilih satu atau beberapa foto</span><input type="file" accept="image/*" multiple></label><div class="up-list"></div></div><div class="fi up" data-up="kartuBaru" data-kosong="Ketuk untuk foto atau pilih gambar"><label>Foto Kartu Baru <small>(kosongkan jika belum ada)</small></label><label class="up-box"><i data-ic="cam"></i><span class="up-t">Ketuk untuk foto atau pilih gambar</span><input type="file" accept="image/*"></label><div class="up-list"></div></div><div class="fi up" data-up="ktp" data-kosong="Ketuk untuk foto atau pilih gambar"><label>Foto KTP <em>*</em></label><label class="up-box"><i data-ic="cam"></i><span class="up-t">Ketuk untuk foto atau pilih gambar</span><input type="file" accept="image/*"></label><div class="up-list"></div></div><div class="fi up" data-up="suratReferensi" data-multi data-kosong="Ketuk untuk pilih satu atau beberapa foto"><label>Surat Referensi Perusahaan Lama <small>(opsional, boleh lebih dari satu)</small></label><label class="up-box"><i data-ic="cam"></i><span class="up-t">Ketuk untuk pilih satu atau beberapa foto</span><input type="file" accept="image/*" multiple></label><div class="up-list"></div></div></div><div class="err"></div><button type="submit" class="btn btn-p fm-send">Kirim Pengajuan</button></form>
+    <form class="fm" id="fm-koreksi" data-jenis="koreksi" novalidate hidden><div class="fm-sec"><h3><i>1</i>Data Diri</h3><div class="fi"><label>Nama Tenaga Kerja <em>*</em></label><input data-k="namaTk" type="text" required></div><div class="g2"><div class="fi"><label>Tanggal Lahir <em>*</em></label><input data-k="tanggalLahir" type="text" required placeholder="Contoh: 17/08/1990"></div><div class="fi"><label>No Kartu Peserta <em>*</em></label><input data-k="noKartuPeserta" type="text" required inputmode="numeric"></div></div><div class="g2"><div class="fi"><label>Email <em>*</em></label><input data-k="email" type="email" required placeholder="nama@email.com"></div><div class="fi"><label>No. WhatsApp Aktif <em>*</em></label><input data-k="noWhatsapp" type="tel" required placeholder="08xxxxxxxxxx" inputmode="tel"></div></div></div><div class="fm-sec"><h3><i>2</i>Data Penempatan</h3><div class="fi"><label>Nama Site Penempatan <em>*</em> <small>(aktif saat ini)</small></label><input data-k="namaSite" type="text" required placeholder="Contoh: PT Kobin Keramik Industri"></div></div><div class="fm-sec"><h3><i>3</i>Data Kepesertaan</h3><div class="g2"><div class="fi"><label>Tahun <em>*</em></label><input data-k="tahun" type="text" required placeholder="Contoh: 2026" inputmode="numeric" maxlength="4"></div><div class="fi"><label>Kepesertaan Awal <em>*</em> <small>(tahun mulai jadi peserta)</small></label><input data-k="kepesertaanAwal" type="text" required placeholder="Contoh: 2015" inputmode="numeric" maxlength="4"></div></div></div><div class="fm-sec"><h3><i>4</i>Jenis Kesalahan</h3><p class="ds">Centang data yang salah, lalu isi yang tertulis dan yang seharusnya.</p><div data-kesalahan></div></div><div class="fm-sec"><h3><i>5</i>Lampiran</h3><div class="fi up" data-up="ktp" data-kosong="Ketuk untuk foto atau pilih gambar"><label>Foto KTP <em>*</em></label><label class="up-box"><i data-ic="cam"></i><span class="up-t">Ketuk untuk foto atau pilih gambar</span><input type="file" accept="image/*"></label><div class="up-list"></div></div><div class="fi up" data-up="kk" data-kosong="Ketuk untuk foto atau pilih gambar"><label>Foto Kartu Keluarga <small>(opsional)</small></label><label class="up-box"><i data-ic="cam"></i><span class="up-t">Ketuk untuk foto atau pilih gambar</span><input type="file" accept="image/*"></label><div class="up-list"></div></div></div><div class="err"></div><button type="submit" class="btn btn-p fm-send">Kirim Pengajuan</button></form>
+    <form class="fm" id="fm-keluarga" data-jenis="keluarga" novalidate hidden><div class="fm-sec"><h3><i>1</i>Data Tenaga Kerja</h3><div class="fi"><label>Nama Tenaga Kerja <em>*</em></label><input data-k="namaTk" type="text" required></div><div class="g2"><div class="fi"><label>NIK <em>*</em></label><input data-k="nikKtp" type="text" required placeholder="16 digit sesuai KTP" inputmode="numeric" maxlength="16"></div><div class="fi"><label>No. WhatsApp <em>*</em></label><input data-k="noWhatsapp" type="tel" required placeholder="08xxxxxxxxxx" inputmode="tel"></div></div><div class="fi"><label>Email <em>*</em></label><input data-k="email" type="email" required placeholder="nama@email.com"></div></div><div class="fm-sec"><h3><i>2</i>Posisi &amp; Penempatan</h3><div class="fi" data-radio="posisi"><label>Posisi Bidang Jasa <em>*</em></label><div class="chips"><label class="chip-o"><input type="radio" name="k_posisi" value="Security" checked><span>Security</span></label><label class="chip-o"><input type="radio" name="k_posisi" value="Non Security"><span>Non Security</span></label></div></div><div data-lain hidden><div class="fi"><label>Sebutkan Posisi Non Security</label><input data-k="posisiLain" type="text" placeholder="Contoh: Kurir, Cleaning Service, Driver, dst."></div></div><div class="fi"><label>Badan Usaha <em>*</em></label><select data-k="badanUsaha" required><option value="">Pilih Badan Usaha</option><option value="SIG">PT SHELTER INDONESIA GEMILANG</option><option value="GSU">PT GLOBAL SECURINDO UTAMA</option><option value="SN">PT SHELTER NUSANTARA</option><option value="SNI">PT SHELTER NUSA INDAH</option><option value="ION">PT INDAH OPTIMAL NUSANTARA</option><option value="RCI">PT RAPI CHEM INDONESIA</option></select></div><div class="fi"><label>Site Penempatan <em>*</em> <small>(aktif saat ini)</small></label><input data-k="site" type="text" required placeholder="Contoh: RS Siloam"></div><div class="ket" data-ket hidden></div></div><div class="fm-sec"><h3><i>3</i>Anggota Keluarga yang Ditambahkan</h3><p class="ds">Boleh pilih lebih dari satu.</p><div class="chips" data-anggota style="margin-top:12px"><label class="chip-o"><input type="checkbox" value="Istri"><span>Istri</span></label><label class="chip-o"><input type="checkbox" value="Suami"><span>Suami</span></label><label class="chip-o"><input type="checkbox" value="Anak 1"><span>Anak 1</span></label><label class="chip-o"><input type="checkbox" value="Anak 2"><span>Anak 2</span></label><label class="chip-o"><input type="checkbox" value="Anak 3"><span>Anak 3</span></label><label class="chip-o"><input type="checkbox" value="Anggota Keluarga Tambahan 1% (Anak 4, Ibu dan ayah kandung)"><span>Anggota Keluarga Tambahan 1% (Anak 4, Ibu dan ayah kandung)</span></label></div></div><div class="fm-sec"><h3><i>4</i>Upload Dokumen</h3><div class="fi up" data-up="kk" data-kosong="Ketuk untuk foto atau pilih gambar"><label>Kartu Keluarga <em>*</em></label><label class="up-box"><i data-ic="cam"></i><span class="up-t">Ketuk untuk foto atau pilih gambar</span><input type="file" accept="image/*"></label><div class="up-list"></div></div><div class="fi up" data-up="ktp" data-kosong="Ketuk untuk foto atau pilih gambar"><label>Foto KTP <em>*</em></label><label class="up-box"><i data-ic="cam"></i><span class="up-t">Ketuk untuk foto atau pilih gambar</span><input type="file" accept="image/*"></label><div class="up-list"></div></div><div class="fi up" data-up="akta" data-kosong="Ketuk untuk foto atau pilih gambar"><label>Akta Kelahiran <em>*</em></label><label class="up-box"><i data-ic="cam"></i><span class="up-t">Ketuk untuk foto atau pilih gambar</span><input type="file" accept="image/*"></label><div class="up-list"></div></div><div class="fi up" data-up="bukuNikah" data-kosong="Ketuk untuk foto atau pilih gambar"><label>Buku Nikah <em>*</em></label><label class="up-box"><i data-ic="cam"></i><span class="up-t">Ketuk untuk foto atau pilih gambar</span><input type="file" accept="image/*"></label><div class="up-list"></div></div></div><div class="err"></div><button type="submit" class="btn btn-p fm-send">Kirim Pengajuan</button></form>
+    <div class="fm-done" id="fmDone" hidden>
+      <div class="ok-ic">&#10003;</div>
+      <h3>Pengajuan terkirim</h3>
+      <p id="fmDoneTx"></p>
+      <button class="btn btn-p" id="fmLihat">Lihat riwayat &amp; status</button>
+      <button class="btn btn-s" data-go="beranda">Kembali ke Beranda</button>
+    </div>
+  </section>
+
+  <section class="screen" data-screen="pesan" data-title="Lainnya">
+    <div class="rw-head">
+      <button class="icb" data-kembali="lainnya" aria-label="Kembali"><span data-ic="back"></span></button>
+      <div class="tx"><b>Request &amp; Question</b><small>Percakapan dengan Admin HRD</small></div>
+      <button class="icb" id="chRefresh" aria-label="Perbarui"><span data-ic="refresh"></span></button>
+    </div>
+    <div class="ch-prof" id="chProf" hidden><div class="tx">Dikirim sebagai<b id="chProfTx"></b></div><button class="copy" id="chUbah">Ubah</button></div>
+    <div class="fm-sec" id="chProfForm" hidden>
+      <h3><i>&#9998;</i>Data pengirim</h3>
+      <p class="ds">Wajib diisi sekali. Setelah itu otomatis dipakai untuk setiap pesan.</p>
+      <div class="g2">
+        <div class="fi"><label>Nama <em>*</em></label><input id="chNama" maxlength="100" placeholder="Nama lengkap kamu"></div>
+        <div class="fi"><label>Badan Usaha <em>*</em></label><select id="chBadan"><option value="">Memuat…</option></select></div>
+        <div class="fi"><label>Site Penempatan <em>*</em></label><input id="chSite" maxlength="120" placeholder="Contoh: PT Kobin Keramik Industri"></div>
+        <div class="fi"><label>Bidang Jasa <em>*</em></label><input id="chBidang" maxlength="80" placeholder="Contoh: Kurir, OB"></div>
+      </div>
+      <button class="btn btn-p" id="chSimpan" style="width:100%; margin-top:16px">Simpan</button>
+    </div>
+    <div class="err" id="chErr"></div>
+    <div class="ch-list" id="chList"></div>
+    <div class="ch-comp">
+      <textarea id="chIn" rows="1" maxlength="1000" placeholder="Tulis pesan…"></textarea>
+      <button id="chKirim" aria-label="Kirim"><span data-ic="send"></span></button>
+    </div>
+  </section>
+
+  <section class="screen" data-screen="kritik" data-title="Lainnya">
+    <div class="rw-head">
+      <button class="icb" data-kembali="lainnya" aria-label="Kembali"><span data-ic="back"></span></button>
+      <div class="tx"><b>Kritik &amp; Saran</b><small>Dikirim secara anonim</small></div>
+    </div>
+    <div id="krForm">
+      <div class="anon"><i data-ic="lock"></i><div>Nama, NIK, dan data pribadi kamu <b>tidak dicatat</b>. Admin hanya membaca isi pesannya, jadi tulislah dengan jujur dan sopan.</div></div>
+      <div class="fm-sec">
+        <div class="fi" style="margin-top:0"><label>Kritik / Saran</label>
+          <textarea id="krIn" rows="7" maxlength="1000" placeholder="Tulis kritik atau saran kamu di sini…"></textarea>
+          <div class="cnt"><span>Maksimal 1000 karakter</span><span id="krCnt">0 / 1000</span></div>
+        </div>
+      </div>
+      <div class="err" id="krErr"></div>
+      <button class="btn btn-p fm-send" id="krKirim">Kirim anonim</button>
+    </div>
+    <div class="fm-done" id="krDone" hidden>
+      <div class="ok-ic">&#10003;</div>
+      <h3>Terkirim, terima kasih!</h3>
+      <p>Masukanmu sudah diterima admin tanpa identitas apa pun.</p>
+      <button class="btn btn-s" id="krLagi">Kirim masukan lain</button>
+    </div>
   </section>
 
   <nav class="nav">
@@ -353,6 +552,9 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
     out:'<svg viewBox="0 0 20 20" fill="none"><path d="M7.5 17.5H4.5C3.7 17.5 3 16.8 3 16V4C3 3.2 3.7 2.5 4.5 2.5H7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M13 14L17 10L13 6M17 10H7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     go:'<svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M7.5 4.5L13 10L7.5 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     back:'<svg width="22" height="22" viewBox="0 0 20 20" fill="none"><path d="M12.5 4.5L7 10L12.5 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    refresh:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M16 10a6 6 0 1 1-1.8-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M16.5 3.5V7H13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    send:'<svg width="22" height="22" viewBox="0 0 20 20" fill="none"><path d="M3.5 10L16.5 3.5L12.5 16.5L9.5 11L3.5 10Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.5 11L16.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    cam:'<svg width="22" height="22" viewBox="0 0 20 20" fill="none"><path d="M3 7C3 6 3.8 5.3 4.7 5.3H6.3L7.5 3.6H12.5L13.7 5.3H15.3C16.2 5.3 17 6 17 7V14.8C17 15.7 16.2 16.5 15.3 16.5H4.7C3.8 16.5 3 15.7 3 14.8V7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="10" cy="10.8" r="3" stroke="currentColor" stroke-width="1.6"/></svg>',
     bell:'<svg width="21" height="21" viewBox="0 0 20 20" fill="none"><path d="M5 8C5 5.2 7.2 3 10 3S15 5.2 15 8V11.5L16.5 14H3.5L5 11.5V8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 16.5C8.3 17.3 9.1 18 10 18S11.7 17.3 12 16.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>'
   };
   document.querySelectorAll('[data-ic]').forEach(function(el){ el.innerHTML = IC[el.getAttribute('data-ic')] || ''; });
@@ -399,6 +601,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
       S.set('sesi', { peran: 'karyawan', token: res.token });
       S.set('profil', res.profil);
       bukaKaryawan(res.profil);
+      muatRiwayat();
     }).catch(function(err){ sibuk(btn, false, 'Masuk'); salah('errK', 'Tidak bisa terhubung. Periksa internet Anda. (' + err.message + ')'); });
   });
 
@@ -416,7 +619,8 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   });
 
   function keluar(){
-    S.del('sesi'); S.del('profil');
+    S.del('sesi'); S.del('profil'); S.del('riwayat'); S.del('chat'); S.del('chprof'); S.del('isian'); RW = null; CH = null; CP = null; chatAktif(false);
+    ['saldo','koreksi','keluarga'].forEach(fmReset);
     tutupWeb(true);
     $('app').hidden = true; $('login').hidden = false;
     $('inNik').value = ''; $('inPass').value = '';
@@ -427,6 +631,9 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
 
   // ======================= APLIKASI KARYAWAN =======================
   var F = {}, layar = {}, posisi = {}, aktif = null;
+  var INDUK = { riwayat: 'pengajuan', form: 'pengajuan', pesan: 'lainnya', kritik: 'lainnya' };
+  // Tombol kembali di dalam layar: mundur satu langkah kalau ada, kalau tidak ke layar induk
+  function kembali(induk){ getar(); if(history.state && history.state.dari) history.back(); else tampil(induk, true); }
   document.querySelectorAll('.screen').forEach(function(s){ layar[s.getAttribute('data-screen')] = s; });
 
   function isiProfil(p){
@@ -450,12 +657,14 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   function tampil(nama, catat){
     if(!layar[nama]) nama = 'beranda';
     if(nama === aktif){ window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    var dari = aktif;
     if(aktif) posisi[aktif] = window.scrollY;
     Object.keys(layar).forEach(function(k){ layar[k].classList.toggle('on', k === nama); });
-    document.querySelectorAll('.nav .it').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-go') === nama); });
+    document.querySelectorAll('.nav .it').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-go') === (INDUK[nama] || nama)); });
     aktif = nama; judul(nama);
+    chatAktif(nama === 'pesan');
     window.scrollTo(0, posisi[nama] || 0);
-    if(catat) history.pushState({ layar: nama }, '', '#' + nama);
+    if(catat) history.pushState({ layar: nama, dari: dari }, '', '#' + nama);
   }
 
   function bukaKaryawan(profil){
@@ -464,6 +673,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
     document.querySelector('meta[name="theme-color"]').content = '#F2F5FB';
     aktif = null;
     var awal = (location.hash || '').replace('#', '');
+    if(awal === 'riwayat' || awal === 'form') awal = 'pengajuan';
     history.replaceState({ layar: layar[awal] ? awal : 'beranda' }, '', '#' + (layar[awal] ? awal : 'beranda'));
     tampil(layar[awal] ? awal : 'beranda', false);
   }
@@ -471,6 +681,12 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   document.addEventListener('click', function(e){
     var g = e.target.closest('[data-go]');
     if(g){ e.preventDefault(); getar(); tampil(g.getAttribute('data-go'), true); return; }
+    var r = e.target.closest('[data-riwayat]');
+    if(r){ e.preventDefault(); getar(); bukaRiwayat(r.getAttribute('data-riwayat'), true); return; }
+    var fo = e.target.closest('[data-form]');
+    if(fo){ e.preventDefault(); getar(); bukaForm(fo.getAttribute('data-form'), true); return; }
+    var kb = e.target.closest('[data-kembali]');
+    if(kb){ e.preventDefault(); kembali(kb.getAttribute('data-kembali')); return; }
     var w = e.target.closest('[data-web]');
     if(w){ e.preventDefault(); getar(); bukaWeb(linkKaryawan(w.getAttribute('data-web')), judulWeb[w.getAttribute('data-web')]); }
   });
@@ -540,8 +756,14 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
     var sesi = S.get('sesi') || {};
     if(page === 'login' || page === 'logout'){ keluar(); return; }
     if(sesi.peran === 'karyawan'){
-      if(page === 'karyawan' && !jenis){ tutupWeb(); tampil('beranda', false); return; }
-      if(page === 'karyawan-identitas'){ tutupWeb(); tampil('identitas', false); return; }
+      if(page === 'karyawan' && !jenis){ tutupLalu(function(){ tampil('beranda', true); }); return; }
+      if(page === 'karyawan-identitas'){ tutupLalu(function(){ tampil('identitas', true); }); return; }
+      if(page === 'karyawan' && RW_JUDUL[jenis] && !u.searchParams.get('aksi')){
+        tutupLalu(function(){ muatRiwayat(); bukaRiwayat(jenis, true); }); return;
+      }
+      if(page === 'karyawan' && RW_JUDUL[jenis] && u.searchParams.get('aksi') === 'baru'){ tutupLalu(function(){ bukaForm(jenis, true); }); return; }
+      if(page === 'karyawan-RequestQuestion'){ tutupLalu(function(){ tampil('pesan', true); }); return; }
+      if(page === 'karyawan-anonim'){ tutupLalu(function(){ tampil('kritik', true); }); return; }
     }
     muatIframe(url);
   }
@@ -553,8 +775,508 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
       var f = $('webBox').querySelector('iframe'); if(f) f.remove();
       if((S.get('sesi') || {}).peran === 'admin'){ keluar(); return; }
     }
-    if(st.layar && !$('app').hidden) tampil(st.layar, false);
+    if(lanjutan){ var f2 = lanjutan; lanjutan = null; f2(); return; }
+    if(st.layar && !$('app').hidden){
+      if(st.layar === 'riwayat' && st.jenis){ rwJenis = st.jenis; renderRiwayat(); }
+      if(st.layar === 'form' && st.jenis) siapkanForm(st.jenis);
+      tampil(st.layar, false);
+    }
   });
+
+  // Tutup halaman lama dulu (lewat tombol kembali), baru jalankan fn
+  var lanjutan = null;
+  function tutupLalu(fn){
+    if(webTerbuka && history.state && history.state.web){ lanjutan = fn; tutupWeb(); }
+    else { tutupWeb(true); fn(); }
+  }
+
+  // ======================= RIWAYAT PENGAJUAN (ASLI, TANPA LOADING HALAMAN) =======================
+  var RW_JUDUL = { saldo:'Penggabungan Saldo', koreksi:'Koreksi Data Tenaga Kerja', keluarga:'Penggabungan Keluarga' };
+  var RW = S.get('riwayat'), rwJenis = 'saldo', rwMuat = false, rwGagal = '';
+
+  function esc(x){ return String(x == null ? '' : x).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function tgl(ts){
+    if(!ts) return '-';
+    var d = new Date(ts); if(isNaN(d.getTime())) return String(ts);
+    var b = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    return d.getDate() + ' ' + b[d.getMonth()] + ' ' + d.getFullYear();
+  }
+  function tahap(st){ return st === 'Selesai' ? 3 : st === 'Diproses' ? 2 : 1; }
+  function badge(st){
+    var n = tahap(st);
+    return n === 3 ? '<span class="bd bd-selesai">&#10003; Selesai</span>'
+         : n === 2 ? '<span class="bd bd-diproses">&#8635; Diproses</span>'
+         : '<span class="bd bd-diajukan">&#8226; Diajukan</span>';
+  }
+  function urut(rows){
+    return (Array.isArray(rows) ? rows.slice() : []).sort(function(a, b){
+      return (new Date(b.timestamp).getTime() || 0) - (new Date(a.timestamp).getTime() || 0);
+    });
+  }
+  function anggota(list){
+    if(!list || !list.length) return '';
+    return list.map(function(a){
+      if(typeof a === 'string') return esc(a);
+      var nm = a.nama || a.namaLengkap || a.name || '', hb = a.hubungan || a.status || '';
+      return esc(nm) + (hb ? ' <small>(' + esc(hb) + ')</small>' : '');
+    }).join('<br>');
+  }
+  function kartu(row, jenis){
+    var n = tahap(row.status), info = '';
+    if(jenis === 'saldo') info += '<div><div class="k">No. kartu (lama &rarr; baru)</div><div class="v">' + esc(row.noLama || '-') + ' &rarr; ' + esc(row.noBaru || '-') + '</div></div>';
+    if(jenis === 'keluarga' && row.anggotaKeluarga && row.anggotaKeluarga.length)
+      info += '<div><div class="k">Anggota keluarga (' + row.anggotaKeluarga.length + ' orang)</div><div class="v">' + anggota(row.anggotaKeluarga) + '</div></div>';
+    var pdf = '';
+    if(row.pdfHasil && /^https:\/\//.test(row.pdfHasil)) pdf = '<a class="rw-pdf" href="' + esc(row.pdfHasil) + '" target="_blank" rel="noopener">Lihat surat (PDF) &rarr;</a>';
+    else if(jenis !== 'keluarga') pdf = '<div class="rw-nopdf">Surat belum tersedia</div>';
+    return '<div class="rw">'
+      + '<div class="rw-top"><div><b>' + esc(row.namaTk || '-') + '</b><div class="rw-date">Diajukan ' + tgl(row.timestamp) + '</div></div>' + badge(row.status) + '</div>'
+      + '<div class="rw-steps' + (n === 3 ? ' selesai' : '') + '"><i class="ok"></i><i class="' + (n >= 2 ? 'ok' : '') + '"></i><i class="' + (n >= 3 ? 'ok' : '') + '"></i></div>'
+      + '<div class="rw-stepl"><span>Diajukan</span><span>Diproses</span><span>Selesai</span></div>'
+      + (info ? '<div class="rw-info">' + info + '</div>' : '')
+      + pdf + '</div>';
+  }
+
+  function renderRiwayat(){
+    $('rwJudul').textContent = RW_JUDUL[rwJenis] || 'Riwayat';
+    $('rwBaru').setAttribute('data-form', rwJenis);
+    $('rwRefresh').classList.toggle('putar', rwMuat);
+    var box = $('rwList');
+    if(!RW){
+      $('rwInfo').textContent = rwGagal ? 'Gagal memuat' : 'Memuat riwayat…';
+      box.innerHTML = rwGagal ? '<div class="rw-empty"><b>Riwayat belum bisa dimuat</b>' + esc(rwGagal) + '<br>Ketuk tombol perbarui di kanan atas.</div>'
+                              : '<div class="rw-sk"></div><div class="rw-sk"></div>';
+      return;
+    }
+    var data = RW[rwJenis];
+    if(data && data.error){ $('rwInfo').textContent = 'Gagal memuat'; box.innerHTML = '<div class="rw-empty"><b>Riwayat belum bisa dimuat</b>' + esc(data.error) + '</div>'; return; }
+    var rows = urut(data);
+    $('rwInfo').textContent = rows.length ? rows.length + ' pengajuan' : 'Belum ada pengajuan';
+    box.innerHTML = rows.length ? rows.map(function(r){ return kartu(r, rwJenis); }).join('')
+      : '<div class="rw-empty"><b>Belum ada pengajuan</b>Ketuk "+ Ajukan baru" di bawah untuk membuat yang pertama.</div>';
+  }
+
+  function ringkas(){
+    if(!RW) return;
+    document.querySelectorAll('[data-ringkas]').forEach(function(el){
+      var rows = urut(RW[el.getAttribute('data-ringkas')]);
+      if(!rows.length){ el.textContent = 'Belum ada pengajuan'; return; }
+      el.textContent = rows.length + ' pengajuan \u00b7 terakhir: ' + (rows[0].status || 'Diajukan');
+    });
+  }
+
+  function muatRiwayat(){
+    var ss = S.get('sesi') || {};
+    if(ss.peran !== 'karyawan' || !ss.token || rwMuat) return;
+    rwMuat = true; rwGagal = ''; renderRiwayat();
+    api('riwayatKaryawan', { token: ss.token }).then(function(res){
+      rwMuat = false;
+      if(res.success){ RW = { saldo: res.saldo, koreksi: res.koreksi, keluarga: res.keluarga, waktu: Date.now() }; S.set('riwayat', RW); }
+      else if(res.error === 'SESI_HABIS'){ keluar(); toast('Sesi berakhir, silakan masuk lagi.'); return; }
+      else rwGagal = res.error || 'Terjadi kesalahan.';
+      renderRiwayat(); ringkas();
+    }).catch(function(err){ rwMuat = false; rwGagal = 'Periksa koneksi internet Anda.'; renderRiwayat(); if(RW) toast('Gagal memperbarui riwayat'); });
+  }
+
+  function bukaRiwayat(jenis, catat){
+    rwJenis = RW_JUDUL[jenis] ? jenis : 'saldo';
+    renderRiwayat();
+    var stR = { layar: 'riwayat', jenis: rwJenis, dari: catat === 'ganti' ? (history.state || {}).dari : aktif };
+    if(catat === 'ganti') history.replaceState(stR, '', '#riwayat'); else if(catat) history.pushState(stR, '', '#riwayat');
+    if(aktif === 'riwayat') window.scrollTo(0, 0);
+    tampil('riwayat', false);
+    if(!RW || Date.now() - (RW.waktu || 0) > 60000) muatRiwayat();   // data lama > 1 menit -> perbarui diam-diam
+  }
+  $('rwBack').addEventListener('click', function(){ kembali('pengajuan'); });
+  $('rwRefresh').addEventListener('click', function(){ getar(); muatRiwayat(); });
+
+
+  // ======================= FORMULIR PENGAJUAN (ASLI) =======================
+  var FM_JUDUL = {
+    saldo: ['Penggabungan Saldo', 'Formulir pengajuan BPJS Ketenagakerjaan'],
+    koreksi: ['Koreksi Data Tenaga Kerja', 'Untuk data BPJS Ketenagakerjaan yang salah tercatat'],
+    keluarga: ['Penambahan Anggota Keluarga', 'Formulir BPJS Kesehatan']
+  };
+  var KESALAHAN = ['Nama tenaga kerja', 'Nama anggota keluarga (suami/istri/anak/ibu)', 'Tanggal lahir tenaga kerja',
+    'Tanggal lahir keluarga (suami/istri/anak)', 'Jenis kelamin tenaga kerja', 'Jenis kelamin keluarga (suami/istri/anak)',
+    'Alamat surat menyurat', 'Hilang Kartu Peserta', 'Belum menerima Kartu Peserta', 'Kartu Peserta rusak', 'Nomor KTP (NIK)'];
+  var fmJenis = 'saldo', UP = {}, fmKirimJalan = false;
+  function fmEl(j){ return $('fm-' + j); }
+  function fk(j, k){ return fmEl(j).querySelector('[data-k="' + k + '"]'); }
+  function fv(j, k){ var e = fk(j, k); return e ? e.value.trim() : ''; }
+
+  // Baris jenis kesalahan (koreksi)
+  fmEl('koreksi').querySelector('[data-kesalahan]').innerHTML = KESALAHAN.map(function(l, i){
+    return '<div class="kes-r"><label><input type="checkbox"><span>' + (i + 1) + '. ' + esc(l) + '</span></label>'
+      + '<div class="kb"><input placeholder="Tertulis (yang salah)" data-f="tertulis"><input placeholder="Seharusnya (yang benar)" data-f="seharusnya"></div></div>';
+  }).join('');
+  fmEl('koreksi').addEventListener('change', function(e){
+    var r = e.target.closest('.kes-r');
+    if(r && e.target.type === 'checkbox'){ r.classList.toggle('on', e.target.checked); if(e.target.checked) r.querySelector('.kb input').focus(); }
+  });
+
+  // Riwayat pekerjaan (saldo)
+  function tambahRiwayat(){
+    var box = fmEl('saldo').querySelector('[data-riwayat-list]'), n = box.children.length + 1;
+    var r = document.createElement('div'); r.className = 'riw-r';
+    r.innerHTML = '<input placeholder="Riwayat pekerjaan sebelumnya ' + n + '"><button type="button" aria-label="Hapus">&#10005;</button>';
+    box.appendChild(r); r.querySelector('input').focus();
+  }
+  fmEl('saldo').addEventListener('click', function(e){
+    if(e.target.closest('[data-tambah-riwayat]')){ getar(); tambahRiwayat(); }
+    var x = e.target.closest('.riw-r button'); if(x) x.parentNode.remove();
+  });
+
+  // Posisi Non Security, angka saja, keterangan badan usaha
+  document.querySelectorAll('form.fm').forEach(function(f){
+    var j = f.getAttribute('data-jenis');
+    f.addEventListener('change', function(e){
+      if(e.target.type === 'radio'){ var lain = f.querySelector('[data-lain]'); if(lain) lain.hidden = e.target.value !== 'Non Security'; }
+    });
+    f.querySelectorAll('[inputmode=numeric]').forEach(function(el){
+      el.addEventListener('input', function(){ var v = el.value.replace(/\D/g, ''); if(v !== el.value) el.value = v; });
+    });
+    f.addEventListener('submit', function(e){ e.preventDefault(); fmKirim(j); });
+  });
+  function updateKet(){
+    var f = fmEl('keluarga'), sel = fk('keluarga', 'badanUsaha'), site = fv('keluarga', 'site'), ket = f.querySelector('[data-ket]');
+    var ada = sel.value && site;
+    ket.hidden = !ada;
+    if(ada) ket.textContent = sel.options[sel.selectedIndex].text + ' UNIT ' + site.toUpperCase();
+  }
+  fk('keluarga', 'badanUsaha').addEventListener('change', updateKet);
+  fk('keluarga', 'site').addEventListener('input', updateKet);
+
+  // ---------- Upload foto: diperkecil di HP dulu supaya kirimnya cepat ----------
+  function kecilkan(file){
+    return new Promise(function(ok, gagal){
+      if(!file || !/^image\//.test(file.type || '')) return gagal(new Error('bukan gambar'));
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function(){
+        var max = 1600, w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, max / Math.max(w, h));
+        var c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+        var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url); ok(c.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = function(){ URL.revokeObjectURL(url); gagal(new Error('gambar rusak')); };
+      img.src = url;
+    });
+  }
+  function upRender(box){
+    var list = UP[box._key], multi = box.hasAttribute('data-multi');
+    box.classList.toggle('ok', list.length > 0);
+    box.querySelector('.up-t').textContent = !list.length ? box.getAttribute('data-kosong')
+      : multi ? list.length + ' foto terpilih · ketuk untuk menambah' : 'Foto terpilih · ketuk untuk mengganti';
+    box.querySelector('.up-list').innerHTML = list.map(function(src, i){
+      return '<div class="up-th"><img src="' + src + '" alt=""><button type="button" data-hapus="' + i + '" aria-label="Hapus">&#10005;</button></div>';
+    }).join('');
+  }
+  document.querySelectorAll('form.fm .up').forEach(function(box){
+    var key = box.closest('form').getAttribute('data-jenis') + '.' + box.getAttribute('data-up');
+    box._key = key; UP[key] = [];
+    var input = box.querySelector('input[type=file]');
+    input.addEventListener('change', function(){
+      var files = Array.prototype.slice.call(input.files || []), multi = box.hasAttribute('data-multi');
+      input.value = '';
+      if(!files.length) return;
+      if(!multi) files = files.slice(0, 1);
+      box.classList.add('proses'); box.querySelector('.up-t').textContent = 'Memproses foto…';
+      Promise.all(files.map(function(f){ return kecilkan(f).catch(function(){ return null; }); })).then(function(hasil){
+        var bagus = hasil.filter(Boolean);
+        if(bagus.length) UP[key] = multi ? UP[key].concat(bagus) : bagus;
+        box.classList.remove('proses'); upRender(box);
+        if(bagus.length < files.length) toast(bagus.length ? 'Sebagian file bukan gambar, dilewati' : 'File harus berupa gambar/foto');
+      });
+    });
+    box.querySelector('.up-list').addEventListener('click', function(e){
+      var b = e.target.closest('[data-hapus]');
+      if(b){ getar(); UP[key].splice(+b.getAttribute('data-hapus'), 1); upRender(box); }
+    });
+  });
+
+  // ---------- Isi otomatis dari profil & isian terakhir ----------
+  function isiAwal(j){
+    var p = S.get('profil') || {}, is = S.get('isian') || {};
+    function isi(k, v){ var e = fk(j, k); if(e && !e.value && v) e.value = v; }
+    isi('namaTk', p.nama); isi('nik', p.nik); isi('nikKtp', p.nik); isi('noKartuPeserta', p.noKpj);
+    isi('ttl', [p.tempatLahir, p.tanggalLahir].filter(function(x){ return x && String(x).trim(); }).join(', '));
+    isi('tanggalLahir', p.tanggalLahir);
+    isi('email', is.email); isi('noWhatsapp', is.wa); isi('namaSite', is.site); isi('site', is.site);
+    if(j === 'keluarga') updateKet();
+  }
+  function fmReset(j){
+    var f = fmEl(j); if(!f) return;
+    f.reset();
+    f.querySelectorAll('.up').forEach(function(b){ UP[b._key] = []; upRender(b); });
+    f.querySelectorAll('[data-lain]').forEach(function(x){ x.hidden = true; });
+    f.querySelectorAll('.kes-r').forEach(function(r){ r.classList.remove('on'); });
+    var rl = f.querySelector('[data-riwayat-list]'); if(rl) rl.innerHTML = '';
+    var ket = f.querySelector('[data-ket]'); if(ket) ket.hidden = true;
+    var er = f.querySelector('.err'); er.textContent = ''; er.classList.remove('on');
+  }
+
+  function siapkanForm(j){
+    if(!FM_JUDUL[j]) j = 'saldo';
+    fmJenis = j;
+    ['saldo', 'koreksi', 'keluarga'].forEach(function(x){ fmEl(x).hidden = x !== j; });
+    $('fmDone').hidden = true;
+    $('fmJudul').textContent = FM_JUDUL[j][0]; $('fmSub').textContent = FM_JUDUL[j][1];
+    isiAwal(j);
+  }
+  function bukaForm(j, catat){
+    siapkanForm(j);
+    if(catat) history.pushState({ layar: 'form', jenis: fmJenis, dari: aktif }, '', '#form');
+    if(aktif === 'form') window.scrollTo(0, 0);
+    tampil('form', false);
+  }
+  $('fmBack').addEventListener('click', function(){ kembali('pengajuan'); });
+  $('fmLihat').addEventListener('click', function(){ getar(); bukaRiwayat(fmJenis, 'ganti'); });
+
+  // ---------- Pemeriksaan isian ----------
+  function labelDari(el){
+    var l = el.closest('.fi') && el.closest('.fi').querySelector('label');
+    return l ? l.childNodes[0].textContent.trim() : 'kolom ini';
+  }
+  function fmCek(j){
+    var f = fmEl(j), hasil = null;
+    f.querySelectorAll('[data-k][required]').forEach(function(el){
+      if(hasil || el.offsetParent === null) return;
+      var v = el.value.trim();
+      if(!v) hasil = { el: el, pesan: 'Mohon isi ' + labelDari(el) + '.' };
+      else if(el.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) hasil = { el: el, pesan: 'Format email belum benar.' };
+    });
+    return hasil;
+  }
+  function wa(v){ return v.replace(/[\s-]/g, ''); }
+  function waOk(v){ return /^(\+62|62|0)8\d{7,12}$/.test(wa(v)); }
+  function dataUp(j, k){ return UP[j + '.' + k] || []; }
+  function boxUp(j, k){ return fmEl(j).querySelector('[data-up="' + k + '"]'); }
+
+  var KUMPUL = {
+    saldo: function(){
+      var f = fmEl('saldo'), pos = f.querySelector('input[name=s_posisi]:checked');
+      if(!/^\d{16}$/.test(fv('saldo', 'nik'))) return { salah: { el: fk('saldo', 'nik'), pesan: 'NIK harus 16 digit angka.' } };
+      if(!/^\d{16}$/.test(fv('saldo', 'noKK'))) return { salah: { el: fk('saldo', 'noKK'), pesan: 'Nomor KK harus 16 digit angka.' } };
+      if(!waOk(fv('saldo', 'noWhatsapp'))) return { salah: { el: fk('saldo', 'noWhatsapp'), pesan: 'No. WhatsApp tidak valid. Contoh: 08123456789.' } };
+      if(!pos) return { salah: { el: f.querySelector('[data-radio]'), pesan: 'Pilih Posisi Bidang Jasa.' } };
+      if(pos.value === 'Non Security' && !fv('saldo', 'posisiLain')) return { salah: { el: fk('saldo', 'posisiLain'), pesan: 'Mohon isi Posisi Non Security.' } };
+      if(!dataUp('saldo', 'kartuLama').length) return { salah: { el: boxUp('saldo', 'kartuLama'), pesan: 'Minimal upload 1 foto Kartu Lama.' } };
+      if(!dataUp('saldo', 'ktp').length) return { salah: { el: boxUp('saldo', 'ktp'), pesan: 'Foto KTP wajib diupload.' } };
+      return { data: {
+        namaSite: fv('saldo', 'namaSite'),
+        posisiBidang: pos.value === 'Non Security' ? fv('saldo', 'posisiLain') : 'Security',
+        namaTk: fv('saldo', 'namaTk'), ttl: fv('saldo', 'ttl'), nik: fv('saldo', 'nik'), noKK: fv('saldo', 'noKK'),
+        email: fv('saldo', 'email'), noWhatsapp: wa(fv('saldo', 'noWhatsapp')),
+        noLama: fv('saldo', 'noLama'), noBaru: fv('saldo', 'noBaru'),
+        riwayat: Array.prototype.map.call(f.querySelectorAll('[data-riwayat-list] input'), function(i){ return i.value.trim(); }).filter(Boolean),
+        ktpBase64: dataUp('saldo', 'ktp')[0], kartuBaruBase64: dataUp('saldo', 'kartuBaru')[0] || null,
+        kartuLamaBase64List: dataUp('saldo', 'kartuLama'), suratReferensiBase64List: dataUp('saldo', 'suratReferensi')
+      } };
+    },
+    koreksi: function(){
+      var f = fmEl('koreksi'), adaIsi = false;
+      if(!waOk(fv('koreksi', 'noWhatsapp'))) return { salah: { el: fk('koreksi', 'noWhatsapp'), pesan: 'No. WhatsApp tidak valid. Contoh: 08123456789.' } };
+      var jenis = Array.prototype.map.call(f.querySelectorAll('.kes-r'), function(r){
+        var on = r.classList.contains('on');
+        var t = on ? r.querySelector('[data-f=tertulis]').value.trim() : '', h = on ? r.querySelector('[data-f=seharusnya]').value.trim() : '';
+        if(t || h) adaIsi = true;
+        return { tertulis: t, seharusnya: h };
+      });
+      if(!adaIsi) return { salah: { el: f.querySelector('[data-kesalahan]'), pesan: 'Centang minimal satu data yang salah dan isi keterangannya.' } };
+      if(!dataUp('koreksi', 'ktp').length) return { salah: { el: boxUp('koreksi', 'ktp'), pesan: 'Foto KTP wajib diupload.' } };
+      return { data: {
+        namaTk: fv('koreksi', 'namaTk'), tanggalLahir: fv('koreksi', 'tanggalLahir'), noKartuPeserta: fv('koreksi', 'noKartuPeserta'),
+        email: fv('koreksi', 'email'), noWhatsapp: wa(fv('koreksi', 'noWhatsapp')), namaSite: fv('koreksi', 'namaSite'),
+        tahun: fv('koreksi', 'tahun'), kepesertaanAwal: fv('koreksi', 'kepesertaanAwal'), jenisKesalahan: jenis,
+        ktpBase64: dataUp('koreksi', 'ktp')[0], kkBase64: dataUp('koreksi', 'kk')[0] || null
+      } };
+    },
+    keluarga: function(){
+      var f = fmEl('keluarga'), pos = f.querySelector('input[name=k_posisi]:checked');
+      if(!/^\d{16}$/.test(fv('keluarga', 'nikKtp'))) return { salah: { el: fk('keluarga', 'nikKtp'), pesan: 'NIK harus 16 digit angka.' } };
+      if(!waOk(fv('keluarga', 'noWhatsapp'))) return { salah: { el: fk('keluarga', 'noWhatsapp'), pesan: 'No. WhatsApp tidak valid. Contoh: 08123456789.' } };
+      if(!pos) return { salah: { el: f.querySelector('[data-radio]'), pesan: 'Pilih Posisi Bidang Jasa.' } };
+      if(pos.value === 'Non Security' && !fv('keluarga', 'posisiLain')) return { salah: { el: fk('keluarga', 'posisiLain'), pesan: 'Mohon isi Posisi Non Security.' } };
+      var anggota = Array.prototype.map.call(f.querySelectorAll('[data-anggota] input:checked'), function(i){ return i.value; });
+      if(!anggota.length) return { salah: { el: f.querySelector('[data-anggota]'), pesan: 'Pilih minimal 1 anggota keluarga yang ingin ditambahkan.' } };
+      var wajib = [['kk', 'Kartu Keluarga'], ['ktp', 'Foto KTP'], ['akta', 'Akta Kelahiran'], ['bukuNikah', 'Buku Nikah']];
+      for(var i = 0; i < wajib.length; i++){
+        if(!dataUp('keluarga', wajib[i][0]).length) return { salah: { el: boxUp('keluarga', wajib[i][0]), pesan: wajib[i][1] + ' wajib diupload.' } };
+      }
+      return { data: {
+        namaTk: fv('keluarga', 'namaTk'), nikKtp: fv('keluarga', 'nikKtp'), noWhatsapp: wa(fv('keluarga', 'noWhatsapp')),
+        email: fv('keluarga', 'email'), posisi: pos.value, posisiLainnya: pos.value === 'Non Security' ? fv('keluarga', 'posisiLain') : '',
+        badanUsahaKey: fk('keluarga', 'badanUsaha').value, sitePenempatan: fv('keluarga', 'site'), anggotaKeluarga: anggota,
+        kkBase64: dataUp('keluarga', 'kk')[0], ktpBase64: dataUp('keluarga', 'ktp')[0],
+        aktaBase64: dataUp('keluarga', 'akta')[0], bukuNikahBase64: dataUp('keluarga', 'bukuNikah')[0]
+      } };
+    }
+  };
+
+  function fmSalah(j, c){
+    var er = fmEl(j).querySelector('.err');
+    er.textContent = c.pesan; er.classList.add('on');
+    toast(c.pesan);
+    var el = c.el || er;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if(el.focus && /INPUT|SELECT|TEXTAREA/.test(el.tagName)) setTimeout(function(){ try{ el.focus({ preventScroll: true }); }catch(x){} }, 350);
+    if(navigator.vibrate){ try{ navigator.vibrate([20, 40, 20]); }catch(x){} }
+  }
+  function fmKirim(j){
+    if(fmKirimJalan) return;
+    var f = fmEl(j), er = f.querySelector('.err'), btn = f.querySelector('.fm-send'), ss = S.get('sesi') || {};
+    er.textContent = ''; er.classList.remove('on');
+    var c = fmCek(j); if(c) return fmSalah(j, c);
+    var hasil = KUMPUL[j](); if(hasil.salah) return fmSalah(j, hasil.salah);
+    fmKirimJalan = true; btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Mengirim…';
+    function selesai(){ fmKirimJalan = false; btn.disabled = false; btn.textContent = 'Kirim Pengajuan'; }
+    api('kirimPengajuan', { token: ss.token, jenis: j, data: hasil.data }).then(function(res){
+      selesai();
+      if(res.success) return fmSukses(j);
+      if(res.error === 'SESI_HABIS'){ keluar(); toast('Sesi berakhir, silakan masuk lagi.'); return; }
+      fmSalah(j, { pesan: res.error || 'Terjadi kesalahan. Coba lagi.' });
+    }).catch(function(){
+      selesai();
+      fmSalah(j, { pesan: 'Gagal mengirim. Periksa internet Anda lalu tekan Kirim lagi — isian Anda tidak hilang.' });
+    });
+  }
+  function fmSukses(j){
+    S.set('isian', { email: fv(j, 'email'), wa: wa(fv(j, 'noWhatsapp')), site: fv(j, j === 'keluarga' ? 'site' : 'namaSite') });
+    fmReset(j);
+    fmEl(j).hidden = true; $('fmDone').hidden = false;
+    $('fmDoneTx').textContent = 'Pengajuan ' + FM_JUDUL[j][0] + ' sudah diterima. Admin akan memprosesnya, dan statusnya bisa dipantau di Riwayat.';
+    window.scrollTo(0, 0);
+    if(RW) RW.waktu = 0;
+    muatRiwayat();
+  }
+
+  // ======================= REQUEST & QUESTION (ASLI) =======================
+  var CH = S.get('chat'), CP = S.get('chprof'), chTimer = null, chSig = '', chAdmin = -1, chEdit = false, chJalan = false, chUlang = false, chAntre = [];
+  function chLengkap(p){ return !!(p && p.nama && p.badan && p.site && p.bidang); }
+  function chOpsi(){
+    var sel = $('chBadan'), cur = sel.value || (CP && CP.badan) || '', opsi = ((CH && CH.usaha) || []).slice();
+    if(cur && opsi.indexOf(cur) < 0) opsi.unshift(cur);
+    sel.innerHTML = '<option value="">' + (opsi.length ? 'Pilih badan usaha…' : 'Memuat…') + '</option>'
+      + opsi.map(function(u){ return '<option value="' + esc(u) + '">' + esc(u) + '</option>'; }).join('');
+    sel.value = cur;
+  }
+  function chIsiProf(){
+    if(!chLengkap(CP) && CH && chLengkap({ nama: CH.prof.nama, badan: CH.prof.badan, site: CH.prof.site, bidang: CH.prof.bidang }))
+      CP = { nama: CH.prof.nama, badan: CH.prof.badan, site: CH.prof.site, bidang: CH.prof.bidang };
+    var p = CP || {};
+    $('chNama').value = p.nama || (F.nama !== 'Karyawan' ? F.nama : '');
+    $('chSite').value = p.site || ''; $('chBidang').value = p.bidang || '';
+    $('chBadan').value = ''; chOpsi(); $('chBadan').value = p.badan || '';
+    var ok = chLengkap(CP);
+    $('chProf').hidden = !ok || chEdit; $('chProfForm').hidden = ok && !chEdit;
+    if(ok) $('chProfTx').textContent = CP.nama + ' · ' + CP.site;
+  }
+  $('chUbah').addEventListener('click', function(){ getar(); chEdit = true; chIsiProf(); $('chNama').focus(); });
+  $('chSimpan').addEventListener('click', function(){
+    var p = { nama: $('chNama').value.trim(), badan: $('chBadan').value, site: $('chSite').value.trim(), bidang: $('chBidang').value.trim() };
+    if(!chLengkap(p)){ salah('chErr', 'Lengkapi Nama, Badan Usaha, Site Penempatan, dan Bidang Jasa dulu ya.'); return; }
+    getar(); salah('chErr'); CP = p; S.set('chprof', p); chEdit = false; chIsiProf();
+    $('chIn').focus();
+  });
+
+  function chDekatBawah(){ return document.documentElement.scrollHeight - window.scrollY - window.innerHeight < 180; }
+  function chKeBawah(){ if(aktif === 'pesan') window.scrollTo(0, document.documentElement.scrollHeight); }
+  function chRender(){
+    var el = $('chList');
+    if(!CH){ el.innerHTML = '<div class="rw-sk"></div><div class="rw-sk" style="height:70px"></div>'; return; }
+    var h = '', last = '';
+    (CH.msgs || []).forEach(function(m){
+      if(m.date !== last){ last = m.date; h += '<div class="ch-sep">' + esc(m.date) + '</div>'; }
+      var a = m.from === 'Admin';
+      h += '<div class="bb ' + (a ? 'a' : 'k') + '">' + (a ? '<span class="who">Admin HRD</span>' : '') + esc(m.text) + '<span class="tt">' + esc(m.time) + '</span></div>';
+    });
+    chAntre.forEach(function(t){ h += '<div class="bb k kirim">' + esc(t) + '<span class="tt">Mengirim…</span></div>'; });
+    el.innerHTML = h || '<div class="rw-empty"><b>Belum ada pesan</b>Tulis pertanyaan atau permintaanmu di bawah. Balasan admin akan muncul di sini.</div>';
+  }
+  function chMuat(paksa){
+    var ss = S.get('sesi') || {};
+    if(ss.peran !== 'karyawan' || !ss.token) return;
+    if(chJalan){ chUlang = chUlang || paksa; return; }
+    chJalan = true; $('chRefresh').classList.add('putar');
+    var awal = chAdmin < 0;
+    api('chatSaya', { token: ss.token, tandai: awal }).then(function(res){
+      chJalan = false; $('chRefresh').classList.remove('putar');
+      if(res.success){
+        var nAdmin = (res.msgs || []).filter(function(m){ return m.from === 'Admin'; }).length;
+        if(!awal && nAdmin > chAdmin && aktif === 'pesan') api('tandaiDibaca', { token: ss.token }).catch(function(){});
+        chAdmin = nAdmin;
+        var sig = JSON.stringify(res.msgs), baru = sig !== chSig; chSig = sig;
+        CH = { msgs: res.msgs || [], prof: res.prof || {}, usaha: res.usaha || [] }; S.set('chat', CH);
+        if($('chProfForm').hidden || !chLengkap(CP)) { if(!chEdit && !chLengkap(CP)) chIsiProf(); else chOpsi(); } else chOpsi();
+        if(baru || paksa){ var dekat = chDekatBawah(); chRender(); if(dekat || paksa) chKeBawah(); }
+        salah('chErr');
+      } else if(res.error === 'SESI_HABIS'){ keluar(); toast('Sesi berakhir, silakan masuk lagi.'); return; }
+      else salah('chErr', res.error || 'Percakapan belum bisa dimuat.');
+      if(chUlang){ chUlang = false; chMuat(true); }
+    }).catch(function(){
+      chJalan = false; $('chRefresh').classList.remove('putar');
+      if(!CH) salah('chErr', 'Tidak bisa terhubung. Periksa internet Anda.');
+      if(chUlang){ chUlang = false; setTimeout(function(){ chMuat(true); }, 3000); }
+    });
+  }
+  function chatAktif(on){
+    clearInterval(chTimer); chTimer = null;
+    if(!on) return;
+    chEdit = false; chAdmin = -1; chSig = CH ? JSON.stringify(CH.msgs) : '';
+    chIsiProf(); chRender(); salah('chErr');
+    setTimeout(chKeBawah, 30);
+    chMuat(true);
+    chTimer = setInterval(function(){ if(!document.hidden) chMuat(false); }, 20000);
+  }
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden && aktif === 'pesan') chMuat(false); });
+  $('chRefresh').addEventListener('click', function(){ getar(); chMuat(true); });
+
+  function chTinggi(){ var t = $('chIn'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight + 2, 130) + 'px'; }
+  $('chIn').addEventListener('input', chTinggi);
+  $('chIn').addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && !e.shiftKey && window.matchMedia('(pointer:fine)').matches){ e.preventDefault(); chKirim(); }
+  });
+  $('chKirim').addEventListener('click', function(){ chKirim(); });
+  function chKirim(){
+    var t = $('chIn').value.trim(), ss = S.get('sesi') || {};
+    if(!t) return;
+    if(!chLengkap(CP)){
+      chEdit = true; chIsiProf(); salah('chErr', 'Isi data pengirim dulu ya, baru pesan bisa dikirim.');
+      window.scrollTo({ top: 0, behavior: 'smooth' }); return;
+    }
+    getar(); salah('chErr');
+    $('chIn').value = ''; chTinggi();
+    chAntre.push(t); chRender(); chKeBawah();
+    function batal(pesan){
+      chAntre.splice(chAntre.indexOf(t), 1);
+      if(!$('chIn').value) $('chIn').value = t;
+      chTinggi(); chRender(); salah('chErr', pesan);
+    }
+    api('kirimPesan', { token: ss.token, data: { nama: CP.nama, badanUsaha: CP.badan, site: CP.site, bidangJasa: CP.bidang, pesan: t } }).then(function(res){
+      if(res.success){ chAntre.splice(chAntre.indexOf(t), 1); chMuat(true); return; }
+      if(res.error === 'SESI_HABIS'){ keluar(); toast('Sesi berakhir, silakan masuk lagi.'); return; }
+      batal(res.error || 'Pesan gagal terkirim. Coba lagi.');
+    }).catch(function(){ batal('Pesan gagal terkirim. Periksa internet Anda lalu coba lagi.'); });
+  }
+
+  // ======================= KRITIK & SARAN (ASLI) =======================
+  $('krIn').addEventListener('input', function(){
+    var n = this.value.length; $('krCnt').textContent = n + ' / 1000'; $('krCnt').style.color = n >= 1000 ? '#B23A3A' : '';
+  });
+  $('krKirim').addEventListener('click', function(){
+    var btn = this, pesan = $('krIn').value.trim(), ss = S.get('sesi') || {};
+    salah('krErr');
+    if(!pesan){ salah('krErr', 'Pesan belum diisi.'); $('krIn').focus(); return; }
+    getar(); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Mengirim…';
+    function selesai(){ btn.disabled = false; btn.textContent = 'Kirim anonim'; }
+    api('kirimAnonim', { token: ss.token, pesan: pesan }).then(function(res){
+      selesai();
+      if(res.success){ $('krIn').value = ''; $('krCnt').textContent = '0 / 1000'; $('krForm').hidden = true; $('krDone').hidden = false; window.scrollTo(0, 0); return; }
+      if(res.error === 'SESI_HABIS'){ keluar(); toast('Sesi berakhir, silakan masuk lagi.'); return; }
+      salah('krErr', res.error || 'Pesan gagal terkirim. Coba lagi.');
+    }).catch(function(){ selesai(); salah('krErr', 'Koneksi bermasalah. Coba lagi.'); });
+  });
+  $('krLagi').addEventListener('click', function(){ getar(); $('krDone').hidden = true; $('krForm').hidden = false; $('krIn').focus(); });
 
   // ======================= ADMIN (sementara: halaman admin lama) =======================
   function bukaAdmin(token){
@@ -569,6 +1291,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   if(sesi && sesi.peran === 'karyawan' && sesi.token){
     bukaKaryawan(S.get('profil'));        // tampil langsung dari data tersimpan
     selesaiSplash();
+    ringkas(); muatRiwayat();
     api('profilKaryawan', { token: sesi.token }).then(function(res){   // perbarui diam-diam
       if(res.success){ S.set('profil', res.profil); isiProfil(res.profil); }
       else if(res.error === 'SESI_HABIS'){ keluar(); toast('Sesi berakhir, silakan masuk lagi.'); }
