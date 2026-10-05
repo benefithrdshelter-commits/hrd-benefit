@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HRD Benefit – SHELTER</title>
+<meta name="theme-color" content="#0A2A78">
+<meta name="description" content="Portal HRD Benefit SHELTER untuk karyawan dan admin.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="HRD Benefit">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#06164A; --navy-2:#0A2A78; --biru:#1557D6; --biru-2:#2F7BFF; --sian:#33D1FF;
+    --tinta:#0E1A36; --redup:#5C6A86; --garis:#E3EAF6; --kartu:#FFFFFF;
+    --font:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:var(--font); color:var(--tinta); background:var(--navy); overflow:hidden;
+    -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;
+  }
+
+  #bingkai{position:fixed; inset:0; width:100%; height:100%; border:0; background:#fff;}
+
+  /* ================= LATAR BERSAMA: langit biru dengan pita cahaya ================= */
+  .layar{
+    position:fixed; inset:0; z-index:10; display:flex; flex-direction:column;
+    background:
+      radial-gradient(120% 70% at 85% 0%, rgba(51,209,255,.35) 0%, rgba(51,209,255,0) 55%),
+      radial-gradient(90% 60% at 0% 30%, rgba(47,123,255,.45) 0%, rgba(47,123,255,0) 60%),
+      linear-gradient(165deg, var(--navy-2) 0%, var(--navy) 70%);
+    color:#fff; overflow:hidden; transition:opacity .3s ease, visibility .3s;
+  }
+  .layar.sembunyi{opacity:0; visibility:hidden; pointer-events:none;}
+
+  .pita{position:absolute; inset:0; pointer-events:none; overflow:hidden;}
+  .pita svg{position:absolute; width:150%; left:-25%; top:-6%; height:auto; opacity:.9;}
+  .kilau{
+    position:absolute; width:420px; height:420px; border-radius:50%; filter:blur(60px);
+    background:radial-gradient(circle, rgba(51,209,255,.55), rgba(51,209,255,0) 70%);
+    top:-140px; right:-160px; animation:melayang 9s ease-in-out infinite alternate;
+  }
+  @keyframes melayang{to{transform:translate(-40px,30px) scale(1.08);}}
+
+  /* ================= BAGIAN ATAS (logo & judul) ================= */
+  .hero{
+    position:relative; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:calc(28px + env(safe-area-inset-top,0px)) 24px 20px; text-align:center;
+  }
+  .logo-wadah{position:relative; width:118px; height:118px;}
+  .logo-wadah::before{
+    content:""; position:absolute; inset:-14px; border-radius:40px;
+    background:conic-gradient(from 210deg, rgba(51,209,255,0), rgba(51,209,255,.65), rgba(47,123,255,.2), rgba(51,209,255,0));
+    filter:blur(10px); opacity:.85;
+  }
+  .logo{
+    position:relative; width:118px; height:118px; border-radius:32px; display:block;
+    box-shadow:0 18px 40px rgba(0,10,40,.45), inset 0 0 0 1px rgba(255,255,255,.6);
+  }
+  .merek{margin-top:20px; font-size:30px; font-weight:800; letter-spacing:-.02em; line-height:1.1;}
+  .merek span{
+    background:linear-gradient(90deg,#fff 0%, #BDEBFF 60%, var(--sian) 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .tagline{margin-top:8px; font-size:14px; font-weight:500; color:rgba(225,236,255,.78); max-width:30ch; line-height:1.5;}
+  .lencana{
+    margin-top:16px; display:inline-flex; align-items:center; gap:8px;
+    padding:7px 13px; border-radius:99px; font-size:12px; font-weight:600;
+    background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); color:#E6F3FF;
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  }
+  .lencana i{width:7px; height:7px; border-radius:50%; background:#4BE3A5; box-shadow:0 0 0 4px rgba(75,227,165,.18);}
+
+  /* ================= PANEL BAWAH ================= */
+  .panel{
+    position:relative; background:#F6F9FF; color:var(--tinta);
+    border-radius:30px 30px 0 0; padding:26px 20px calc(22px + env(safe-area-inset-bottom,0px));
+    box-shadow:0 -20px 50px rgba(0,8,40,.35);
+    animation:naik .55s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .panel::before{
+    content:""; position:absolute; top:10px; left:50%; width:42px; height:5px; margin-left:-21px;
+    border-radius:99px; background:#D5DEEE;
+  }
+  @keyframes naik{from{transform:translateY(40px); opacity:0;} to{transform:none; opacity:1;}}
+  .panel-isi{max-width:440px; margin:0 auto;}
+  .label-panel{font-size:12.5px; font-weight:700; color:var(--redup); margin:4px 4px 14px;}
+
+  /* Kartu Karyawan (utama) */
+  .kartu{
+    position:relative; display:flex; align-items:center; gap:16px; width:100%;
+    border:none; text-align:left; font:inherit; cursor:pointer; border-radius:22px;
+    padding:20px 18px; overflow:hidden; transition:transform .15s ease, box-shadow .2s ease;
+  }
+  .kartu:active{transform:scale(.985);}
+  .kartu:focus-visible{outline:3px solid rgba(47,123,255,.45); outline-offset:3px;}
+  .kartu + .kartu{margin-top:12px;}
+
+  .kartu.utama{
+    color:#fff; min-height:132px;
+    background:
+      radial-gradient(120% 140% at 100% 0%, rgba(51,209,255,.9) 0%, rgba(51,209,255,0) 55%),
+      linear-gradient(135deg, #1D6BFF 0%, #1247C9 55%, #0B2E8F 100%);
+    box-shadow:0 18px 34px rgba(18,71,201,.38);
+  }
+  .kartu.utama::after{
+    content:""; position:absolute; right:-40px; bottom:-60px; width:200px; height:200px; border-radius:50%;
+    border:22px solid rgba(255,255,255,.08);
+  }
+  .kartu .ik{
+    position:relative; flex:none; width:56px; height:56px; border-radius:17px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .kartu.utama .ik{background:rgba(255,255,255,.16); box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);}
+  .kartu .teks{position:relative; flex:1; min-width:0;}
+  .kartu .t{display:block; font-size:18px; font-weight:800; letter-spacing:-.01em;}
+  .kartu .d{display:block; font-size:13px; line-height:1.45; margin-top:4px; opacity:.82;}
+  .kartu .chip{
+    display:inline-block; margin-top:10px; padding:4px 10px; border-radius:99px; font-size:11px; font-weight:700;
+    background:rgba(255,255,255,.18); color:#fff;
+  }
+  .kartu .panah{
+    position:relative; flex:none; width:38px; height:38px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; transition:transform .2s ease;
+  }
+  .kartu.utama .panah{background:#fff; color:var(--biru);}
+  .kartu:hover .panah{transform:translateX(3px);}
+
+  /* Kartu Admin */
+  .kartu.kedua{
+    background:var(--kartu); color:var(--tinta);
+    box-shadow:0 1px 0 rgba(14,26,54,.04), 0 10px 24px rgba(14,26,54,.06);
+    border:1px solid var(--garis);
+  }
+  .kartu.kedua .ik{background:linear-gradient(135deg,#0A2A78,#1557D6); color:#fff;}
+  .kartu.kedua .d{color:var(--redup); opacity:1;}
+  .kartu.kedua .panah{background:#EEF3FC; color:var(--navy-2);}
+
+  .kaki{margin-top:18px; text-align:center; font-size:11.5px; color:#8A97B0;}
+
+  /* Masuk berurutan (sekali saat dibuka) */
+  .muncul{animation:muncul .5s cubic-bezier(.2,.8,.2,1) both;}
+  .muncul.d1{animation-delay:.12s;} .muncul.d2{animation-delay:.2s;} .muncul.d3{animation-delay:.28s;}
+  @keyframes muncul{from{transform:translateY(14px); opacity:0;} to{transform:none; opacity:1;}}
+
+  /* ================= LAYAR MEMBUKA ================= */
+  .tengah{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px; position:relative;}
+  .cincin{position:relative; width:150px; height:150px; display:flex; align-items:center; justify-content:center;}
+  .cincin svg{position:absolute; inset:0; animation:putar 1.1s linear infinite;}
+  @keyframes putar{to{transform:rotate(360deg);}}
+  .cincin .logo{width:104px; height:104px; border-radius:28px;}
+  .status{margin-top:22px; font-size:14px; font-weight:600; color:#DCEBFF;}
+  .link-ganti{
+    margin-top:14px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); color:#fff;
+    font:inherit; font-size:13px; font-weight:600; padding:9px 16px; border-radius:99px; cursor:pointer;
+  }
+  .link-ganti:focus-visible{outline:3px solid rgba(51,209,255,.6); outline-offset:2px;}
+
+  /* ================= LAYAR OFFLINE ================= */
+  .offline-ik{
+    width:64px; height:64px; border-radius:20px; display:flex; align-items:center; justify-content:center;
+    background:#FFEDEB; color:#D9382B; margin:4px auto 14px;
+  }
+  .judul-panel{font-size:19px; font-weight:800; text-align:center;}
+  .sub-panel{font-size:13.5px; color:var(--redup); text-align:center; margin:6px auto 18px; max-width:30ch; line-height:1.5;}
+  .tombol{
+    width:100%; border:none; border-radius:16px; padding:15px; font:inherit; font-size:15px; font-weight:700; cursor:pointer;
+    color:#fff; background:linear-gradient(135deg,#1D6BFF,#1247C9); box-shadow:0 12px 24px rgba(18,71,201,.3);
+  }
+
+  @media (min-width:700px){
+    .panel{max-width:520px; margin:0 auto 28px; border-radius:30px; width:calc(100% - 40px);}
+    .panel::before{display:none;}
+  }
+  @media (max-height:640px){
+    .logo-wadah,.logo-wadah .logo{width:92px; height:92px;}
+    .merek{font-size:25px; margin-top:14px;} .lencana{display:none;}
+    .kartu.utama{min-height:112px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<iframe id="bingkai" title="Portal HRD Benefit" allow="clipboard-write; camera; fullscreen"></iframe>
+
+<!-- ============ LAYAR PILIH ============ -->
+<div class="layar sembunyi" id="layarPilih" aria-hidden="true">
+  <div class="pita" aria-hidden="true">
+    <div class="kilau"></div>
+    <svg viewBox="0 0 600 300" fill="none" preserveAspectRatio="none">
+      <path d="M-20 210 C 120 120, 260 260, 420 150 S 640 60, 640 60" stroke="url(#g1)" stroke-width="26" stroke-linecap="round" opacity=".35"/>
+      <path d="M-20 240 C 140 160, 280 290, 440 180 S 640 100, 640 100" stroke="url(#g2)" stroke-width="2" opacity=".7"/>
+      <defs>
+        <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#33D1FF" stop-opacity="0"/><stop offset=".5" stop-color="#33D1FF"/><stop offset="1" stop-color="#2F7BFF" stop-opacity="0"/></linearGradient>
+        <linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".6" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+      </defs>
+    </svg>
+  </div>
+
+  <div class="hero">
+    <div class="logo-wadah muncul"><img class="logo" src="icons/logo-launcher.png" alt="Logo HRD Benefit"></div>
+    <h1 class="merek muncul d1"><span>HRD Benefit</span></h1>
+    <p class="tagline muncul d2">Urus BPJS Ketenagakerjaan &amp; Kesehatan dalam satu aplikasi.</p>
+    <div class="lencana muncul d3"><i></i>Portal resmi SHELTER</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-isi">
+      <div class="label-panel">Masuk sebagai</div>
+
+      <button class="kartu utama" data-mode="karyawan">
+        <span class="ik">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7.5" r="3.6" stroke="#fff" stroke-width="1.8"/><path d="M4.5 20c.6-3.8 3.7-6.2 7.5-6.2s6.9 2.4 7.5 6.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </span>
+        <span class="teks">
+          <span class="t">Karyawan</span>
+          <span class="d">Ajukan penggabungan saldo, koreksi data, dan pantau statusnya.</span>
+          <span class="chip">Saldo · Koreksi · Keluarga</span>
+        </span>
+        <span class="panah"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </button>
+
+      <button class="kartu kedua" data-mode="admin">
+        <span class="ik">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6L12 3z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12l2.2 2.2L15.5 10" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="teks">
+          <span class="t">Admin HRD</span>
+          <span class="d">Proses pengajuan, buat laporan, dan kelola dokumen.</span>
+        </span>
+        <span class="panah"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </button>
+
+      <div class="kaki">Pilihanmu akan diingat untuk pembukaan berikutnya</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ LAYAR MEMBUKA ============ -->
+<div class="layar" id="layarBuka">
+  <div class="pita" aria-hidden="true"><div class="kilau"></div></div>
+  <div class="tengah">
+    <div class="cincin">
+      <svg viewBox="0 0 150 150" aria-hidden="true">
+        <defs><linearGradient id="gc" x1="0" x2="1"><stop offset="0" stop-color="#33D1FF" stop-opacity="0"/><stop offset="1" stop-color="#33D1FF"/></linearGradient></defs>
+        <circle cx="75" cy="75" r="70" stroke="rgba(255,255,255,.12)" stroke-width="4" fill="none"/>
+        <path d="M75 5 A70 70 0 0 1 145 75" stroke="url(#gc)" stroke-width="4" stroke-linecap="round" fill="none"/>
+      </svg>
+      <img class="logo" src="icons/logo-launcher.png" alt="Logo HRD Benefit">
+    </div>
+    <div class="status" id="teksBuka">Memuat...</div>
+    <button class="link-ganti" id="btnGanti" hidden>Ganti pilihan</button>
+  </div>
+</div>
+
+<!-- ============ LAYAR OFFLINE ============ -->
+<div class="layar sembunyi" id="layarOffline" aria-hidden="true">
+  <div class="pita" aria-hidden="true"><div class="kilau"></div></div>
+  <div class="hero">
+    <div class="logo-wadah"><img class="logo" src="icons/logo-launcher.png" alt="Logo HRD Benefit"></div>
+    <h1 class="merek"><span>HRD Benefit</span></h1>
+  </div>
+  <div class="panel">
+    <div class="panel-isi">
+      <div class="offline-ik">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M3 9.5a14 14 0 0 1 18 0M6.5 13a9 9 0 0 1 11 0M10 16.5a4 4 0 0 1 4 0" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+      </div>
+      <div class="judul-panel">Tidak ada koneksi internet</div>
+      <div class="sub-panel">Periksa data seluler atau Wi-Fi, lalu coba lagi.</div>
+      <button class="tombol" id="btnCobaLagi">Coba lagi</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== PENGATURAN =====================
+// Link web app Apps Script (TANPA ?page=... di belakangnya).
+const EXEC_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-nnJ9icZYDpZQungzNqzvzK4v2ZuKpkga8PKEgEncF6/exec';
+const HALAMAN = {
+  karyawan: { url: EXEC_URL + '?page=karyawan', label: 'Portal Karyawan' },
+  admin:    { url: EXEC_URL + '?page=login',    label: 'Portal Admin' }
+};
+const KUNCI_MODE = 'hrd_benefit_mode';
+
+// ===================== ELEMEN =====================
+const bingkai = document.getElementById('bingkai');
+const layarPilih = document.getElementById('layarPilih');
+const layarBuka = document.getElementById('layarBuka');
+const layarOffline = document.getElementById('layarOffline');
+const teksBuka = document.getElementById('teksBuka');
+const btnGanti = document.getElementById('btnGanti');
+
+function tampil(el){ el.classList.remove('sembunyi'); el.setAttribute('aria-hidden','false'); }
+function sembunyi(el){ el.classList.add('sembunyi'); el.setAttribute('aria-hidden','true'); }
+
+function bacaMode(){ try { return localStorage.getItem(KUNCI_MODE); } catch(e){ return null; } }
+function simpanMode(m){ try { localStorage.setItem(KUNCI_MODE, m); } catch(e){} }
+function hapusMode(){ try { localStorage.removeItem(KUNCI_MODE); } catch(e){} }
+
+let modeAktif = null, waktuMulai = 0, jedaMin = 0;
+
+function bukaMode(mode, jedaMs){
+  const h = HALAMAN[mode];
+  if(!h) return tampilPilihan();
+  if(!navigator.onLine) return tampilOffline();
+  modeAktif = mode;
+  waktuMulai = Date.now();
+  jedaMin = jedaMs || 0;
+  sembunyi(layarPilih); sembunyi(layarOffline); tampil(layarBuka);
+  teksBuka.textContent = 'Membuka ' + h.label + '...';
+  btnGanti.hidden = false;
+  bingkai.src = h.url;
+}
+
+// Layar pembuka ditutup setelah halaman termuat (minimal sesuai jeda,
+// supaya tombol "Ganti pilihan" sempat terlihat).
+bingkai.addEventListener('load', () => {
+  if(!bingkai.getAttribute('src') || layarBuka.classList.contains('sembunyi')) return;
+  const sisa = Math.max(0, jedaMin - (Date.now() - waktuMulai));
+  setTimeout(() => { if(modeAktif) sembunyi(layarBuka); }, sisa + 120);
+});
+
+function tampilPilihan(){
+  modeAktif = null;
+  sembunyi(layarBuka); sembunyi(layarOffline); tampil(layarPilih);
+  bingkai.removeAttribute('src');
+}
+
+function tampilOffline(){
+  sembunyi(layarBuka); sembunyi(layarPilih); tampil(layarOffline);
+}
+
+document.querySelectorAll('[data-mode]').forEach(b => {
+  b.addEventListener('click', () => { simpanMode(b.dataset.mode); bukaMode(b.dataset.mode, 300); });
+});
+btnGanti.addEventListener('click', () => { hapusMode(); tampilPilihan(); });
+document.getElementById('btnCobaLagi').addEventListener('click', () => {
+  const m = bacaMode(); m ? bukaMode(m, 300) : tampilPilihan();
+});
+window.addEventListener('offline', () => { if(!modeAktif) tampilOffline(); });
+
+// ===================== NAVIGASI DARI DALAM APLIKASI =====================
+// Halaman Apps Script mengirim pesan {type:'shelter-nav', url} supaya pindah halaman
+// tetap di dalam aplikasi (tidak keluar ke browser).
+window.addEventListener('message', (e) => {
+  const asal = String(e.origin || '');
+  const asalSah = asal === 'https://script.google.com' || /\.googleusercontent\.com$/.test(asal);
+  const d = e.data;
+  if(!asalSah || !d || d.type !== 'shelter-nav' || typeof d.url !== 'string') return;
+  if(d.url.indexOf(EXEC_URL) !== 0) return;
+  try { e.source && e.source.postMessage({ type: 'shelter-nav-ok' }, asal); } catch(err){}
+  bingkai.src = d.url;
+});
+
+// ===================== MULAI =====================
+(function mulai(){
+  if(/[?&]pilih=1\b/.test(location.search)) hapusMode();
+  const m = bacaMode();
+  if(m && HALAMAN[m]) bukaMode(m, 900);
+  else tampilPilihan();
+})();
+
+// Service worker: wajib supaya aplikasi bisa di-install
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+</script>
+</body>
+</html>
