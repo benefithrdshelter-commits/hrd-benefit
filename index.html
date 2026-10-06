@@ -539,6 +539,41 @@
     .ch-comp{bottom:14px;}
   }
 
+
+  /* ---------- Aplikasi ADMIN ---------- */
+  .adm-note{background:#FFF7E6; border:1px solid #FFE3A8; color:#8A6300; border-radius:14px; padding:10px 14px; font-size:13px; font-weight:600; line-height:1.5; margin-top:12px;}
+  .adm-sum{position:relative; overflow:hidden; border-radius:24px; padding:18px; color:#fff; margin-top:6px; box-shadow:0 16px 32px rgba(31,111,235,.3);
+    background:radial-gradient(120% 130% at 100% 0%, rgba(51,209,255,.5) 0%, rgba(51,209,255,0) 55%), linear-gradient(140deg,#1D6BFF 0%,#1247C9 55%,#0E3A8C 100%);}
+  .adm-sum::after{content:""; position:absolute; right:-50px; bottom:-70px; width:200px; height:200px; border-radius:50%; border:24px solid rgba(255,255,255,.07); pointer-events:none;}
+  .adm-sum .k{font-size:13.5px; font-weight:700; color:rgba(230,240,255,.92);}
+  .adm-sum .v{font-size:50px; font-weight:800; line-height:1.05; margin:4px 0 2px; letter-spacing:-.02em;}
+  .adm-sum .s{font-size:14px; color:rgba(230,240,255,.92);}
+  .adm-sum .go{position:absolute; right:16px; top:16px; z-index:1; border:none; background:#fff; color:#1447C8; font:inherit; font-size:13.5px; font-weight:800; border-radius:99px; padding:8px 15px; cursor:pointer;}
+  .adm-chips{position:relative; z-index:1; display:flex; gap:8px; margin-top:14px;}
+  .adm-chips div{flex:1; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.2); border-radius:14px; padding:10px 12px;}
+  .adm-chips b{display:block; font-size:19px; font-weight:800;}
+  .adm-chips span{font-size:11.5px; color:rgba(230,240,255,.92);}
+  .g6 .bdg, .set-it .bdg{min-width:21px; height:21px; padding:0 6px; border-radius:99px; background:#F0506E; color:#fff; font-size:11.5px; font-weight:800; font-style:normal; display:flex; align-items:center; justify-content:center;}
+  .g6{position:relative;}
+  .g6 i.bdg, .set-it i.bdg, .adm-st i.bdg{width:auto; height:21px; min-width:21px; border-radius:99px; margin:0;}
+  .g6 .bdg{position:absolute; top:8px; right:9px;}
+  .bar .icb{position:relative;}
+  .bar .icb .bdg{position:absolute; top:3px; right:2px; min-width:19px; height:19px; padding:0 5px; border-radius:99px; background:#F0506E; color:#fff; font-size:11px; font-weight:800; font-style:normal; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 2px #F3F7FD;}
+  .adm-stats{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .adm-st{background:#fff; border:1px solid var(--line); border-radius:18px; padding:14px; box-shadow:0 4px 14px rgba(20,60,140,.05);}
+  .adm-st i{width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-style:normal; margin-bottom:10px;}
+  .adm-st i svg{width:19px; height:19px;}
+  .adm-st b{display:block; font-size:28px; font-weight:800; line-height:1.05;}
+  .adm-st span{display:block; font-size:13px; color:var(--muted); font-weight:600; margin-top:3px;}
+  .adm-gh{font-size:12.5px; font-weight:800; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; margin:18px 4px 8px;}
+  .adm-gh:first-of-type{margin-top:4px;}
+  .set-it .bdg{flex:none;}
+  .set-it.wa i{background:#E3F8EC; color:#1E9E5A;}
+  @media (min-width:900px){
+    #adm .screen[data-screen="adm-beranda"].on{display:grid; grid-template-columns:1.1fr 1fr; gap:28px; align-items:start;}
+    #adm .screen[data-screen="adm-layanan"], #adm .screen[data-screen="adm-akun"]{max-width:760px;}
+  }
+
   @media (prefers-reduced-motion:reduce){ .screen.on{animation:none;} .seg .thumb, .dw, .dw-bg{transition:none;} }
 </style>
 </head>
@@ -769,6 +804,25 @@
   </div>
 </div>
 
+<!-- ================= APLIKASI ADMIN ================= -->
+<div class="app" id="adm" hidden>
+  <header class="bar">
+    <div class="tx"><small>Selamat Datang,</small><b id="admNama"></b><em id="admPeran"></em></div>
+    <button class="icb" id="admBell" aria-label="Pesan masuk"><span data-ic="bell"></span><i class="bdg" id="admBellN" hidden></i></button>
+    <button class="av" id="admAv" aria-label="Akun"></button>
+  </header>
+  <section class="screen" data-screen="adm-beranda" id="admBeranda"></section>
+  <section class="screen" data-screen="adm-layanan" id="admLayanan"></section>
+  <section class="screen" data-screen="adm-akun" id="admAkun"></section>
+  <nav class="nav" id="admNav">
+    <div class="nav-brand"><span class="emb" data-logo></span><div><b>HRD_BENEFIT</b><small>Portal Admin</small></div></div>
+    <button class="it on" data-ag="beranda"><span class="pl" data-ic="home"></span>Beranda</button>
+    <button class="it" data-ag="layanan"><span class="pl" data-ic="doc"></span>Layanan</button>
+    <button class="it" data-ag="pesan" id="admNavPesan"><span class="pl" data-ic="chat"></span>Pesan</button>
+    <button class="it" data-ag="akun"><span class="pl" data-ic="user"></span>Akun</button>
+  </nav>
+</div>
+
 <!-- ================= HALAMAN LAMA (sementara, di dalam aplikasi) ================= -->
 <div id="web" hidden>
   <div class="wbar">
@@ -893,12 +947,15 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
     api('loginAdmin', { email: $('inEmail').value, password: $('inPass').value }).then(function(res){
       sibuk(btn, false, 'Masuk');
       if(!res.success){ salah('errA', res.error || 'Login gagal.'); return; }
-      S.set('sesi', { peran: 'admin', token: res.token, email: res.email });
-      bukaAdmin(res.token);
+      S.set('sesi', { peran: 'admin', token: res.token, email: res.email, role: res.role });
+      bukaAdmin();
     }).catch(function(err){ sibuk(btn, false, 'Masuk'); salah('errA', 'Tidak bisa terhubung. Periksa internet Anda. (' + err.message + ')'); });
   });
 
   function keluar(){
+    var s0 = S.get('sesi') || {};
+    if(s0.peran === 'admin' && s0.token){ try{ api('logoutAdmin', { token: s0.token }).catch(function(){}); }catch(x){} }
+    S.del('adm'); ADM = null; $('adm').hidden = true;
     S.del('sesi'); S.del('profil'); S.del('riwayat'); S.del('chat'); S.del('chprof'); S.del('isian'); RW = null; CH = null; CP = null; chatAktif(false);
     ['saldo','koreksi','keluarga'].forEach(fmReset);
     tutupWeb(true);
@@ -1054,6 +1111,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
     var page = u.searchParams.get('page') || '', jenis = u.searchParams.get('jenis') || '';
     var sesi = S.get('sesi') || {};
     if(page === 'login' || page === 'logout'){ keluar(); return; }
+    if(sesi.peran === 'admin' && page === 'admin' && !jenis){ tutupLalu(function(){ admTampil('beranda'); admMuat(); }); return; }
     if(sesi.peran === 'karyawan'){
       if(page === 'karyawan' && !jenis){ tutupLalu(function(){ tampil('beranda', true); }); return; }
       if(page === 'karyawan-identitas'){ tutupLalu(function(){ tampil('identitas', true); }); return; }
@@ -1072,7 +1130,10 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
     if(webTerbuka && !st.web){
       webTerbuka = false; $('web').hidden = true;
       var f = $('webBox').querySelector('iframe'); if(f) f.remove();
-      if((S.get('sesi') || {}).peran === 'admin'){ keluar(); return; }
+      if((S.get('sesi') || {}).peran === 'admin'){
+        if(lanjutan){ var f3 = lanjutan; lanjutan = null; f3(); } else { admMuat(); }
+        return;
+      }
     }
     if(lanjutan){ var f2 = lanjutan; lanjutan = null; f2(); return; }
     if(st.layar && !$('app').hidden){
@@ -1633,11 +1694,143 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   });
   $('krLagi').addEventListener('click', function(){ getar(); $('krDone').hidden = true; $('krForm').hidden = false; $('krIn').focus(); });
 
-  // ======================= ADMIN (sementara: halaman admin lama) =======================
-  function bukaAdmin(token){
-    $('login').hidden = true; $('app').hidden = true;
-    document.querySelector('meta[name="theme-color"]').content = '#0A2A78';
-    bukaWeb(API_URL + '?page=admin&token=' + encodeURIComponent(token), 'Admin', true);
+  // ======================= ADMIN (APLIKASI NATIVE) =======================
+  IC.warn = '<svg viewBox="0 0 20 20" fill="none"><path d="M10 2.8L18 16.5H2L10 2.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 8V11.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="10" cy="13.9" r=".9" fill="currentColor"/></svg>';
+  var ADM = S.get('adm'), admMuatSedang = false, admAktif = 'beranda';
+  var ADM_MOD = [
+    { k:'saldo', t:'Penggabungan Saldo', p:'Gabung Saldo', ic:'saldo', c:'c-blue', g:'Pengajuan', n:function(r){ return r.saldo && r.saldo.belum; } },
+    { k:'koreksi', t:'Koreksi Tenaga Kerja', p:'Koreksi Data', ic:'koreksi', c:'c-violet', g:'Pengajuan', n:function(r){ return r.koreksi && r.koreksi.belum; } },
+    { k:'kecelakaan', t:'Laporan Kecelakaan', p:'Kecelakaan', ic:'warn', c:'c-orange', g:'Pengajuan', n:function(r){ return r.kecelakaan && r.kecelakaan.belum; } },
+    { k:'perbaikan-npp', t:'Perbaikan NPP', p:'Perbaikan NPP', ic:'idc', c:'c-blue', g:'Pengajuan' },
+    { k:'keluarga', t:'Penggabungan Keluarga', p:'Keluarga', ic:'keluarga', c:'c-green', g:'Pengajuan', n:function(r){ return r.keluarga && r.keluarga.belum; } },
+    { k:'payment-ketenagakerjaan', t:'Payment Ketenagakerjaan', p:'BPJS TK', ic:'kartu', c:'c-violet', g:'Payment' },
+    { k:'payment-kesehatan', t:'Payment Kesehatan', p:'BPJS Kes', ic:'jantung', c:'c-pink', g:'Payment' },
+    { k:'pesan', t:'Pesan Masuk', p:'Pesan', ic:'chat', c:'c-pink', g:'Lainnya', s:true, n:function(r){ return r.pesan; } },
+    { k:'anonim', t:'Kritik & Saran', p:'Kritik & Saran', ic:'lock', c:'c-grey', g:'Lainnya', s:true, n:function(r){ return r.anonim; } }
+  ];
+  function admSesi(){ var x = S.get('sesi') || {}; return x.peran === 'admin' ? x : null; }
+  function admViewer(){ var x = admSesi(); return !!(x && x.role === 'ADMIN'); }
+  function admModul(){ var v = admViewer(); return ADM_MOD.filter(function(m){ return !(v && m.s); }); }
+  function admNamaDari(email){
+    var n = String(email || '').split('@')[0].replace(/[._-]+/g, ' ').trim();
+    return n ? n.replace(/\b\w/g, function(c){ return c.toUpperCase(); }) : 'Admin';
+  }
+  function admAngka(v){ return v == null ? '–' : v; }
+
+  function admRender(){
+    var x = admSesi() || {}, r = ADM || {}, v = admViewer();
+    var nama = admNamaDari(x.email);
+    $('admNama').textContent = nama + ' \uD83D\uDC4B';
+    $('admPeran').textContent = v ? 'Admin \u00b7 hanya lihat' : 'Super Admin';
+    $('admAv').textContent = nama.charAt(0).toUpperCase();
+    $('admNavPesan').hidden = v;
+    $('admBell').hidden = v;
+    var np = r.pesan || 0; $('admBellN').hidden = !np; $('admBellN').textContent = np > 99 ? '99+' : np;
+
+    var mod = admModul();
+    function bdg(m){ var n = m.n && ADM ? m.n(r) : null; return n ? '<i class="bdg">' + (n > 99 ? '99+' : n) + '</i>' : ''; }
+
+    // ----- Beranda -----
+    var perlu = ADM ? ['saldo', 'koreksi', 'kecelakaan', 'keluarga'].reduce(function(a, k){ return a + ((r[k] && r[k].belum) || 0); }, 0) : null;
+    var tgl = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    var stat = [
+      { c:'c-blue', ic:'doc', n:r.kecelakaan && r.kecelakaan.total, l:'Kasus Kecelakaan' },
+      { c:'c-violet', ic:'user', n:r.karyawan, l:'Total Karyawan' }
+    ];
+    if(!v){ stat.push({ c:'c-pink', ic:'chat', n:r.pesan, l:'Pesan Baru' }, { c:'c-orange', ic:'lock', n:r.anonim, l:'Kritik & Saran Baru' }); }
+    $('admBeranda').innerHTML =
+      '<div class="b-a">' +
+        '<div class="hero-k"><div class="ilus"></div><p>Melindungi Pekerja,<br>Menguatkan<br>Indonesia</p></div>' +
+        (v ? '<div class="adm-note">Masuk sebagai <b>Admin</b> &mdash; hanya bisa melihat data. Memproses, mengubah, dan menghapus hanya untuk Super Admin.</div>' : '') +
+        '<div class="sec-h"><div><b>Perlu Diproses</b><small>' + esc(tgl) + '</small></div></div>' +
+        '<div class="adm-sum"><button class="go" data-ag="layanan">Lihat</button>' +
+          '<div class="k">Pengajuan menunggu</div><div class="v">' + (ADM ? perlu : '…') + '</div><div class="s">perlu tindakan dari HRD</div>' +
+          '<div class="adm-chips">' +
+            '<div><b>' + admAngka(r.kecelakaan && r.kecelakaan.total) + '</b><span>Kasus kecelakaan</span></div>' +
+            '<div><b>' + admAngka(r.karyawan) + '</b><span>Karyawan</span></div>' +
+            (v ? '' : '<div><b>' + admAngka(r.pesan) + '</b><span>Pesan baru</span></div>') +
+          '</div></div>' +
+      '</div>' +
+      '<div class="b-b">' +
+        '<div class="sec-h"><div><b>Menu Cepat</b></div><button data-ag="layanan">Semua &rsaquo;</button></div>' +
+        '<div class="grid6">' + mod.map(function(m){
+          return '<button class="g6" data-am="' + m.k + '"><i class="' + m.c + '">' + (IC[m.ic] || '') + '</i>' + esc(m.p) + bdg(m) + '</button>';
+        }).join('') + '</div>' +
+        '<div class="sec-h"><div><b>Ringkasan</b></div></div>' +
+        '<div class="adm-stats">' + stat.map(function(t){
+          return '<div class="adm-st"><i class="' + t.c + '">' + (IC[t.ic] || '') + '</i><b>' + admAngka(t.n) + '</b><span>' + esc(t.l) + '</span></div>';
+        }).join('') + '</div>' +
+      '</div>';
+
+    // ----- Layanan -----
+    var h = '';
+    ['Pengajuan', 'Payment', 'Lainnya'].forEach(function(g){
+      var list = mod.filter(function(m){ return m.g === g; });
+      if(!list.length) return;
+      h += '<div class="adm-gh">' + g + '</div><div class="set">' + list.map(function(m){
+        return '<button class="set-it" data-am="' + m.k + '"><i class="' + m.c + '">' + (IC[m.ic] || '') + '</i><span>' + esc(m.t) + '</span>' + (bdg(m) || '<em>&rsaquo;</em>') + '</button>';
+      }).join('') + '</div>';
+    });
+    $('admLayanan').innerHTML = '<div class="rw-head"><button class="icb" data-ag="beranda" aria-label="Kembali"><span>' + IC.back + '</span></button><div class="tx"><b>Layanan Admin</b></div><span class="sp"></span></div>' + h;
+
+    // ----- Akun -----
+    $('admAkun').innerHTML =
+      '<div class="rw-head"><button class="icb" data-ag="beranda" aria-label="Kembali"><span>' + IC.back + '</span></button><div class="tx"><b>Akun Admin</b></div><span class="sp"></span></div>' +
+      '<div class="pf-card"><div class="pf-av">' + esc(nama.charAt(0).toUpperCase()) + '</div><h1>' + esc(nama) + '</h1><p>' + (v ? 'Admin \u00b7 hanya lihat' : 'Super Admin') + ' &bull; HRD Benefit</p></div>' +
+      '<div class="pf-list"><div class="pf-row"><i class="c-blue">' + IC.user + '</i><div class="c"><div class="k">Email / Username</div><div class="v">' + esc(x.email || '-') + '</div></div></div></div>' +
+      '<div class="adm-gh">Bantuan HRD</div><div class="set">' +
+        '<a class="set-it wa" href="https://wa.me/62812398735" target="_blank" rel="noopener"><i>' + IC.chat + '</i><span>0812-3987-35</span><em>WhatsApp</em></a>' +
+        '<a class="set-it wa" href="https://wa.me/628212368690" target="_blank" rel="noopener"><i>' + IC.chat + '</i><span>0821-2368-90</span><em>WhatsApp</em></a>' +
+      '</div>' +
+      '<div class="banner-k"><div class="ilus"></div><p>Bersama<br><b>HRD_BENEFIT</b><br>Kita Tumbuh<br>Lebih Baik</p></div>' +
+      '<button class="out-btn" id="admKeluar"><span style="display:flex">' + IC.out + '</span>Keluar</button>';
+  }
+
+  function admTampil(nama){
+    admAktif = nama;
+    [['beranda', 'admBeranda'], ['layanan', 'admLayanan'], ['akun', 'admAkun']].forEach(function(p){ $(p[1]).classList.toggle('on', p[0] === nama); });
+    document.querySelectorAll('#admNav .it').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-ag') === nama); });
+    document.body.classList.toggle('di-beranda', nama === 'beranda');
+    window.scrollTo(0, 0);
+  }
+
+  function admBuka(k){
+    var x = admSesi(); if(!x) return;
+    var m = ADM_MOD.filter(function(i){ return i.k === k; })[0];
+    bukaWeb(API_URL + '?page=admin&jenis=' + encodeURIComponent(k) + '&token=' + encodeURIComponent(x.token), m ? m.t : 'Admin', true);
+  }
+
+  function admMuat(){
+    var x = admSesi(); if(!x || admMuatSedang) return;
+    admMuatSedang = true;
+    api('adminRingkasan', { token: x.token }).then(function(res){
+      admMuatSedang = false;
+      if(res && res.success){
+        ADM = res; S.set('adm', res);
+        if(res.role && res.role !== x.role){ x.role = res.role; S.set('sesi', x); }
+        admRender();
+      } else if(res && res.error === 'SESI_HABIS'){ keluar(); toast('Sesi berakhir, silakan masuk lagi.'); }
+    }).catch(function(){ admMuatSedang = false; });
+  }
+
+  document.addEventListener('click', function(e){
+    if(!$('adm') || $('adm').hidden) return;
+    var m = e.target.closest('[data-am]');
+    if(m){ getar(); admBuka(m.getAttribute('data-am')); return; }
+    var a = e.target.closest('#adm [data-ag], #admBell, #admAv, #admKeluar');
+    if(!a) return;
+    getar();
+    if(a.id === 'admKeluar'){ keluar(); return; }
+    if(a.id === 'admBell'){ admBuka('pesan'); return; }
+    if(a.id === 'admAv'){ admTampil('akun'); return; }
+    var g = a.getAttribute('data-ag');
+    if(g === 'pesan') admBuka('pesan'); else admTampil(g);
+  });
+
+  function bukaAdmin(){
+    $('login').hidden = true; $('app').hidden = true; $('adm').hidden = false;
+    document.querySelector('meta[name="theme-color"]').content = '#F3F8FF';
+    admRender(); admTampil('beranda'); admMuat();
   }
 
   // ======================= MULAI =======================
@@ -1652,7 +1845,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
       else if(res.error === 'SESI_HABIS'){ keluar(); toast('Sesi berakhir, silakan masuk lagi.'); }
     }).catch(function(){});
   } else if(sesi && sesi.peran === 'admin' && sesi.token){
-    bukaAdmin(sesi.token); selesaiSplash();
+    bukaAdmin(); selesaiSplash();
   } else {
     $('login').hidden = false; selesaiSplash(); bangunkan();
   }
