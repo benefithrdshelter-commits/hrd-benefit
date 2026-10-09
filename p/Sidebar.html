@@ -87,6 +87,38 @@
   }
   .app-sidebar a.logout-link:hover{background:rgba(255,255,255,.08); color:#fff;}
 
+
+  /* ---------- Sidebar bisa diperkecil (tombol panah) ---------- */
+  .app-sidebar{transition:width .28s cubic-bezier(.4,0,.2,1);}
+  .app-sidebar .brand, .app-sidebar nav, .app-sidebar a.nav-item{transition:padding .28s, gap .28s;}
+  .app-sidebar .nav-label, .app-sidebar .brand-text, .app-sidebar a.nav-item .label{white-space:nowrap;}
+  .app-sidebar a.nav-item{position:relative;}
+  .sb-toggle{
+    position:fixed; top:74px; left:228px; z-index:40; width:26px; height:26px; border-radius:50%; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; padding:0;
+    background:#fff; color:#0B2A6B; border:1px solid #D5DEEE; box-shadow:0 4px 12px rgba(8,30,90,.28);
+    transition:left .28s cubic-bezier(.4,0,.2,1), transform .28s, background .15s, color .15s;
+  }
+  .sb-toggle:hover{background:var(--active-blue); color:#fff; border-color:var(--active-blue);}
+  .sb-toggle svg{transition:transform .28s;}
+  .sb-min .sb-toggle svg, .sb-toggle.min svg{transform:rotate(180deg);}
+  .sb-toggle.min{left:64px;}
+
+  .app-sidebar.sb-min{width:76px;}
+  .app-sidebar.sb-min .brand{padding:0 0 18px; justify-content:center;}
+  .app-sidebar.sb-min .brand-text{display:none;}
+  .app-sidebar.sb-min nav{padding:6px 12px; align-items:stretch;}
+  .app-sidebar.sb-min .nav-label{font-size:0; height:1px; background:rgba(255,255,255,.14); margin:12px 10px;}
+  .app-sidebar.sb-min a.nav-item{justify-content:center; gap:0; padding:12px 0;}
+  .app-sidebar.sb-min a.nav-item .label{display:none;}
+  .app-sidebar.sb-min a.nav-item svg{width:20px; height:20px;}
+  .app-sidebar.sb-min a.nav-item > span[id^="badge"]{position:absolute; top:5px; right:7px; margin:0 !important; padding:0 !important; min-width:0 !important; width:9px; height:9px; font-size:0 !important; border-radius:50% !important; box-shadow:0 0 0 2px #0B2A6B;}
+  .app-sidebar.sb-min .help-card{margin:14px 6px 0; padding:8px 0; background:transparent; border:0; text-align:center;}
+  .app-sidebar.sb-min .help-card .help-title, .app-sidebar.sb-min .help-card .help-sub, .app-sidebar.sb-min .help-card .help-contact{display:none;}
+  .app-sidebar.sb-min .help-card .help-icon{margin:0 auto; width:42px; height:42px; border-radius:12px;}
+  @media (max-width:900px){ .sb-toggle{display:none !important;} .app-sidebar.sb-min{width:auto;} .app-sidebar.sb-min .brand-text, .app-sidebar.sb-min a.nav-item .label{display:revert;} }
+  @media print{ .sb-toggle{display:none !important;} }
+
   /* ---------- Konten utama ---------- */
   .app-content{flex:1; min-width:0; padding:22px 28px 36px; background:var(--paper);}
   .topbar{display:flex; align-items:center; gap:16px; margin-bottom:22px;}
@@ -368,6 +400,31 @@
   </nav>
 </div>
 
+<button type="button" class="sb-toggle" id="sbToggle" title="Perkecil / perbesar menu" aria-label="Perkecil atau perbesar menu">
+  <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M12.5 4.5L7 10L12.5 15.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+<script>
+(function(){
+  var sb = document.getElementById('appSidebar'), btn = document.getElementById('sbToggle');
+  if(!sb || !btn) return;
+  function simpan(v){ try{ localStorage.setItem('sb_min', v ? '1' : '0'); }catch(e){} }
+  function baca(){ try{ return localStorage.getItem('sb_min') === '1'; }catch(e){ return false; } }
+  function terapkan(min, anim){
+    sb.classList.toggle('sb-min', min);
+    btn.classList.toggle('min', min);
+    sb.querySelectorAll('a.nav-item').forEach(function(a){
+      var l = a.querySelector('.label');
+      if(min && l) a.setAttribute('title', l.textContent.trim()); else a.removeAttribute('title');
+    });
+    if(anim) setTimeout(function(){ try{ window.dispatchEvent(new Event('resize')); }catch(e){} }, 320);
+  }
+  terapkan(baca(), false);
+  btn.addEventListener('click', function(){
+    var min = !sb.classList.contains('sb-min');
+    terapkan(min, true); simpan(min);
+  });
+})();
+</script>
 <script>
   window.refreshBadgePesan = function(){
     if (!(window.google && google.script && google.script.run)) return;
