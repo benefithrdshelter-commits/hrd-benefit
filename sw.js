@@ -1,6 +1,6 @@
 // Service worker HRD Benefit: menyimpan tampilan aplikasi di HP supaya terbuka instan.
 // Data (Apps Script) TIDAK disimpan di sini, selalu diambil langsung dari server.
-var CACHE = 'hrd-benefit-v9';
+var CACHE = 'hrd-benefit-v10';
 var ASET = [
   './', './index.html', './d.html', './manifest.webmanifest',
   './p/Dashboard.html', './p/DashboardKaryawan.html', './p/DashboardKecelakaan.html', './p/DashboardKeluargaAdmin.html', './p/DashboardKoreksi.html', './p/DashboardKritikSaran.html', './p/DashboardPaymentKesehatan.html', './p/Identitas.html', './p/RiwayatSaldoKaryawan.html', './p/DashboardPaymentKetenagakerjaan.html', './p/DashboardPerbaikanNPP.html', './p/DashboardPesan.html', './p/FormKaryawan.html', './p/FormKecelakaan.html', './p/FormKeluargaKaryawan.html', './p/FormKoreksi.html', './p/KritikSaranAnonimKaryawan.html', './p/LandingAdmin.html', './p/RequestQuestionKaryawan.html', './p/RiwayatKeluargaKaryawan.html', './p/RiwayatKoreksiKaryawan.html', './p/Sidebar.html',

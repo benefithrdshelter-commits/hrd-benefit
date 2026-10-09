@@ -244,7 +244,7 @@
   // ---------- Jaringan (antrian + sesi) ----------
   var aktifNet = 0, antri = [];
   function jalan(){
-    while(aktifNet < 4 && antri.length){
+    while(aktifNet < 6 && antri.length){
       (function(it){
         aktifNet++;
         fetch(API_URL, { method: 'POST', body: JSON.stringify(it.body) })
@@ -254,13 +254,15 @@
       })(antri.shift());
     }
   }
-  function net(body, depan){
+  function net(body, depan, simpanIt){
     return new Promise(function(res, rej){
       var it = { body: body, res: res, rej: rej };
+      if(simpanIt) simpanIt.it = it;
       if(depan) antri.unshift(it); else antri.push(it);
       jalan();
     });
   }
+  function kedepan(it){ var i = antri.indexOf(it); if(i > 0){ antri.splice(i, 1); antri.unshift(it); } }
   function keluarSesi(){
     if(ADMIN){ try{ fetch(API_URL, { method: 'POST', body: JSON.stringify({ aksi: 'logoutAdmin', token: sesi.token }) }); }catch(e){} }
     ['sesi','profil','adm','riwayat','chat','chprof','isian','dcache','apraw'].forEach(function(k){ try{ localStorage.removeItem('hrd_' + k); }catch(e){} });
@@ -305,11 +307,28 @@
 
   // ---------- Jembatan google.script.run ----------
   var reg = [];      // panggilan baca yang bisa di-refresh
-  function kirim(fn, args, depan){
+  function kirim(fn, args, depan, holder){
     var body = { aksi: 'run', fn: fn, args: args };
     if(ADMIN) body.token = sesi.token; else body.ktoken = sesi.token;
-    return net(body, depan);
+    return net(body, depan, holder);
   }
+  // Panggilan baca yang sama (fungsi + argumen) dipakai bersama: tidak dikirim dua kali, dan bisa dinaikkan ke depan antrian
+  var inflight = {};
+  function bacaBersama(fn, args, k, depan){
+    var h = inflight[k];
+    if(h){ if(depan && h.it) kedepan(h.it); return h.p; }
+    h = inflight[k] = { it: null, p: null };
+    h.p = kirim(fn, args, depan, h);
+    var bersih = function(){ if(inflight[k] === h) delete inflight[k]; };
+    h.p.then(bersih, bersih);
+    return h.p;
+  }
+  function prioritas(win){
+    if(win === aktifWin) return true;
+    return !!(mauKey && frames[mauKey] && frames[mauKey].el && frames[mauKey].el.contentWindow === win);
+  }
+  var ALWAYS = { getNotificationCounts: 1 };
+  var kotor = 0;
   function kena(ent, v, dariCache){
     if(!ent.win || ent.win.closed || !ent.win.document) return;
     try{ if(ent.st.ok) ent.st.ok(v, ent.st.uo); }catch(e){ try{ console.error(e); }catch(x){} }
@@ -325,12 +344,12 @@
     }
     var v = j.result;
     if(ent.baca){
-      var s = JSON.stringify(v), ada = cache[k];
-      if(ada && ada.s === s && dariCache) { ent.sudah = true; return; }
+      var s = JSON.stringify(v);
       cache[k] = { s: s, v: v }; simpan();
-      if(ada && ada.s === s && ent.sudah) return;      // sama dengan yang sudah ditampilkan
+      if(ent.tampilS === s) { ent.sudah = true; return; }      // sama dengan yang sudah ditampilkan
+      ent.tampilS = s;
     } else {
-      v = olahPdf(v); bust();
+      v = olahPdf(v); bust(ent.win);
       var ok = !(v && typeof v === 'object' && v.success === false);
       if(ok){
         var ps = pesanTulis(ent.fn);
@@ -345,29 +364,61 @@
     if(fn === 'ubahStatusPengajuan') return 'Status diperbarui';
     return '';
   }
-  function bust(){ cache = {}; try{ localStorage.removeItem('hrd_dcache'); }catch(e){} }
+  // Setelah ada perubahan data: buang cache milik halaman yang mengubah saja (supaya tidak muncul data lama di halaman itu),
+  // halaman lain tetap tampil seketika dari cache lalu diperbarui diam-diam saat dibuka.
+  function bust(win){
+    kotor = Date.now();
+    reg.forEach(function(x){ if(x.win === win) delete cache[x.k]; });
+    simpan();
+  }
 
   function call(win, fn, args, st){
     var baca = !!BACA[fn], k = kunci(fn, args);
     var ent = { win: win, fn: fn, args: args, st: st, baca: baca, k: k, sudah: false };
     if(baca){
+      var ulang = reg.some(function(x){ return x.win === win && x.k === k; });
       reg = reg.filter(function(x){ return !(x.win === win && x.k === k); });
       reg.push(ent);
       var c = cache[k];
-      if(c){ ent.sudah = true; setTimeout(function(){ kena(ent, c.v, true); }, 0); }
+      if(c){ ent.sudah = true; ent.tampilS = c.s; setTimeout(function(){ kena(ent, c.v, true); }, 0); }
+      // halaman yang sedang tersembunyi tidak perlu terus-menerus menanyai server (diperbarui saat dibuka)
+      if(c && ulang && win !== aktifWin && !ALWAYS[fn]) return;
+      bacaBersama(fn, args, k, prioritas(win)).then(function(j){
+        jawab(ent, j, false, k);
+      }).catch(function(e){ if(!ent.sudah) gagal(ent, e); });
+      return;
     }
-    kirim(fn, args, win === aktifWin).then(function(j){
+    kirim(fn, args, true).then(function(j){
       jawab(ent, j, false, k);
-    }).catch(function(e){ if(!(baca && ent.sudah)) gagal(ent, e); });
+    }).catch(function(e){ gagal(ent, e); });
+  }
+
+  // Ambil data semua halaman di latar belakang sejak awal, supaya saat pindah halaman datanya sudah ada
+  function ambilAwal(){
+    if(!ADMIN) return;
+    var T = sesi.token;
+    [['getNotificationCounts',[]],['getSubmissions',[]],['getKecelakaanCases',[]],['getUnreadRequestQuestionCount',[]],['getUnreadAnonimCount',[]],
+     ['getKoreksiSubmissions',[]],['getKeluargaSubmissions',[]],['adminGetChatList',[T]],['adminGetAnonim',[T]],
+     ['getPerbaikanNppList',[]],['getNppTemplateOptions',[]],['getPaymentPeriodeList',[]],['getPaymentKesehatanPeriodeList',[]],['getAsuransiKesehatanList',[]]
+    ].forEach(function(p){
+      var k = kunci(p[0], p[1]);
+      if(cache[k]) { /* sudah ada dari sesi sebelumnya: cukup diperbarui saat halaman dibuka */ }
+      bacaBersama(p[0], p[1], k, false).then(function(j){
+        if(!j || !j.success) return;
+        var s = JSON.stringify(j.result);
+        if(!cache[k] || cache[k].s !== s){ cache[k] = { s: s, v: j.result }; simpan(); }
+      }).catch(function(){});
+    });
   }
 
   function segarkan(win){
     reg.filter(function(x){ return x.win === win && x.baca; }).forEach(function(ent){
-      kirim(ent.fn, ent.args, true).then(function(j){
+      bacaBersama(ent.fn, ent.args, ent.k, true).then(function(j){
         if(!j.success){ if(j.error === 'SESI_HABIS') keluarSesi(); return; }
-        var s = JSON.stringify(j.result), ada = cache[ent.k];
+        var s = JSON.stringify(j.result);
         cache[ent.k] = { s: s, v: j.result }; simpan();
-        if(ada && ada.s === s) return;
+        if(ent.tampilS === s) return;
+        ent.tampilS = s;
         kena(ent, j.result, false);
       }).catch(function(){});
     });
@@ -375,7 +426,7 @@
 
   // ---------- Bingkai halaman ----------
   var stage = document.getElementById('stage'), boot = document.getElementById('boot');
-  var frames = {}, aktifWin = null, aktifKey = null, sidebarTxt = null, teksCache = {};
+  var frames = {}, aktifWin = null, aktifKey = null, sidebarTxt = null, teksCache = {}, mauKey = null;
   function ambil(nama){
     if(teksCache[nama]) return Promise.resolve(teksCache[nama]);
     return fetch('p/' + nama + '.html').then(function(r){
@@ -406,12 +457,13 @@
   }
   function tampil(r, dorong){
     if(r.keluar){ keluarSesi(); return; }
+    mauKey = r.key;
     bikin(r).then(function(f){
       if(aktifKey && frames[aktifKey] && frames[aktifKey].el) frames[aktifKey].el.classList.remove('on');
       f.el.classList.add('on'); aktifKey = r.key; aktifWin = f.el.contentWindow;
       try{ document.title = f.el.contentDocument.title || 'SHELTER'; }catch(e){}
       boot.classList.add('off');
-      if(Date.now() - f.tgl > 4000) segarkan(aktifWin);
+      if(Date.now() - f.tgl > 4000 || f.tgl < kotor) segarkan(aktifWin);
       f.tgl = Date.now();
       if(dorong) history.pushState({ k: r.key }, '', BASE + (r.q || (ADMIN ? '?page=admin' : '?page=karyawan')));
     });
@@ -433,7 +485,7 @@
       if(i >= daftar.length) return;
       var r = daftar[i++];
       if(frames[r.key]){ lagi(); return; }
-      bikin(r).then(function(){ setTimeout(lagi, 350); });
+      bikin(r).then(function(){ setTimeout(lagi, 250); });
     })();
   }
 
@@ -451,7 +503,8 @@
   var awal = rute(location.search ? location.href : BASE + '?page=' + (ADMIN ? 'admin' : 'karyawan'));
   tampil(awal, false);
   history.replaceState({}, '', BASE + (awal.q || (ADMIN ? '?page=admin' : '?page=karyawan')));
-  setTimeout(praMuat, 900);
+  ambilAwal();
+  setTimeout(praMuat, 500);
 })();
 </script>
 </body>
