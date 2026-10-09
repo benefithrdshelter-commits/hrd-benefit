@@ -2319,11 +2319,16 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
       '<button class="ap-btn p" id="pfGo" style="width:100%;margin-top:16px;padding:14px">Buat &amp; unduh PDF</button>' +
       '<p class="ap-note">PDF langsung diunduh ke perangkat kamu dan <b>tidak disimpan di Drive</b>. Status otomatis menjadi Selesai.</p><div id="pfHasil"></div></div>';
   }
+  function __stamp(n){
+    n = String(n || 'dokumen.pdf'); var d = new Date(), z = function(x){ return (x < 10 ? '0' : '') + x; };
+    var t = '' + d.getFullYear() + z(d.getMonth() + 1) + z(d.getDate()) + '-' + z(d.getHours()) + z(d.getMinutes());
+    return /\.pdf$/i.test(n) ? n.replace(/\.pdf$/i, '_' + t + '.pdf') : n + '_' + t;
+  }
   function apUnduh(namaFile, b64){
     var bin = atob(b64), n = bin.length, u = new Uint8Array(n);
     for(var i = 0; i < n; i++) u[i] = bin.charCodeAt(i);
     var url = URL.createObjectURL(new Blob([u], { type: 'application/pdf' }));
-    var a = document.createElement('a'); a.href = url; a.download = namaFile; document.body.appendChild(a); a.click();
+    var a = document.createElement('a'); a.href = url; a.download = __stamp(namaFile); document.body.appendChild(a); a.click();
     setTimeout(function(){ a.remove(); URL.revokeObjectURL(url); }, 4000);
   }
   function apProses(){
