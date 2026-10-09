@@ -438,12 +438,24 @@ function muatSites(){
     $('upSite').innerHTML = '<option value="">-- Pilih Site --</option>' + sites.map(function(s){ return '<option>' + esc(s) + '</option>'; }).join('');
   }, function(){ sitesMuat = false; });
 }
+var TPL = {};
+function tplAmbil(site, ok, bad){
+  var k = CFG.jenis + '|' + site, t = TPL[k];
+  if(t && t.res){ ok(t.res); return; }
+  if(t && t.q){ t.q.push([ok, bad]); return; }
+  TPL[k] = t = { q: [[ok, bad]] };
+  call('payTemplateData', [CFG.jenis, site], function(res){
+    var q = t.q; t.q = null; if(res && res.success !== false) t.res = res; else delete TPL[k];
+    q.forEach(function(x){ x[0](res); });
+  }, function(e){ var q = t.q; delete TPL[k]; (q||[]).forEach(function(x){ if(x[1]) x[1](e); }); });
+}
+function tplSiap(){ var v = $('upSite').value; if(v) tplAmbil(v, function(){}, function(){}); }
 function unduhTemplate(){
   var site = $('upSite').value;
   if(!site){ toast('Pilih Site dulu, supaya NIK karyawan site itu terisi otomatis di template.', 'err'); return; }
-  var b = $('btnTpl'); b.disabled = true;
-  call('payTemplateData', [CFG.jenis, site], function(res){
-    b.disabled = false;
+  var b = $('btnTpl'); b.disabled = true; var lbl = b.innerHTML; b.innerHTML = 'Menyiapkan...';
+  tplAmbil(site, function(res){
+    b.disabled = false; b.innerHTML = lbl;
     if(!res || res.success === false){ toast((res && res.error) || 'Gagal membuat template.', 'err'); return; }
     var aoa, merges = [], widths;
     var rows = res.rows || [];
@@ -464,7 +476,7 @@ function unduhTemplate(){
     XLSX.utils.book_append_sheet(wb, ws, CFG.jenis === 'tk' ? 'ketenagakerjaan' : 'kesehatan');
     XLSX.writeFile(wb, 'Template_' + CFG.nama + '_' + site.replace(/[\\\/:*?"<>|]/g, '_') + '.xlsx');
     toast('Template ' + site + ' diunduh: ' + rows.length + ' karyawan aktif sudah terisi.');
-  }, function(e){ b.disabled = false; toast(String((e && e.message) || e), 'err'); });
+  }, function(e){ b.disabled = false; b.innerHTML = lbl; toast(String((e && e.message) || e), 'err'); });
 }
 function pilihFile(){ $('upFile').click(); }
 function numv(v){
@@ -561,6 +573,7 @@ function mulai(){
   T2 = makeTable($('tDet'), { cols: detailCols(), head: detailHead(), checkbox: CFG.jenis === 'ks', empty: 'Tidak ada data.' });
   if(!VIEWER){
     ['focus','mousedown'].forEach(function(ev){ $('upSite').addEventListener(ev, muatSites); });
+    $('upSite').addEventListener('change', tplSiap);
     setTimeout(muatSites, 9000);
     if(CFG.jenis === 'ks') muatAsu();
     $('upFile').addEventListener('change', function(){ $('upName').value = this.files && this.files[0] ? this.files[0].name : ''; });
