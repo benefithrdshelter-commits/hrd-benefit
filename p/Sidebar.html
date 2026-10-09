@@ -492,8 +492,19 @@
   css.textContent =
     '.js-write,[data-write],.viewer-hide{display:none !important;}' +
     'a[href*="jenis=pesan"],a[href*="jenis=anonim"]{display:none !important;}' +
-    '.viewer-banner{background:#FFF7E6;border:1px solid #FFE3A8;color:#8A6300;border-radius:10px;padding:9px 14px;' +
-    'font-size:12.5px;font-weight:600;margin:0 0 14px;line-height:1.5;}' +
+    '.viewer-banner{position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;margin:12px 16px 4px;padding:13px 16px;border-radius:18px;color:#fff;' +
+    'background:radial-gradient(260px 120px at 100% 0%,rgba(79,214,232,.35),transparent 70%),linear-gradient(120deg,#0B2A6B 0%,#1456C8 60%,#2B86F5 100%);' +
+    'box-shadow:0 14px 30px -14px rgba(18,102,230,.7),inset 0 0 0 1px rgba(255,255,255,.16);animation:vbIn .5s cubic-bezier(.2,.8,.2,1) both;}' +
+    '.viewer-banner .vb-ic{flex:none;width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(6px);}' +
+    '.viewer-banner .vb-tx{flex:1;min-width:0;font-size:12.5px;line-height:1.55;color:rgba(255,255,255,.88);}' +
+    '.viewer-banner .vb-tx b{display:block;font-size:14px;font-weight:700;color:#fff;margin-bottom:1px;}' +
+    '.viewer-banner .vb-chip{flex:none;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.04em;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);white-space:nowrap;}' +
+    '.viewer-banner .vb-chip i{width:7px;height:7px;border-radius:50%;background:#6FE0A0;box-shadow:0 0 0 0 rgba(111,224,160,.7);animation:vbPulse 2s infinite;}' +
+    '.viewer-banner .vb-x{flex:none;width:28px;height:28px;border:0;border-radius:50%;cursor:pointer;color:#fff;background:rgba(255,255,255,.14);font-size:16px;line-height:1;display:grid;place-items:center;}' +
+    '.viewer-banner .vb-x:hover{background:rgba(255,255,255,.28);}' +
+    '@keyframes vbIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:none;}}' +
+    '@keyframes vbPulse{0%{box-shadow:0 0 0 0 rgba(111,224,160,.7);}70%{box-shadow:0 0 0 8px rgba(111,224,160,0);}100%{box-shadow:0 0 0 0 rgba(111,224,160,0);}}' +
+    '@media(max-width:700px){.viewer-banner{flex-wrap:wrap;}.viewer-banner .vb-chip{display:none;}}' +
     '.viewer-locked{opacity:.65;cursor:not-allowed !important;}';
   document.head.appendChild(css);
 
@@ -512,7 +523,16 @@
     var b = document.createElement('div');
     b.id = 'viewerBanner';
     b.className = 'viewer-banner';
-    b.innerHTML = 'Masuk sebagai <b>Admin</b> &mdash; akses hanya lihat data. Memproses, mengubah, mengunggah, dan menghapus hanya bisa dilakukan Super Admin.';
+    try { if (sessionStorage.getItem('vb_closed') === '1') return; } catch (e) {}
+    b.innerHTML =
+      '<span class="vb-ic"><svg width="22" height="22" viewBox="0 0 20 20" fill="none"><path d="M10 2L16 4.5V9C16 13 13.5 16.3 10 17.5C6.5 16.3 4 13 4 9V4.5L10 2Z" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 9.8C7.8 8.6 8.8 8 10 8C11.2 8 12.2 8.6 13 9.8C12.2 11 11.2 11.6 10 11.6C8.8 11.6 7.8 11 7 9.8Z" stroke="#fff" stroke-width="1.2"/></svg></span>' +
+      '<div class="vb-tx"><b>Masuk sebagai Admin</b>Akses hanya lihat data. Memproses, mengubah, mengunggah, dan menghapus hanya bisa dilakukan Super Admin.</div>' +
+      '<span class="vb-chip"><i></i>HANYA LIHAT</span>' +
+      '<button type="button" class="vb-x" title="Tutup" aria-label="Tutup">&times;</button>';
+    b.querySelector('.vb-x').addEventListener('click', function () {
+      try { sessionStorage.setItem('vb_closed', '1'); } catch (e) {}
+      b.style.display = 'none';
+    });
     host.insertBefore(b, host.firstChild);
   }
 
