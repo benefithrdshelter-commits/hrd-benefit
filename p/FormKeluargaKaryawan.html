@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formulir Penambahan Anggota Keluarga - Portal Karyawan SHELTER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-1:#0B1E3E; --navy-2:#123063; --navy-3:#0A1830;
+    --blue:#2F6FE4; --blue-2:#1E5BD6; --blue-tint:#E7F0FF; --blue-tint-2:#DCEBFF;
+    --teal:#0E7C86; --teal-soft:#E7F6F7;
+    --paper:#F4F7FC; --ink:#101A2E; --muted:#5C6B84; --line:#E4E9F2;
+    --danger:#D9382B; --danger-bg:#FDECEA; --success:#1E9E6B; --success-bg:#E8F8F0;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0; padding:0;}
+  body{font-family:'Plus Jakarta Sans',-apple-system,'Segoe UI',Arial,sans-serif; color:var(--ink); -webkit-font-smoothing:antialiased; background:var(--paper);}
+  a{color:inherit; text-decoration:none;}
+  button,input,textarea,select{font-family:inherit;}
+
+  .app-shell{display:flex; min-height:100vh;}
+  .app-sidebar{
+    width:252px; flex:none; color:#fff; position:relative; overflow:hidden;
+    background:linear-gradient(180deg, var(--navy-2) 0%, var(--navy-1) 55%, var(--navy-3) 100%);
+    display:flex; flex-direction:column; padding:22px 0;
+  }
+  .app-sidebar::before{
+    content:''; position:absolute; left:-70px; bottom:-110px; width:340px; height:340px; border-radius:50%;
+    background:radial-gradient(circle at 32% 32%, rgba(90,150,255,.28), transparent 70%); pointer-events:none;
+  }
+  .app-sidebar > *{position:relative; z-index:1;}
+  .brand{display:flex; align-items:center; gap:11px; padding:0 22px 24px;}
+  .brand-mark{
+    width:40px; height:40px; flex:none; border-radius:11px;
+    background:linear-gradient(155deg,#5A9BFF 0%,#2F6FE4 55%,#1848B0 100%);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 16px rgba(30,91,214,.45), inset 0 1px 0 rgba(255,255,255,.25);
+  }
+  .brand-text .t1{font-weight:800; font-size:16.5px; letter-spacing:.02em; color:#fff;}
+  .brand-text .t2{font-size:10px; color:rgba(255,255,255,.55); margin-top:2px; letter-spacing:.03em;}
+  nav{flex:1; display:flex; flex-direction:column; padding:4px 14px; overflow-y:auto;}
+  .nav-item{
+    display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:10px;
+    color:rgba(255,255,255,.72); font-size:13.5px; font-weight:500; margin-bottom:2px;
+    transition:background .15s, color .15s; cursor:pointer;
+  }
+  .nav-item svg{flex:none; opacity:.85;}
+  .nav-item:hover{background:rgba(255,255,255,.07); color:#fff;}
+  .nav-item.active{background:linear-gradient(135deg,#3A7BEF,#2159C9); color:#fff; font-weight:600; box-shadow:0 6px 16px rgba(47,111,228,.4);}
+  .nav-item.active svg{opacity:1;}
+  .nav-item .chev{margin-left:auto; transition:transform .18s ease;}
+  .nav-item.open .chev{transform:rotate(180deg);}
+  .nav-label{font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:rgba(255,255,255,.34); margin:16px 12px 6px; font-weight:600;}
+  .sub-list{overflow:hidden; max-height:0; transition:max-height .22s ease;}
+  .sub-list.open{max-height:200px;}
+  .sub-item{display:flex; align-items:center; gap:11px; padding:9px 12px 9px 34px; color:rgba(255,255,255,.62); font-size:12.5px; font-weight:500; border-radius:8px;}
+  .sub-item::before{content:''; width:6px; height:6px; border-radius:50%; border:1.5px solid rgba(255,255,255,.55); background:transparent; flex:none;}
+  .sub-item:hover{background:rgba(255,255,255,.07); color:#fff;}
+  .sub-item:hover::before{border-color:#fff; background:#fff;}
+  .sub-item.active{background:rgba(255,255,255,.1); color:#fff;}
+  .sub-item.active::before{border-color:#fff; background:#fff;}
+  .sidebar-footer{margin-top:auto; padding:16px 14px 0;}
+  .footer-user{display:flex; align-items:center; gap:10px; padding:8px 8px 16px;}
+  .footer-avatar{width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.12); flex:none; display:flex; align-items:center; justify-content:center; color:#fff;}
+  .footer-name{font-size:12.5px; font-weight:600; color:#fff; line-height:1.3;}
+  .footer-role{font-size:10.5px; color:rgba(255,255,255,.55); line-height:1.3;}
+  .logout-link{display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:10px; font-size:13px; color:rgba(255,255,255,.65); font-weight:500; border-top:1px solid rgba(255,255,255,.1); padding-top:14px;}
+  .logout-link:hover{color:#fff;}
+
+  .app-content{flex:1; min-width:0; display:flex; flex-direction:column;}
+  .topbar{display:flex; align-items:center; gap:16px; padding:20px 34px; background:#fff; border-bottom:1px solid var(--line);}
+  .topbar .tagline{font-style:italic; font-size:12.5px; color:#7C8AA3; font-weight:500;}
+  .topbar .spacer{flex:1;}
+  .topbar .bell{color:var(--ink); display:flex; cursor:pointer; margin-right:22px;}
+  .topbar .user{display:flex; align-items:center; gap:10px; cursor:pointer;}
+  .user-avatar{width:36px; height:36px; border-radius:50%; background:var(--blue-tint-2); color:var(--blue-2); display:flex; align-items:center; justify-content:center; flex:none;}
+  .user-info .name{font-size:12.5px; font-weight:700; line-height:1.3;}
+  .user-info .role{font-size:11px; color:var(--muted); line-height:1.3;}
+  .topbar .chevron{color:var(--muted); flex:none;}
+
+  .page-hero{
+    position:relative; overflow:hidden; border-radius:16px;
+    margin:26px 34px 0; min-height:150px; padding:26px 30px;
+    display:flex; align-items:center;
+    box-shadow:0 18px 40px -12px rgba(11,37,69,.18);
+    background-image: linear-gradient(100deg, rgba(11,30,62,.88) 0%, rgba(11,30,62,.7) 40%, rgba(11,30,62,.25) 75%, rgba(11,30,62,.05) 100%);
+    background-color:#0B1E3E;
+    background-size:cover; background-position:right center; background-repeat:no-repeat;
+  }
+  .page-hero-text{position:relative; z-index:1; max-width:520px;}
+  .page-hero h1{font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:21px; color:#fff; letter-spacing:-.01em; line-height:1.3; margin:0 0 8px;}
+  .page-hero p{font-size:12.5px; color:rgba(255,255,255,.82); line-height:1.55; margin:0;}
+  @media (max-width:900px){
+    .page-hero{margin:22px 20px 0; padding:20px 22px; min-height:120px;}
+    .page-hero h1{font-size:18px;}
+  }
+
+  .content-body{padding:22px 34px 44px;}
+  .card{
+    max-width:760px;
+    background:#fff; border-radius:16px; padding:26px 24px 28px;
+    box-shadow:0 18px 40px -12px rgba(11,37,69,.14), 0 2px 8px rgba(11,37,69,.04);
+    border:1px solid rgba(11,37,69,.05);
+  }
+  .btn-back{
+    display:inline-flex; align-items:center; gap:6px;
+    background:#fff; color:var(--navy-1); border:1.5px solid var(--line);
+    border-radius:10px; padding:9px 16px; font-size:12.5px;
+    font-weight:700; cursor:pointer; text-decoration:none; margin-bottom:14px;
+  }
+  .btn-back:hover{border-color:var(--blue); color:var(--blue-2);}
+
+  .section{margin-bottom:28px;}
+  .section:last-of-type{margin-bottom:0;}
+  .section-head{display:flex; align-items:center; gap:10px; margin-bottom:16px;}
+  .section-num{
+    flex:none; width:26px; height:26px; border-radius:8px; background:var(--navy-1); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700;
+  }
+  .section-head h3{font-size:15px; font-weight:700; color:var(--navy-1);}
+  .section-desc{font-size:12px; color:var(--muted); margin:-10px 0 16px 36px; line-height:1.5;}
+
+  .field{margin-bottom:15px;}
+  .field label{display:block; font-size:12.5px; font-weight:600; margin-bottom:6px; color:var(--ink);}
+  .field label .req{color:var(--danger); margin-left:2px;}
+  .field label .hint{color:var(--muted); font-weight:400; margin-left:4px; font-size:11.5px;}
+  .field input, .field select{
+    width:100%; border:1.5px solid var(--line); border-radius:10px; padding:11px 13px;
+    font-size:13.5px; color:var(--ink); background:#fff; transition:border-color .15s, box-shadow .15s;
+  }
+  .field input::placeholder{color:#A9B3C2;}
+  .field input:focus, .field select:focus{outline:none; border-color:var(--blue); box-shadow:0 0 0 4px var(--blue-tint);}
+  .field select{
+    appearance:none; -webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2368758A'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 12px center; background-size:16px; padding-right:36px;
+  }
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:560px){ .grid-2{grid-template-columns:1fr;} }
+
+  .keterangan-box{
+    margin-top:-6px; margin-bottom:15px; padding:11px 14px; border-radius:10px;
+    background:var(--teal-soft); border:1px dashed rgba(14,124,134,.35);
+    font-size:12.5px; color:var(--teal); font-weight:600; display:none;
+  }
+  .keterangan-box.show{display:block;}
+
+  .sub-field{
+    margin-top:-4px; margin-bottom:15px; padding:14px; border-radius:10px;
+    background:var(--teal-soft); border:1px dashed rgba(14,124,134,.35); display:none;
+  }
+  .sub-field.show{display:block;}
+  .sub-field label{color:var(--teal);}
+
+  .radio-row{display:flex; gap:18px; flex-wrap:wrap; margin-bottom:4px;}
+  .radio-opt{display:flex; align-items:center; gap:7px; font-size:13px; cursor:pointer;}
+  .radio-opt input{width:auto; accent-color:var(--blue);}
+
+  .check-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  @media (max-width:560px){ .check-grid{grid-template-columns:1fr;} }
+  .check-opt{
+    display:flex; align-items:flex-start; gap:9px; border:1.5px solid var(--line); border-radius:10px;
+    padding:11px 13px; font-size:13px; cursor:pointer; transition:border-color .15s, background .15s;
+  }
+  .check-opt:hover{border-color:var(--blue);}
+  .check-opt.checked{border-color:var(--blue); background:var(--blue-tint);}
+  .check-opt input{margin-top:2px; width:auto; accent-color:var(--blue); flex:none;}
+  .check-opt.wide{grid-column:1 / -1;}
+
+  .dropzone{
+    border:1.5px dashed #C3CEDC; border-radius:10px; padding:18px; text-align:center;
+    font-size:12.5px; color:var(--muted); cursor:pointer; background:#FAFBFD; min-height:88px;
+    display:flex; align-items:center; justify-content:center; line-height:1.5; flex-direction:column; gap:6px;
+    transition:border-color .15s, background .15s;
+  }
+  .dropzone:hover{border-color:var(--blue); background:var(--blue-tint);}
+  .dropzone.has-file{border-style:solid; border-color:var(--success); background:var(--success-bg); color:var(--success); padding:10px;}
+  .dropzone img{max-height:110px; max-width:100%; border-radius:8px; display:block;}
+  .dz-icon{font-size:20px; opacity:.55;}
+  .dz-hint{font-size:11px; color:var(--muted); margin-top:6px; line-height:1.5;}
+
+  .btn-submit{
+    width:100%; background:linear-gradient(135deg, var(--blue) 0%, var(--navy-1) 130%);
+    color:#fff; border:none; border-radius:10px; padding:15px; font-size:14.5px;
+    font-weight:700; cursor:pointer; margin-top:8px;
+    box-shadow:0 10px 24px -8px rgba(47,111,228,.55);
+    transition:transform .12s, box-shadow .12s;
+  }
+  .btn-submit:hover{transform:translateY(-1px);}
+  .btn-submit:disabled{opacity:.55; cursor:not-allowed; transform:none;}
+  .err-box{background:var(--danger-bg); color:var(--danger); border-radius:10px; padding:12px 14px; font-size:12.5px; margin-top:12px; display:none; font-weight:500;}
+
+  .result-box{display:none; text-align:center; max-width:760px;}
+  .result-box.show{display:block;}
+  .success-icon{
+    width:58px; height:58px; border-radius:50%; background:var(--success-bg); color:var(--success);
+    display:flex; align-items:center; justify-content:center; font-size:26px; margin:0 auto 14px; font-weight:900;
+  }
+  .result-box h1{color:var(--navy-1);}
+
+  @media (max-width:560px){
+    .content-body{padding:18px 16px 30px;}
+    .card{padding:20px 16px 22px;}
+  }
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <div class="app-sidebar">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L21 6.5V12C21 17 17.2 20.7 12 22C6.8 20.7 3 17 3 12V6.5L12 2Z" fill="white" fill-opacity=".95"/>
+          <path d="M9 12.2L11 14.2L15.3 9.5" stroke="#2F6FE4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <div class="brand-text">
+        <div class="t1">SHELTER</div>
+        <div class="t2">Portal Karyawan</div>
+      </div>
+    </div>
+
+    <nav>
+      <a class="nav-item" href="<?!= baseUrl ?>?page=karyawan&nik=<?!= nik ?>" target="_top">
+        <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M3 9.5L10 3L17 9.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 8.5V16.5C5 17.05 5.45 17.5 6 17.5H14C14.55 17.5 15 17.05 15 16.5V8.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" href="<?!= baseUrl ?>?page=karyawan-identitas&nik=<?!= nik ?>" target="_top">
+        <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6.5" r="3.3" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 17C4.2 13.3 6.8 11 10 11C13.2 11 15.8 13.3 16.5 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span>Identitas</span>
+      </a>
+
+      <div class="nav-label">Pengajuan</div>
+      <div class="nav-item open" id="pengajuanToggle">
+        <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><rect x="4" y="2.5" width="12" height="15" rx="1.5" stroke="currentColor" stroke-width="1.7"/><path d="M7 6.5H13M7 10H13M7 13.5H10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>Pengajuan</span>
+        <svg class="chev" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5.5 7.5L10 12L14.5 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="sub-list open" id="pengajuanSub">
+        <a class="sub-item" href="<?!= baseUrl ?>?page=karyawan&jenis=saldo&nik=<?!= nik ?>" target="_top">Penggabungan Saldo</a>
+        <a class="sub-item" href="<?!= baseUrl ?>?page=karyawan&jenis=koreksi&nik=<?!= nik ?>" target="_top">Koreksi Data Tenaga Kerja</a>
+        <a class="sub-item active" href="<?!= baseUrl ?>?page=karyawan&jenis=keluarga&nik=<?!= nik ?>" target="_top">Penggabungan Keluarga</a>
+      </div>
+
+      <div class="nav-label">Lainnya</div>
+      <a class="nav-item" href="<?!= baseUrl ?>?page=karyawan-RequestQuestion&nik=<?!= nik ?>" target="_top">
+        <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M3 5.5C3 4.4 3.9 3.5 5 3.5H15C16.1 3.5 17 4.4 17 5.5V11.5C17 12.6 16.1 13.5 15 13.5H8L4.5 16.5V13.5H5C3.9 13.5 3 12.6 3 11.5V5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span>Request &amp; Question</span>
+      </a>
+      <a class="nav-item" href="<?!= baseUrl ?>?page=karyawan-anonim&nik=<?!= nik ?>" target="_top">
+        <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><rect x="4" y="9" width="12" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span>Kritik &amp; Saran</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="footer-user">
+        <div class="footer-avatar">
+          <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6.5" r="3.3" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 17C4.2 13.3 6.8 11 10 11C13.2 11 15.8 13.3 16.5 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="footer-name"><?= namaKaryawan || 'Karyawan' ?></div>
+          <div class="footer-role">Karyawan</div>
+        </div>
+      </div>
+      <a class="logout-link" href="<?!= baseUrl ?>?page=login" target="_top">
+        <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M7.5 17.5H4.5C3.7 17.5 3 16.8 3 16V4C3 3.2 3.7 2.5 4.5 2.5H7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M13 14L17 10L13 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 10H7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span>Logout</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="app-content">
+    <div class="topbar">
+      <div class="spacer"></div>
+      <div class="bell" title="Notifikasi">
+        <svg width="19" height="19" viewBox="0 0 20 20" fill="none"><path d="M5 8C5 5.2 7.2 3 10 3C12.8 3 15 5.2 15 8V11.5L16.5 14H3.5L5 11.5V8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 16.5C8.3 17.3 9.1 18 10 18C10.9 18 11.7 17.3 12 16.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </div>
+      <div class="user">
+        <div class="user-avatar">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6.5" r="3.3" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 17C4.2 13.3 6.8 11 10 11C13.2 11 15.8 13.3 16.5 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <div class="user-info">
+          <div class="name"><?= namaKaryawan || 'Karyawan' ?></div>
+          <div class="role">Karyawan</div>
+        </div>
+        <svg class="chevron" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5.5 7.5L10 12L14.5 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+
+    <div class="page-hero">
+      <div class="page-hero-text">
+        <h1>Formulir Penambahan Anggota Keluarga BPJS Kesehatan</h1>
+        <p>Lengkapi data di bawah dan upload dokumen yang diminta. Tim admin akan memproses pengajuan Anda.</p>
+      </div>
+    </div>
+
+    <div class="content-body">
+      <a class="btn-back" href="<?!= baseUrl ?>?page=karyawan&jenis=keluarga&nik=<?!= nik ?>" target="_top">&larr; Kembali ke Riwayat</a>
+
+      <div class="card" id="formCard">
+        <form id="formKeluarga">
+
+          <div class="section">
+            <div class="section-head"><div class="section-num">1</div><h3>Data Tenaga Kerja</h3></div>
+            <div class="field">
+              <label>Nama Tenaga Kerja<span class="req">*</span></label>
+              <input type="text" id="namaTk" required>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label>NIK<span class="req">*</span></label>
+                <input type="text" id="nikKtp" inputmode="numeric" maxlength="16" placeholder="16 digit sesuai KTP" required>
+              </div>
+              <div class="field">
+                <label>No. WhatsApp<span class="req">*</span></label>
+                <input type="text" id="noWhatsapp" inputmode="tel" placeholder="08xxxxxxxxxx" required>
+              </div>
+            </div>
+            <div class="field">
+              <label>Email<span class="req">*</span></label>
+              <input type="email" id="email" placeholder="nama@email.com" required>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><div class="section-num">2</div><h3>Posisi &amp; Penempatan</h3></div>
+
+            <div class="field">
+              <label>Posisi Bidang Jasa<span class="req">*</span></label>
+              <div class="radio-row">
+                <label class="radio-opt"><input type="radio" name="posisi" value="Security" checked> Security</label>
+                <label class="radio-opt"><input type="radio" name="posisi" value="Non Security"> Non Security</label>
+              </div>
+            </div>
+            <div class="sub-field" id="posisiLainWrap">
+              <label>Sebutkan Posisi Non Security<span class="req">*</span></label>
+              <input type="text" id="posisiBidangLain" placeholder="Contoh: OB, Cleaning Service, Kurir, Driver, dst.">
+            </div>
+
+            <div class="field">
+              <label>Badan Usaha<span class="req">*</span></label>
+              <select id="badanUsaha" required>
+                <option value="">Pilih Badan Usaha</option>
+                <option value="SIG">PT SHELTER INDONESIA GEMILANG</option>
+                <option value="GSU">PT GLOBAL SECURINDO UTAMA</option>
+                <option value="SN">PT SHELTER NUSANTARA</option>
+                <option value="SNI">PT SHELTER NUSA INDAH</option>
+                <option value="ION">PT INDAH OPTIMAL NUSANTARA</option>
+                <option value="RCI">PT RAPI CHEM INDONESIA</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Site Penempatan<span class="req">*</span> <span class="hint">(aktif saat ini)</span></label>
+              <input type="text" id="site" placeholder="Contoh: RS Siloam" required>
+            </div>
+            <div class="keterangan-box" id="keteranganBox"></div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><div class="section-num">3</div><h3>Anggota Keluarga yang Ditambahkan</h3></div>
+            <div class="section-desc">Boleh pilih lebih dari satu, sesuai anggota keluarga yang ingin ditambahkan.</div>
+            <div class="check-grid" id="anggotaGrid">
+              <label class="check-opt"><input type="checkbox" value="Istri"> Istri</label>
+              <label class="check-opt"><input type="checkbox" value="Suami"> Suami</label>
+              <label class="check-opt"><input type="checkbox" value="Anak 1"> Anak 1</label>
+              <label class="check-opt"><input type="checkbox" value="Anak 2"> Anak 2</label>
+              <label class="check-opt"><input type="checkbox" value="Anak 3"> Anak 3</label>
+              <label class="check-opt wide"><input type="checkbox" value="Anggota Keluarga Tambahan 1% (Anak 4, Ibu dan ayah kandung)"> Anggota Keluarga Tambahan 1% (Anak 4, Ibu dan ayah kandung)</label>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><div class="section-num">4</div><h3>Upload Dokumen</h3></div>
+            <div class="section-desc">Klik kotak untuk upload, atau screenshot (Win+Shift+S) lalu arahkan mouse ke kotak dan tekan Ctrl+V.</div>
+
+            <div class="field">
+              <label>Kartu Keluarga<span class="req">*</span></label>
+              <div class="dropzone" id="dz-kk" onclick="document.getElementById('file-kk').click()">
+                <span class="dz-icon">&#128247;</span><span>Klik untuk upload, atau Ctrl+V</span>
+              </div>
+              <input type="file" id="file-kk" accept="image/*" style="display:none;">
+            </div>
+            <div class="field">
+              <label>Foto KTP<span class="req">*</span></label>
+              <div class="dropzone" id="dz-ktp" onclick="document.getElementById('file-ktp').click()">
+                <span class="dz-icon">&#128247;</span><span>Klik untuk upload, atau Ctrl+V</span>
+              </div>
+              <input type="file" id="file-ktp" accept="image/*" style="display:none;">
+            </div>
+            <div class="field">
+              <label>Akta Kelahiran<span class="req">*</span></label>
+              <div class="dropzone" id="dz-akta" onclick="document.getElementById('file-akta').click()">
+                <span class="dz-icon">&#128247;</span><span>Klik untuk upload, atau Ctrl+V</span>
+              </div>
+              <input type="file" id="file-akta" accept="image/*" style="display:none;">
+            </div>
+            <div class="field">
+              <label>Buku Nikah<span class="req">*</span></label>
+              <div class="dropzone" id="dz-bukuNikah" onclick="document.getElementById('file-bukuNikah').click()">
+                <span class="dz-icon">&#128247;</span><span>Klik untuk upload, atau Ctrl+V</span>
+              </div>
+              <input type="file" id="file-bukuNikah" accept="image/*" style="display:none;">
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit" id="btnSubmit">Kirim Data</button>
+          <div class="err-box" id="errBox"></div>
+        </form>
+      </div>
+
+      <div class="card result-box" id="resultBox">
+        <div class="success-icon">&#10003;</div>
+        <h1 style="text-align:center;">Data Berhasil Dikirim</h1>
+        <p style="text-align:center; color:var(--muted); font-size:13px; margin:10px 0 0;">Terima kasih. Admin akan memproses pengajuan penggabungan keluarga kamu.</p>
+        <a class="btn-back" style="margin-top:18px; display:inline-flex;" href="<?!= baseUrl ?>?page=karyawan&jenis=keluarga&nik=<?!= nik ?>" target="_top">&larr; Kembali ke Riwayat</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var NIK = "<?= nik ?>";
+
+document.getElementById('pengajuanToggle').addEventListener('click', function(){
+  this.classList.toggle('open');
+  document.getElementById('pengajuanSub').classList.toggle('open');
+});
+
+// ---- Posisi Non Security ----
+var posisiRadios = document.querySelectorAll('input[name="posisi"]');
+var posisiLainWrap = document.getElementById('posisiLainWrap');
+var posisiLainInput = document.getElementById('posisiBidangLain');
+posisiRadios.forEach(function(r){
+  r.addEventListener('change', function(){
+    if(this.value === 'Non Security'){
+      posisiLainWrap.classList.add('show');
+      posisiLainInput.required = true;
+    } else {
+      posisiLainWrap.classList.remove('show');
+      posisiLainInput.required = false;
+      posisiLainInput.value = '';
+    }
+  });
+});
+
+// ---- Keterangan otomatis Badan Usaha + Site ----
+var badanSelect = document.getElementById('badanUsaha');
+var siteInput = document.getElementById('site');
+var keteranganBox = document.getElementById('keteranganBox');
+function updateKeterangan(){
+  var opt = badanSelect.options[badanSelect.selectedIndex];
+  var badan = opt ? opt.text : '';
+  var site = siteInput.value.trim();
+  if(badanSelect.value && site){
+    keteranganBox.textContent = badan + ' UNIT ' + site.toUpperCase();
+    keteranganBox.classList.add('show');
+  } else {
+    keteranganBox.classList.remove('show');
+  }
+}
+badanSelect.addEventListener('change', updateKeterangan);
+siteInput.addEventListener('input', updateKeterangan);
+
+// ---- Checkbox anggota keluarga (multi-select bebas) ----
+document.querySelectorAll('#anggotaGrid .check-opt').forEach(function(opt){
+  var input = opt.querySelector('input');
+  input.addEventListener('change', function(){ opt.classList.toggle('checked', input.checked); });
+});
+function getAnggotaTerpilih(){
+  return Array.from(document.querySelectorAll('#anggotaGrid input:checked')).map(function(i){ return i.value; });
+}
+
+// ---- Dropzone + paste (KK, KTP, Akta, Buku Nikah) ----
+var fileData = { kk:null, ktp:null, akta:null, bukuNikah:null };
+var currentPasteZone = null;
+var dzMap = { kk:'dz-kk', ktp:'dz-ktp', akta:'dz-akta', bukuNikah:'dz-bukuNikah' };
+
+function loadFileIntoZone(file, dz, key){
+  if(!file || !file.type || file.type.indexOf('image') === -1) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    fileData[key] = e.target.result;
+    dz.classList.add('has-file');
+    dz.innerHTML = '<img src="' + e.target.result + '">';
+  };
+  reader.readAsDataURL(file);
+}
+function setupDropzone(dzId, inputId, key){
+  var dz = document.getElementById(dzId);
+  var input = document.getElementById(inputId);
+  input.addEventListener('change', function(){ loadFileIntoZone(input.files[0], dz, key); });
+  dz.addEventListener('mouseenter', function(){ currentPasteZone = key; });
+  dz.addEventListener('mouseleave', function(){ if(currentPasteZone === key) currentPasteZone = null; });
+}
+Object.keys(dzMap).forEach(function(key){ setupDropzone(dzMap[key], 'file-' + key, key); });
+
+document.addEventListener('paste', function(e){
+  if(!currentPasteZone) return;
+  var items = (e.clipboardData || window.clipboardData).items;
+  for(var i = 0; i < items.length; i++){
+    if(items[i].type.indexOf('image') !== -1){
+      var file = items[i].getAsFile();
+      loadFileIntoZone(file, document.getElementById(dzMap[currentPasteZone]), currentPasteZone);
+      e.preventDefault();
+      break;
+    }
+  }
+});
+
+// ---- Submit ----
+document.getElementById('formKeluarga').addEventListener('submit', function(e){
+  e.preventDefault();
+  var btn = document.getElementById('btnSubmit');
+  var errBox = document.getElementById('errBox');
+  errBox.style.display = 'none';
+
+  var nikKtpVal = document.getElementById('nikKtp').value.replace(/\s/g,'');
+  if(!/^\d{16}$/.test(nikKtpVal)){
+    errBox.textContent = 'NIK harus 16 digit angka.';
+    errBox.style.display = 'block';
+    return;
+  }
+  var waVal = document.getElementById('noWhatsapp').value.replace(/[\s-]/g,'');
+  if(!/^(\+62|62|0)8\d{7,12}$/.test(waVal)){
+    errBox.textContent = 'No. WhatsApp tidak valid. Contoh: 08123456789.';
+    errBox.style.display = 'block';
+    return;
+  }
+
+  var posisiVal = document.querySelector('input[name="posisi"]:checked').value;
+  if(posisiVal === 'Non Security' && !posisiLainInput.value.trim()){
+    errBox.textContent = 'Mohon isi Posisi Non Security.';
+    errBox.style.display = 'block';
+    return;
+  }
+  if(!badanSelect.value || !siteInput.value.trim()){
+    errBox.textContent = 'Mohon lengkapi Badan Usaha dan Site Penempatan.';
+    errBox.style.display = 'block';
+    return;
+  }
+  var anggota = getAnggotaTerpilih();
+  if(anggota.length === 0){
+    errBox.textContent = 'Pilih minimal 1 anggota keluarga yang ingin ditambahkan.';
+    errBox.style.display = 'block';
+    return;
+  }
+  if(!fileData.kk || !fileData.ktp || !fileData.akta || !fileData.bukuNikah){
+    errBox.textContent = 'Kartu Keluarga, KTP, Akta Kelahiran, dan Buku Nikah wajib diupload semua.';
+    errBox.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Mengirim...';
+
+  var data = {
+    nik: NIK,
+    namaTk: document.getElementById('namaTk').value,
+    nikKtp: nikKtpVal,
+    noWhatsapp: waVal,
+    email: document.getElementById('email').value.trim(),
+    posisi: posisiVal,
+    posisiLainnya: posisiVal === 'Non Security' ? posisiLainInput.value.trim() : '',
+    badanUsahaKey: badanSelect.value,
+    sitePenempatan: siteInput.value.trim(),
+    anggotaKeluarga: anggota,
+    kkBase64: fileData.kk,
+    ktpBase64: fileData.ktp,
+    aktaBase64: fileData.akta,
+    bukuNikahBase64: fileData.bukuNikah
+  };
+
+  google.script.run
+    .withSuccessHandler(function(res){
+      btn.disabled = false;
+      btn.textContent = 'Kirim Data';
+      if(res && res.success){
+        document.getElementById('formCard').style.display = 'none';
+        document.getElementById('resultBox').classList.add('show');
+      } else {
+        errBox.textContent = (res && res.error) || 'Terjadi kesalahan.';
+        errBox.style.display = 'block';
+      }
+    })
+    .withFailureHandler(function(err){
+      btn.disabled = false;
+      btn.textContent = 'Kirim Data';
+      errBox.textContent = (err && err.message) || String(err);
+      errBox.style.display = 'block';
+    })
+    .submitPenggabunganKeluarga(data);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="only light">
+<title>Payment - Kesehatan</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{ --violet:#0B7FC7; --violet-deep:#086694; --violet-tint:#E6F6FE; }
+.page-title{font-size:19px;font-weight:700;margin:0 0 4px}
+.page-sub{font-size:12.5px;color:var(--muted);margin:0}
+.hp{background:#fff;border:1px solid var(--line);border-top:3px solid #1d5fc4;border-radius:6px;padding:18px 20px;margin-bottom:16px}
+.hp-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.hp-row + .hp-row{margin-top:12px}
+.sp{flex:1}
+.lbl{font-weight:700;font-size:13.5px;color:#212529}
+.hi,.hs{border:1px solid #ced4da;border-radius:4px;padding:8px 12px;font-size:13.5px;font-family:inherit;background:#fff;color:#212529;min-width:150px}
+.hi:focus,.hs:focus{outline:none;border-color:#1d5fc4;box-shadow:0 0 0 3px rgba(29,95,196,.15)}
+.hb{border:1px solid transparent;border-radius:4px;padding:8px 14px;font-size:13.5px;font-family:inherit;font-weight:500;cursor:pointer;color:#fff;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;transition:filter .12s}
+.hb:hover{filter:brightness(.92)}
+.hb:disabled{opacity:.55;cursor:not-allowed}
+.hb svg{flex:none}
+.hb-blue{background:#1d5fc4}.hb-green{background:#1f9d4d}.hb-red{background:#dc3545}.hb-gray{background:#6c757d}
+.hb-sm{padding:6px 14px;font-size:13px}
+.fileb{display:flex;align-items:stretch;min-width:280px;flex:1;max-width:520px}
+.fileb input[type=text]{flex:1;min-width:0;border:1px solid #ced4da;border-right:none;border-radius:4px 0 0 4px;padding:8px 12px;font-size:13.5px;font-family:inherit;color:#495057;background:#fff}
+.fileb .fb{border:1px solid #ced4da;background:#e9ecef;color:#495057;padding:0 14px;font-size:13.5px;font-family:inherit;cursor:pointer}
+.fileb .fb:last-child{border-radius:0 4px 4px 0;border-left:none}
+.fileb .fb:hover{background:#dde1e5}
+.fileb .fb:disabled{opacity:.6;cursor:not-allowed}
+.dt-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0 10px;font-size:13.5px;color:#212529}
+.dt-len select{border:1px solid #ced4da;border-radius:4px;padding:4px 6px;margin:0 6px;font-size:13px}
+.dt-pg{display:flex;border-radius:4px;overflow:hidden}
+.dt-pg button{border:1px solid #dee2e6;margin-left:-1px;background:#fff;color:#1d5fc4;padding:7px 12px;font-size:13px;font-family:inherit;cursor:pointer}
+.dt-pg button:first-child{border-radius:4px 0 0 4px;margin-left:0}
+.dt-pg button:last-child{border-radius:0 4px 4px 0}
+.dt-pg button.on{background:#1d5fc4;border-color:#1d5fc4;color:#fff;cursor:default}
+.dt-pg button:disabled{color:#adb5bd;cursor:not-allowed;background:#fff}
+.dt-pg button:hover:not(:disabled):not(.on){background:#e9ecef}
+.dt-pg .dots{padding:7px 12px;font-size:13px;border:1px solid #dee2e6;margin-left:-1px;color:#6c757d;background:#fff}
+.dt-scroll{overflow-x:auto;border-top:1px solid #dee2e6}
+table.ht{width:100%;border-collapse:collapse;font-size:13.5px;color:#212529}
+table.ht th,table.ht td{border:1px solid #dee2e6;padding:12px 14px;vertical-align:top;text-align:left}
+table.ht thead th{font-weight:700;background:#fff;white-space:nowrap;vertical-align:middle;position:relative}
+table.ht thead th.srt{cursor:pointer;padding-right:26px}
+table.ht thead th.srt:after{content:"\2195";position:absolute;right:9px;top:50%;transform:translateY(-50%);color:#b8bfc6;font-size:13px}
+table.ht thead th.asc:after{content:"\2191";color:#212529}
+table.ht thead th.desc:after{content:"\2193";color:#212529}
+table.ht thead th.ctr{text-align:center}
+table.ht tr.flt td{padding:8px 10px;background:#fff}
+table.ht tr.flt input{width:100%;min-width:90px;border:1px solid #adb5bd;border-radius:3px;padding:3px 7px;font-size:13px;font-family:inherit}
+table.ht tbody tr:nth-child(even) td{background:#f6f7f8}
+table.ht tbody tr:hover td{background:#eef5ff}
+table.ht .acts{display:flex;flex-direction:column;gap:8px;align-items:stretch;min-width:84px}
+table.ht .acts .hb{justify-content:center;padding:6px 12px;font-size:13px}
+table.ht td.e{text-align:center;color:#6c757d;padding:34px}
+input.cb{width:20px;height:20px;border:2px solid #868e96;border-radius:4px;cursor:pointer;accent-color:#1d5fc4}
+.crumb{display:flex;justify-content:flex-end;font-size:13.5px;margin-bottom:10px;gap:6px}
+.crumb a{color:#1d5fc4;text-decoration:none;cursor:pointer}.crumb a:hover{text-decoration:underline}
+.dtitle{display:flex;align-items:center;gap:8px;font-size:15px;color:#212529;padding-bottom:12px;border-bottom:1px solid #e9ecef;margin-bottom:12px}
+.modal-o{display:none;position:fixed;inset:0;background:rgba(15,31,51,.45);z-index:60;align-items:center;justify-content:center;padding:20px}
+.modal-o.on{display:flex}
+.modal-b{background:#fff;border-radius:12px;padding:24px;max-width:500px;width:100%;max-height:86vh;overflow:auto}
+.modal-b h3{font-size:16px;font-weight:700;margin:0 0 6px}
+.modal-b p{font-size:12.5px;color:var(--muted);margin:0 0 14px;line-height:1.55}
+.ml{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #eef0f2;font-size:13.5px}
+.ml span{flex:1}
+.btn-logout{display:inline-flex;align-items:center;gap:6px;border:none;background:#E23744;color:#fff;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s;box-shadow:0 2px 8px rgba(226,55,68,.35)}
+.btn-logout:hover{background:#C81E2B}
+@media (max-width:900px){.fileb{min-width:100%;max-width:none}}
+</style>
+</head>
+<body>
+<div class="app-shell">
+<?!= sidebarHtml ?>
+<div class="app-content">
+
+<div id="vList">
+  <div class="hero-banner compact" style="min-height:0;">
+    <div class="topbar">
+       <div class="spacer"></div>
+       <button class="btn-logout" onclick="logout()" title="Keluar">
+         <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M8 4H5C4.4 4 4 4.4 4 5V15C4 15.6 4.4 16 5 16H8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 14L17 10L13 6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 10H8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+         Keluar
+       </button>
+     </div>
+    <div class="hero-body" style="flex-direction:column; align-items:stretch;">
+      <div>
+        <div class="page-title">Payment &middot; Kesehatan</div>
+        <div class="page-sub">Rekap pembayaran BPJS Kesehatan per periode. Template per site sudah terisi NIK karyawan aktif.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hp">
+    <div class="hp-row">
+      <span class="lbl">Pilih Site :</span>
+      <select class="hs" id="fField" onchange="onField()" style="min-width:210px">
+        <option value="">-- Pilih Pencarian --</option>
+        <option value="site">Site Bisnis</option>
+        <option value="npp">NPP Kesehatan</option>
+        <option value="periode">Periode</option>
+      </select>
+      <span id="fWrap"></span>
+      <div class="sp"></div>
+      <button class="hb hb-blue" onclick="filterList()">Cari</button>
+    </div>
+  </div>
+
+  <div class="hp" id="upCard" style="display:none">
+    <div class="hp-row">
+      <button class="hb hb-green" id="btnTpl" onclick="unduhTemplate()"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 3v10M10 13l-4-4M10 13l4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15v1.5c0 .8.7 1.5 1.5 1.5h11c.8 0 1.5-.7 1.5-1.5V15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> Template Kesehatan</button>
+      <select class="hs" id="upSite" title="Site" style="min-width:230px"><option value="">-- Pilih Site --</option></select>
+      <select class="hs" id="upAsuransi" title="Nama Asuransi" style="min-width:190px"><option value="">-- Pilih Asuransi --</option></select><button class="hb hb-blue" type="button" onclick="bukaAsu()">+ Tambah Asuransi</button>
+      <input class="hi" type="month" id="upPeriode" title="Periode" style="min-width:160px">
+      <div class="fileb">
+        <input type="text" id="upName" placeholder="upload Data" readonly onclick="pilihFile()">
+        <input type="file" id="upFile" accept=".xlsx,.xls" style="display:none">
+        <button class="fb" type="button" onclick="pilihFile()">Browse</button>
+        <button class="fb" type="button" id="btnUp" onclick="unggah()">Upload</button>
+      </div>
+    </div>
+    <div class="hp-row">
+      <div class="sp"></div>
+      <button class="hb hb-green" onclick="bukaGagal()"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 3v10M10 13l-4-4M10 13l4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15v1.5c0 .8.7 1.5 1.5 1.5h11c.8 0 1.5-.7 1.5-1.5V15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> Daftar Upload Gagal</button>
+      <button class="hb hb-red" onclick="hapusForm()"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M8 6V4.5c0-.3.2-.5.5-.5h3c.3 0 .5.2.5.5V6M6 6l.7 9.6c0 .5.5.9 1 .9h4.6c.5 0 1-.4 1-.9L14 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Hapus</button>
+    </div>
+  </div>
+
+  <div class="hp"><div id="tList"></div></div>
+</div>
+
+<div id="vDetail" style="display:none">
+  <div class="hero-banner compact" style="min-height:0;">
+    <div class="topbar">
+       <div class="spacer"></div>
+       <button class="btn-logout" onclick="logout()" title="Keluar">
+         <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M8 4H5C4.4 4 4 4.4 4 5V15C4 15.6 4.4 16 5 16H8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 14L17 10L13 6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 10H8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+         Keluar
+       </button>
+     </div>
+    <div class="hero-body" style="flex-direction:column; align-items:stretch;">
+      <div>
+        <div class="page-title">Asuransi Kesehatan</div>
+        <div class="page-sub" id="dSub"></div>
+      </div>
+    </div>
+  </div>
+  <div class="crumb"><a onclick="balik()">&larr; Kembali</a><span>/</span><span style="color:#6c757d">Asuransi Kesehatan</span></div>
+  <div class="hp">
+    <div class="dtitle"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M4 16l1-4 8.5-8.5a1.4 1.4 0 012 2L7 14l-3 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg> Asuransi Kesehatan</div>
+    <div class="hp-row">
+      <button class="hb hb-green" onclick="exportDetail()"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 3v10M10 13l-4-4M10 13l4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15v1.5c0 .8.7 1.5 1.5 1.5h11c.8 0 1.5-.7 1.5-1.5V15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> Export Data</button>
+      <button class="hb hb-gray" onclick="balik()">&larr; Kembali</button>
+    </div>
+    <div id="tDet"></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<div class="modal-o" id="mGagal"><div class="modal-b">
+  <h3>Daftar Upload Gagal</h3>
+  <p>Baris dari file yang di-upload terakhir di sesi ini tetapi tidak tersimpan (NIK kosong atau tidak ada di data karyawan).</p>
+  <div id="gBody"></div>
+  <div style="margin-top:16px"><button class="hb hb-gray" style="width:100%;justify-content:center" onclick="tutup('mGagal')">Tutup</button></div>
+</div></div>
+
+<div class="modal-o" id="mAsu"><div class="modal-b">
+  <h3>Kelola Nama Asuransi</h3><p>Daftar nama asuransi kesehatan yang muncul saat upload.</p>
+  <div id="aList"></div>
+  <div class="hp-row" style="margin-top:14px"><input class="hi" id="aNew" placeholder="mis. PRUDENTIAL" style="flex:1"><button class="hb hb-blue" onclick="tambahAsu()">Tambah</button></div>
+  <div style="margin-top:16px"><button class="hb hb-gray" style="width:100%;justify-content:center" onclick="tutup('mAsu')">Tutup</button></div>
+</div></div>
+
+<script>
+
+var CFG = {"jenis": "ks", "nama": "Kesehatan", "prefix": "Kesehatan", "nppLabel": "NPP Kesehatan", "sub": "Rekap pembayaran BPJS Kesehatan per periode. Template per site sudah terisi NIK karyawan aktif.", "fnList": "getPaymentKesehatanPeriodeList", "fnExport": "getPaymentKesehatanDetailExport", "fnDelete": "deletePaymentKesehatanPeriode"};
+var VIEWER = <?!= isViewer ? 'true' : 'false' ?>;
+var BASE_URL = '<?!= baseUrl ?>';
+var TOKEN = '<?!= token ?>';
+var HH = (window.parent && window.parent !== window && window.parent.__host) || null;
+
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function rp(n){ n = Math.round(Number(n) || 0); return 'Rp ' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function toast(m, t){ if(HH && HH.toast) HH.toast(m, t); else try{ alert(m); }catch(e){} }
+function ask(msg, fn){ if(HH && HH.confirm) HH.confirm(msg, fn, {danger:true}); else if(window.confirm(msg)) fn(); }
+function $(id){ return document.getElementById(id); }
+function call(fn, args, ok, fail){
+  var r = google.script.run.withSuccessHandler(function(x){ ok && ok(x); }).withFailureHandler(function(e){ (fail || function(er){ toast(String((er && er.message) || er), 'err'); })(e); });
+  r[fn].apply(r, args);
+}
+function J(raw, d){ if(typeof raw === 'string'){ try{ return JSON.parse(raw); }catch(e){ return d; } } return raw == null ? d : raw; }
+function bulan(p){
+  var m = String(p || '').match(/^(\d{4})-(\d{2})/); if(!m) return p || '-';
+  var b = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  return b[parseInt(m[2], 10)] + ' ' + m[1];
+}
+var IC_DL = '<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 3v10M10 13l-4-4M10 13l4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15v1.5c0 .8.7 1.5 1.5 1.5h11c.8 0 1.5-.7 1.5-1.5V15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
+var IC_TR = '<svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M8 6V4.5c0-.3.2-.5.5-.5h3c.3 0 .5.2.5.5V6M6 6l.7 9.6c0 .5.5.9 1 .9h4.6c.5 0 1-.4 1-.9L14 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* ---------- Tabel gaya HRIS (Show N entries, urut, cari per kolom, halaman) ---------- */
+function makeTable(host, o){
+  var st = { rows: [], page: 1, size: 10, sc: -1, sd: 1, f: {}, chk: {} };
+  host.innerHTML =
+    '<div class="dt-top"><div class="dt-info"></div><div class="dt-len">Show<select>' +
+    [10,25,50,100].map(function(n){ return '<option>' + n + '</option>'; }).join('') + '</select>entries</div><div class="dt-pg"></div></div>' +
+    '<div class="dt-scroll"><table class="ht"><thead></thead><tbody></tbody></table></div>' +
+    '<div class="dt-top" style="margin-bottom:0"><div class="dt-info"></div><div class="dt-pg"></div></div>';
+  var thead = host.querySelector('thead'), tbody = host.querySelector('tbody');
+  var infos = host.querySelectorAll('.dt-info'), pgs = host.querySelectorAll('.dt-pg');
+  var cols = o.cols, nOff = o.checkbox ? 1 : 0;
+
+  function buildHead(){
+    var rows = o.head || [cols.map(function(c, i){ return { t: c.label, c: i, cls: c.hc }; })];
+    var h = '';
+    rows.forEach(function(r, ri){
+      h += '<tr>';
+      if(o.checkbox && ri === 0) h += '<th rowspan="' + rows.length + '" style="width:44px"><input type="checkbox" class="cb" data-all="1"></th>';
+      r.forEach(function(c){
+        var srt = (c.c != null && cols[c.c] && cols[c.c].sort !== false);
+        h += '<th' + (srt ? ' class="srt' + (c.cls ? ' ' + c.cls : '') + '" data-c="' + c.c + '"' : (c.cls ? ' class="' + c.cls + '"' : '')) +
+          (c.cs ? ' colspan="' + c.cs + '"' : '') + (c.rs ? ' rowspan="' + c.rs + '"' : '') + '>' + esc(c.t) + '</th>';
+      });
+      h += '</tr>';
+    });
+    if(cols.some(function(c){ return c.filter; })){
+      h += '<tr class="flt">' + (o.checkbox ? '<td></td>' : '') + cols.map(function(c, i){
+        return '<td>' + (c.filter ? '<input type="text" data-f="' + i + '" placeholder="' + esc(c.filter) + '">' : '') + '</td>';
+      }).join('') + '</tr>';
+    }
+    thead.innerHTML = h;
+  }
+  buildHead();
+
+  function view(){
+    var q = Object.keys(st.f).filter(function(k){ return st.f[k]; });
+    var a = st.rows.filter(function(r){
+      return q.every(function(k){ return String(cols[k].val(r)).toLowerCase().indexOf(st.f[k].toLowerCase()) !== -1; });
+    });
+    if(st.sc >= 0){
+      var c = cols[st.sc];
+      a = a.slice().sort(function(x, y){
+        var u = c.val(x), v = c.val(y);
+        if(c.num) return (Number(u) - Number(v)) * st.sd;
+        return String(u).localeCompare(String(v), 'id', { numeric: true }) * st.sd;
+      });
+    }
+    return a;
+  }
+  function pager(total, pages){
+    var b = '<button data-p="' + (st.page - 1) + '"' + (st.page <= 1 ? ' disabled' : '') + '>Previous</button>';
+    var show = [], last = 0;
+    for(var p = 1; p <= pages; p++) if(p <= 5 || p === pages || Math.abs(p - st.page) <= 1) show.push(p);
+    show.forEach(function(p){
+      if(last && p - last > 1) b += '<span class="dots">…</span>';
+      b += '<button data-p="' + p + '"' + (p === st.page ? ' class="on"' : '') + '>' + p + '</button>'; last = p;
+    });
+    b += '<button data-p="' + (st.page + 1) + '"' + (st.page >= pages ? ' disabled' : '') + '>Next</button>';
+    return b;
+  }
+  function render(){
+    var a = view(), total = a.length, pages = Math.max(1, Math.ceil(total / st.size));
+    if(st.page > pages) st.page = pages;
+    var s0 = (st.page - 1) * st.size, pageRows = a.slice(s0, s0 + st.size);
+    if(!pageRows.length){
+      tbody.innerHTML = '<tr><td class="e" colspan="' + (cols.length + nOff) + '">' + esc(st.rows.length ? 'Tidak ada data yang cocok.' : (st.loading ? 'Memuat data…' : (st.err || o.empty || 'Tidak ada data.'))) + '</td></tr>';
+    } else {
+      tbody.innerHTML = pageRows.map(function(r){
+        return '<tr>' + (o.checkbox ? '<td><input type="checkbox" class="cb" data-i="' + r.__i + '"' + (st.chk[r.__i] ? ' checked' : '') + '></td>' : '') +
+          cols.map(function(c){ return '<td' + (c.tc ? ' class="' + c.tc + '"' : '') + '>' + c.cell(r) + '</td>'; }).join('') + '</tr>';
+      }).join('');
+    }
+    var txt = total ? ('Showing ' + (s0 + 1) + ' to ' + (s0 + pageRows.length) + ' of ' + total + ' entries') : 'Showing 0 to 0 of 0 entries';
+    Array.prototype.forEach.call(infos, function(e){ e.textContent = txt; });
+    Array.prototype.forEach.call(pgs, function(e){ e.innerHTML = pager(total, pages); });
+    var ths = thead.querySelectorAll('th.srt');
+    Array.prototype.forEach.call(ths, function(th){
+      th.classList.remove('asc', 'desc');
+      if(+th.getAttribute('data-c') === st.sc) th.classList.add(st.sd === 1 ? 'asc' : 'desc');
+    });
+  }
+  host.querySelector('select').addEventListener('change', function(e){ st.size = +e.target.value; st.page = 1; render(); });
+  host.addEventListener('click', function(e){
+    var t = e.target;
+    var pb = t.closest && t.closest('.dt-pg button');
+    if(pb && !pb.disabled){ st.page = +pb.getAttribute('data-p'); render(); return; }
+    var th = t.closest && t.closest('th.srt');
+    if(th){ var c = +th.getAttribute('data-c'); if(st.sc === c) st.sd = -st.sd; else { st.sc = c; st.sd = 1; } render(); return; }
+    var ab = t.closest && t.closest('[data-act]');
+    if(ab && o.onAct){ o.onAct(ab.getAttribute('data-act'), st.rows[+ab.getAttribute('data-i')]); return; }
+    if(t.getAttribute && t.getAttribute('data-all')){
+      view().forEach(function(r){ if(t.checked) st.chk[r.__i] = 1; else delete st.chk[r.__i]; }); render(); return;
+    }
+    if(t.getAttribute && t.getAttribute('data-i') != null && t.classList.contains('cb')){
+      var i = t.getAttribute('data-i'); if(t.checked) st.chk[i] = 1; else delete st.chk[i];
+    }
+  });
+  thead.addEventListener('input', function(e){
+    var k = e.target.getAttribute && e.target.getAttribute('data-f');
+    if(k != null){ st.f[k] = e.target.value; st.page = 1; render(); }
+  });
+  render();
+  return {
+    setRows: function(rows){ st.rows = rows; rows.forEach(function(r, i){ r.__i = i; }); st.loading = false; st.err = ''; st.chk = {}; render(); },
+    loading: function(){ st.rows = []; st.loading = true; st.err = ''; render(); },
+    fail: function(m){ st.rows = []; st.loading = false; st.err = m; render(); },
+    filtered: view,
+    checked: function(){ return st.rows.filter(function(r){ return st.chk[r.__i]; }); },
+    render: render
+  };
+}
+
+/* ---------- Daftar periode ---------- */
+var all = [], gagal = [], sites = [];
+var T1;
+function listCols(){
+  var c = [
+    { label: 'Periode', val: function(r){ return r.periode; }, cell: function(r){ return esc(bulan(r.periode)); } }
+  ];
+  if(CFG.jenis === 'ks') c.push({ label: 'Asuransi', val: function(r){ return r.namaAsuransi || ''; }, cell: function(r){ return esc(r.namaAsuransi || '-'); } });
+  c.push({ label: 'Site Bisnis', val: function(r){ return r.site || ''; }, cell: function(r){ return esc(r.site || ''); } });
+  c.push({ label: CFG.nppLabel, val: function(r){ return r.npp || ''; }, cell: function(r){ return esc(r.npp || ''); } });
+  c.push({ label: 'Jumlah Dibayarkan', num: true, val: function(r){ return r.totalDibayarkan || 0; }, cell: function(r){ return esc(r.totalDibayarkanFormatted || rp(r.totalDibayarkan)); } });
+  c.push({ label: 'Total Pembayaran', num: true, val: function(r){ return r.jumlahKaryawan || 0; }, cell: function(r){ return esc((r.jumlahKaryawan || 0) + ' Karyawan'); } });
+  c.push({ label: '#', sort: false, cell: function(r){
+    return '<div class="acts"><button class="hb hb-blue" data-act="detail" data-i="' + r.__i + '">Detail</button>' +
+      '<button class="hb hb-green" data-act="export" data-i="' + r.__i + '">Export</button>' +
+      (VIEWER ? '' : '<button class="hb hb-red" data-act="hapus" data-i="' + r.__i + '">Hapus</button>') + '</div>';
+  } });
+  return c;
+}
+function muatList(){
+  T1.loading();
+  call(CFG.fnList, [], function(raw){
+    var rows = J(raw, []); if(!Array.isArray(rows)) rows = [];
+    all = rows; filterList();
+  }, function(e){ T1.fail('Gagal memuat: ' + String((e && e.message) || e)); });
+}
+function onField(){
+  var f = $('fField').value, w = $('fWrap');
+  if(f === 'site'){
+    var s = {}; all.forEach(function(r){ if(r.site) s[r.site] = 1; });
+    w.innerHTML = '<select class="hs" id="fVal" onchange="filterList()"><option value="">-- Semua Site --</option>' +
+      Object.keys(s).sort().map(function(x){ return '<option>' + esc(x) + '</option>'; }).join('') + '</select>';
+  } else if(f === 'npp'){
+    w.innerHTML = '<input class="hi" id="fVal" placeholder="Ketik NPP…" oninput="filterList()">';
+  } else if(f === 'periode'){
+    w.innerHTML = '<input class="hi" type="month" id="fVal" onchange="filterList()">';
+  } else w.innerHTML = '';
+  filterList();
+}
+function filterList(){
+  var f = $('fField') ? $('fField').value : '', v = $('fVal') ? $('fVal').value.trim() : '';
+  var rows = all.filter(function(r){
+    if(!v) return true;
+    if(f === 'site') return (r.site || '') === v;
+    if(f === 'npp') return String(r.npp || '').toLowerCase().indexOf(v.toLowerCase()) !== -1;
+    if(f === 'periode') return String(r.periode) === v;
+    return true;
+  });
+  T1.setRows(rows.map(function(r){ var o = {}; for(var k in r) o[k] = r[k]; return o; }));
+}
+function argsOf(r){ return CFG.jenis === 'ks' ? [r.periode, r.namaAsuransi || '', r.site || ''] : [r.periode, r.site || '']; }
+
+function onList(act, r){
+  if(!r) return;
+  if(act === 'detail') bukaDetail(r);
+  else if(act === 'export'){
+    toast('Menyiapkan file Excel…');
+    call(CFG.fnExport, argsOf(r), function(raw){ var rows = J(raw, []); xlsx(rows, CFG.prefix + '_' + r.periode + (r.site ? '_' + r.site : '') + '.xlsx'); });
+  }
+  else if(act === 'hapus') hapus(r.periode, r.namaAsuransi || '', r.site || '');
+}
+function hapus(periode, asuransi, site){
+  if(VIEWER) return;
+  ask('Hapus data pembayaran ini?\nSemua data karyawan periode ' + bulan(periode) + (site ? ' (' + site + ')' : '') + ' akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.', function(){
+    var a = CFG.jenis === 'ks' ? [periode, asuransi, site] : [periode, site];
+    call(CFG.fnDelete, a, function(res){
+      if(res && res.success === false){ toast('Gagal menghapus: ' + (res.error || 'terjadi kesalahan'), 'err'); return; }
+      toast('Data pembayaran dihapus.'); muatList();
+    });
+  });
+}
+function xlsx(aoa, name){
+  var ws = XLSX.utils.aoa_to_sheet(aoa), wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Data');
+  XLSX.writeFile(wb, name.replace(/[\\\/:*?"<>|]/g, '_'));
+}
+
+/* ---------- Detail ---------- */
+var T2, curR = null, hdr = [];
+function detailCols(){
+  var tk = CFG.jenis === 'tk', o = tk ? 2 : 0;
+  function T(i, label, extra){ var c = { label: label, val: function(r){ return r[o + i]; }, cell: function(r){ return esc(r[o + i]); } }; for(var k in extra) c[k] = extra[k]; return c; }
+  function N(i, label){ return { label: label, num: true, val: function(r){ return r[o + i]; }, cell: function(r){ return esc(rp(r[o + i])); } }; }
+  if(tk) return [ T(0,'NIK KTP',{filter:'Cari NIK KTP'}), T(1,'Nama Karyawan',{filter:'Cari Nama Karyawan'}), T(2,'NO KPJ',{filter:'Cari NO KPJ'}), T(3,'Site Bisnis'), T(4,'NPP Ketenagakerjaan'),
+    N(5,'Perusahaan'), N(6,'Karyawan'), N(7,'Perusahaan'), N(8,'karyawan'), N(9,'JKK'), N(10,'JKM') ];
+  return [ T(0,'NIK KTP',{filter:'Cari NIK KTP'}), T(1,'Nama Karyawan',{filter:'Cari Nama Karyawan'}), T(2,'NO KIS',{filter:'Cari NO KIS'}), T(3,'Site Bisnis'), T(4,'NPP Kesehatan'),
+    N(6,'Pembayaran Karyawan'), N(5,'Pembayaran Perusahaan') ];
+}
+function detailHead(){
+  if(CFG.jenis !== 'tk') return null;
+  return [
+    [ {t:'NIK KTP',c:0,rs:2}, {t:'Nama Karyawan',c:1,rs:2}, {t:'NO KPJ',c:2,rs:2}, {t:'Site Bisnis',c:3,rs:2}, {t:'NPP Ketenagakerjaan',c:4,rs:2}, {t:'JHT',cs:2,cls:'ctr'}, {t:'JP',cs:2,cls:'ctr'}, {t:'JKK',c:9,rs:2}, {t:'JKM',c:10,rs:2} ],
+    [ {t:'Perusahaan',c:5}, {t:'Karyawan',c:6}, {t:'Perusahaan',c:7}, {t:'karyawan',c:8} ]
+  ];
+}
+function bukaDetail(r){
+  curR = r;
+  $('vList').style.display = 'none'; $('vDetail').style.display = '';
+  $('dSub').textContent = bulan(r.periode) + (r.site ? ' · ' + r.site : '') + (r.namaAsuransi ? ' · ' + r.namaAsuransi : '');
+  T2.loading();
+  call(CFG.fnExport, argsOf(r), function(raw){
+    var rows = J(raw, []);
+    hdr = rows.length ? rows[0] : [];
+    T2.setRows(rows.slice(1));
+  }, function(e){ T2.fail('Gagal memuat: ' + String((e && e.message) || e)); });
+}
+function balik(){ $('vDetail').style.display = 'none'; $('vList').style.display = ''; }
+function exportDetail(){
+  var pick = T2.checked();
+  var rows = pick.length ? pick : T2.filtered();
+  if(!rows.length){ toast('Tidak ada data untuk diexport.', 'err'); return; }
+  xlsx([hdr].concat(rows.map(function(r){ return r.slice(); })), CFG.prefix + '_' + (curR ? curR.periode : '') + (curR && curR.site ? '_' + curR.site : '') + '.xlsx');
+  toast((pick.length ? pick.length + ' baris terpilih' : rows.length + ' baris') + ' diexport.');
+}
+
+/* ---------- Template & Upload (khusus Super Admin) ---------- */
+var sitesMuat = false;
+function muatSites(){
+  if(sitesMuat) return; sitesMuat = true;
+  call('payLabourSites', [], function(res){
+    if(!res || res.success === false){ toast((res && res.error) || 'Daftar site gagal dimuat.', 'err'); return; }
+    sites = res.sites || [];
+    $('upSite').innerHTML = '<option value="">-- Pilih Site --</option>' + sites.map(function(s){ return '<option>' + esc(s) + '</option>'; }).join('');
+  }, function(){ sitesMuat = false; });
+}
+function unduhTemplate(){
+  var site = $('upSite').value;
+  if(!site){ toast('Pilih Site dulu, supaya NIK karyawan site itu terisi otomatis di template.', 'err'); return; }
+  var b = $('btnTpl'); b.disabled = true;
+  call('payTemplateData', [CFG.jenis, site], function(res){
+    b.disabled = false;
+    if(!res || res.success === false){ toast((res && res.error) || 'Gagal membuat template.', 'err'); return; }
+    var aoa, merges = [], widths;
+    var rows = res.rows || [];
+    if(CFG.jenis === 'tk'){
+      aoa = [['NIK KTP','NPP Asuransi Ketenagakerjaan','No KPJ','JHT',null,'JP',null,'JKK','JKM'], [null,null,null,'Perusahaan','Karyawan','Perusahaan','Karyawan',null,null]];
+      rows.forEach(function(r){ aoa.push([r[0], r[1] || null, r[2] || null, null, null, null, null, null, null]); });
+      merges = [[0,0,1,0],[0,1,1,1],[0,2,1,2],[0,3,0,4],[0,5,0,6],[0,7,1,7],[0,8,1,8]];
+      widths = [20,30,14,13,11,13,11,12,12];
+    } else {
+      aoa = [['NIK KTP','NPP Asuransi Kesehatan','NO KIS','Pembayaran Perusahaan','Pembayaran Karyawan']];
+      rows.forEach(function(r){ aoa.push([r[0], r[1] || null, r[2] || null, null, null]); });
+      widths = [20,24,18,24,22];
+    }
+    var ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!merges'] = merges.map(function(m){ return { s: { r: m[0], c: m[1] }, e: { r: m[2], c: m[3] } }; });
+    ws['!cols'] = widths.map(function(w){ return { wch: w }; });
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, CFG.jenis === 'tk' ? 'ketenagakerjaan' : 'kesehatan');
+    XLSX.writeFile(wb, 'Template_' + CFG.nama + '_' + site.replace(/[\\\/:*?"<>|]/g, '_') + '.xlsx');
+    toast('Template ' + site + ' diunduh: ' + rows.length + ' karyawan aktif sudah terisi.');
+  }, function(e){ b.disabled = false; toast(String((e && e.message) || e), 'err'); });
+}
+function pilihFile(){ $('upFile').click(); }
+function numv(v){
+  if(typeof v === 'number') return v;
+  var s = String(v == null ? '' : v).replace(/[^0-9,\-]/g, '').replace(',', '.');
+  return Number(s) || 0;
+}
+function nikv(v){
+  if(typeof v === 'number') return String(Math.round(v));
+  return String(v == null ? '' : v).replace(/\D/g, '');
+}
+function unggah(){
+  var periode = $('upPeriode').value, site = $('upSite').value, f = $('upFile').files && $('upFile').files[0];
+  var asuransi = CFG.jenis === 'ks' ? $('upAsuransi').value : '';
+  if(!site){ toast('Pilih Site dulu.', 'err'); return; }
+  if(CFG.jenis === 'ks' && !asuransi){ toast('Pilih Nama Asuransi dulu.', 'err'); return; }
+  if(!periode){ toast('Pilih periode dulu.', 'err'); return; }
+  if(!f){ toast('Pilih file Excel dulu (Browse).', 'err'); return; }
+  var b = $('btnUp'); b.disabled = true; b.textContent = 'Membaca…';
+  var rd = new FileReader();
+  rd.onerror = function(){ b.disabled = false; b.textContent = 'Upload'; toast('File tidak bisa dibaca.', 'err'); };
+  rd.onload = function(e){
+    try{
+      var wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true });
+      gagal = [];
+      var rows = [];
+      aoa.forEach(function(r, i){
+        var nik = nikv(r[0]);
+        if(nik.length < 8){
+          var c0 = r[0] == null ? '' : String(r[0]).trim();
+          if(c0 && !/^(nik|jht|jp)/i.test(c0)) gagal.push({ baris: i + 1, alasan: 'NIK tidak valid' });
+          return;
+        }
+        if(CFG.jenis === 'tk') rows.push({ __baris: i + 1, nikKtp: nik, nppKetenagakerjaan: String(r[1] || '').trim(), noKpj: String(r[2] || '').trim(),
+          jhtPerusahaan: numv(r[3]), jhtKaryawan: numv(r[4]), jpPerusahaan: numv(r[5]), jpKaryawan: numv(r[6]), jkk: numv(r[7]), jkm: numv(r[8]) });
+        else rows.push({ __baris: i + 1, nikKtp: nik, nppKesehatan: String(r[1] || '').trim(), noKis: String(r[2] || '').trim(),
+          pembayaranPerusahaan: numv(r[3]), pembayaranKaryawan: numv(r[4]) });
+      });
+      if(!rows.length){ b.disabled = false; b.textContent = 'Upload'; toast('Tidak ada baris data. Pakai template dari tombol Template.', 'err'); return; }
+      b.textContent = 'Menyimpan…';
+      call('payUpload', [CFG.jenis, periode, site, asuransi, rows], function(res){
+        b.disabled = false; b.textContent = 'Upload';
+        if(res && res.gagal) gagal = gagal.concat(res.gagal);
+        if(!res || res.success === false){ toast((res && res.error) || 'Gagal menyimpan.', 'err'); return; }
+        toast(res.jumlahBaris + ' baris tersimpan' + (gagal.length ? ', ' + gagal.length + ' baris gagal (lihat Daftar Upload Gagal).' : '.'));
+        $('upFile').value = ''; $('upName').value = '';
+        muatList();
+      }, function(er){ b.disabled = false; b.textContent = 'Upload'; toast(String((er && er.message) || er), 'err'); });
+    }catch(err){ b.disabled = false; b.textContent = 'Upload'; toast('Gagal membaca file: ' + (err.message || err), 'err'); }
+  };
+  rd.readAsArrayBuffer(f);
+}
+function bukaGagal(){
+  $('gBody').innerHTML = gagal.length
+    ? '<table class="ht"><thead><tr><th>Baris Excel #</th><th>Alasan</th></tr></thead><tbody>' + gagal.map(function(g){ return '<tr><td>' + esc(g.baris) + '</td><td>' + esc(g.alasan) + '</td></tr>'; }).join('') + '</tbody></table>'
+    : '<div style="text-align:center;color:var(--muted);padding:26px">Belum ada upload gagal di sesi ini.</div>';
+  $('mGagal').classList.add('on');
+}
+function hapusForm(){
+  var p = $('upPeriode').value, s = $('upSite').value, a = CFG.jenis === 'ks' ? $('upAsuransi').value : '';
+  if(!p || !s || (CFG.jenis === 'ks' && !a)){ toast('Pilih ' + (CFG.jenis === 'ks' ? 'Periode, Asuransi dan Site' : 'Periode dan Site') + ' di form dulu, baru Hapus.', 'err'); return; }
+  hapus(p, a, s);
+}
+function tutup(id){ $(id).classList.remove('on'); }
+
+/* ---------- Kelola asuransi (Kesehatan) ---------- */
+var asu = [];
+function muatAsu(){
+  call('getAsuransiKesehatanList', [], function(raw){
+    asu = J(raw, []) || [];
+    var o = asu.map(function(a){ return '<option>' + esc(a.nama) + '</option>'; }).join('');
+    var cur = $('upAsuransi').value;
+    $('upAsuransi').innerHTML = '<option value="">-- Pilih Asuransi --</option>' + o;
+    if(cur) $('upAsuransi').value = cur;
+    $('aList').innerHTML = asu.length ? asu.map(function(a, i){
+      return '<div class="ml"><span>' + esc(a.nama) + '</span><button class="hb hb-red hb-sm" data-ad="' + i + '">' + IC_TR + '</button></div>';
+    }).join('') : '<div class="ml"><span style="color:var(--muted)">Belum ada asuransi.</span></div>';
+  }, function(){});
+}
+function tambahAsu(){
+  var n = $('aNew').value.trim(); if(!n){ toast('Isi nama asuransi dulu.', 'err'); return; }
+  call('addAsuransiKesehatan', [n], function(res){
+    if(res && res.success === false){ toast(res.error || 'Gagal menambah.', 'err'); return; }
+    $('aNew').value = ''; toast('Asuransi ditambahkan.'); muatAsu();
+  });
+}
+function bukaAsu(){ $('mAsu').classList.add('on'); muatAsu(); }
+
+/* ---------- Mulai ---------- */
+function mulai(){
+  T1 = makeTable($('tList'), { cols: listCols(), onAct: onList, empty: 'Belum ada data pembayaran.' });
+  T2 = makeTable($('tDet'), { cols: detailCols(), head: detailHead(), checkbox: CFG.jenis === 'ks', empty: 'Tidak ada data.' });
+  if(!VIEWER){
+    ['focus','mousedown'].forEach(function(ev){ $('upSite').addEventListener(ev, muatSites); });
+    setTimeout(muatSites, 9000);
+    if(CFG.jenis === 'ks') muatAsu();
+    $('upFile').addEventListener('change', function(){ $('upName').value = this.files && this.files[0] ? this.files[0].name : ''; });
+  }
+  var al = $('aList');
+  if(al) al.addEventListener('click', function(e){
+    var b = e.target.closest && e.target.closest('[data-ad]'); if(!b) return;
+    var a = asu[+b.getAttribute('data-ad')]; if(!a) return;
+    ask('Hapus asuransi ' + a.nama + '?\nNama asuransi ini tidak akan muncul lagi di pilihan upload.', function(){
+      call('deleteAsuransiKesehatan', [a.id], function(){ toast('Asuransi dihapus.'); muatAsu(); });
+    });
+  });
+  muatList();
+}
+function logout(){
+  try{ localStorage.removeItem('kk_admin_token'); localStorage.removeItem('kk_admin_email'); sessionStorage.removeItem('kk_admin_token'); sessionStorage.removeItem('kk_admin_email'); }catch(e){}
+  window.__go(BASE_URL + '?page=logout&token=' + encodeURIComponent(TOKEN));
+}
+mulai();
+
+if(!VIEWER){ var _c = document.getElementById('upCard'); if(_c) _c.style.display = ''; }
+</script>
+</body>
+</html>
