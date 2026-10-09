@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment - Kesehatan</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* --violet dipetakan ke skema biru brand (variabel ini tidak ada di Sidebar.html secara default) */
+:root{
+  --violet:#0B7FC7; --violet-deep:#086694; --violet-tint:#E6F6FE;
+}
+.page-title{font-size:19px;font-weight:700;margin:0 0 4px}
+.page-sub{font-size:12.5px;color:var(--muted);margin:0}
+
+/* toolbar */
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.toolbar input[type=month],.toolbar select,.toolbar input[type=file]{
+  border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13px;
+  font-family:inherit;background:#FAFCFD;color:var(--ink)
+}
+.toolbar input[type=month]:focus,.toolbar select:focus{outline:none;border-color:var(--violet);background:#fff}
+.toolbar select{min-width:190px}
+.toolbar input[type=file]{font-size:12.5px}
+
+/* btn */
+.btn{border:none;border-radius:8px;padding:9px 16px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:7px;transition:opacity .15s,box-shadow .15s;white-space:nowrap}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--violet);color:#fff}
+.btn-primary:hover{background:var(--violet-deep)}
+.btn-success{background:#1E7D4A;color:#fff}
+.btn-success:hover{background:#155c36}
+.btn-outline{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn-outline:hover{background:var(--violet-tint);border-color:var(--violet);color:var(--violet-deep)}
+.btn-danger{background:var(--amber-tint);color:var(--amber)}
+.btn-danger:hover{background:#F5D9C9}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* filter bar — ditaruh di dalam hero, styling disesuaikan biar kebaca di atas ilustrasi gelap */
+.filter-bar{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;align-items:flex-end}
+.filter-bar .field{flex:1;min-width:180px;max-width:240px}
+.filter-bar .field label{display:block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.75);margin-bottom:6px}
+.filter-bar select,.filter-bar input[type=month]{
+  width:100%;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:9px 12px;font-size:13px;
+  font-family:inherit;background:rgba(255,255,255,.14);color:#fff
+}
+.filter-bar select:focus,.filter-bar input[type=month]:focus{outline:none;background:rgba(255,255,255,.22);box-shadow:0 0 0 3px rgba(255,255,255,.18)}
+.filter-bar select option{color:var(--ink)}
+.filter-bar .search-wrap input{background:rgba(255,255,255,.14) !important;border:1px solid rgba(255,255,255,.3) !important;color:#fff !important}
+.filter-bar .search-wrap input::placeholder{color:rgba(255,255,255,.65)}
+.filter-bar .search-wrap svg{color:rgba(255,255,255,.75) !important}
+
+/* panel */
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+
+/* table */
+table.dt{width:100%;border-collapse:collapse;font-size:13px}
+table.dt th{text-align:left;padding:12px 14px;font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line);white-space:nowrap;background:#FAFBFC}
+table.dt td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.dt tr:last-child td{border-bottom:none}
+table.dt tr:hover td{background:var(--violet-tint)}
+.cell-strong{font-weight:600;color:var(--ink)}
+.cell-muted{color:var(--muted);font-size:12px}
+.cell-num{text-align:right;font-variant-numeric:tabular-nums}
+th.cell-num{text-align:right}
+.empty{text-align:center;padding:44px;color:var(--muted);font-size:13px}
+
+/* badge */
+.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-violet{background:var(--violet-tint);color:var(--violet-deep)}
+.badge-blue{background:var(--blue-tint);color:var(--blue-deep)}
+.badge-green{background:var(--green-tint);color:var(--green)}
+
+/* pagination */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+.pagination .pg-btns{display:flex;gap:6px}
+.pagination button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit;color:var(--ink)}
+.pagination button:hover:not(:disabled){background:var(--violet-tint);border-color:var(--violet)}
+.pagination button:disabled{opacity:.4;cursor:not-allowed}
+
+/* back */
+.back-link{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--violet);text-decoration:none;font-weight:600;margin-bottom:14px;cursor:pointer;border:none;background:none;padding:0;font-family:inherit}
+.back-link:hover{text-decoration:underline}
+
+/* modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(15,31,51,.45);z-index:50;align-items:center;justify-content:center;padding:20px}
+.overlay.open{display:flex}
+.mbox{background:#fff;border-radius:14px;padding:28px;width:100%;max-width:440px}
+.mbox h3{font-size:16px;font-weight:700;margin:0 0 6px}
+.mbox p{font-size:12.5px;color:var(--muted);margin:0 0 18px;line-height:1.6}
+.mfield{margin-bottom:14px}
+.mfield label{display:block;font-size:11.5px;font-weight:700;margin-bottom:6px;color:var(--ink)}
+.mfield input,.mfield select{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;background:#FAFCFD;color:var(--ink)}
+.mfield input:focus,.mfield select:focus{outline:none;border-color:var(--violet);background:#fff}
+.mactions{display:flex;gap:10px;margin-top:18px}
+.mactions .btn{flex:1;justify-content:center}
+.status-msg{font-size:12.5px;margin-top:12px;padding:10px 13px;border-radius:8px;display:none;font-weight:500}
+.status-msg.ok{display:block;background:var(--green-tint);color:var(--green)}
+.status-msg.err{display:block;background:var(--amber-tint);color:var(--amber)}
+.btn-logout{
+  display:inline-flex; align-items:center; gap:6px; border:none; background:#E23744; color:#fff;
+  border-radius:8px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;
+  transition:background .15s, box-shadow .15s; box-shadow:0 2px 8px rgba(226,55,68,.35);
+}
+.btn-logout:hover{background:#C81E2B;}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <?!= sidebarHtml ?>
+  <div class="app-content">
+
+    <!-- ===== VIEW: LIST PERIODE ===== -->
+    <div id="listView">
+      <div class="hero-banner compact" style="min-height:0;">
+        <div class="topbar">
+          <div class="spacer"></div>
+          <button class="btn-logout" onclick="logout()" title="Keluar">
+            <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M8 4H5C4.4 4 4 4.4 4 5V15C4 15.6 4.4 16 5 16H8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 14L17 10L13 6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 10H8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Keluar
+          </button>
+        </div>
+        <div class="hero-body" style="flex-direction:column; align-items:stretch;">
+          <div>
+            <div class="page-title">Payment &middot; Kesehatan</div>
+            <div class="page-sub">Rekap pembayaran asuransi kesehatan per periode &amp; site bisnis.</div>
+          </div>
+
+          <!-- filter — ditaruh di dalam hero biar ilustrasinya kebagian ruang -->
+          <div class="filter-bar">
+            <div class="field">
+              <label>Pilih Site</label>
+              <select id="filterSite" onchange="renderPeriodeList()">
+                <option value="">-- Semua Site --</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Nama Asuransi</label>
+              <select id="filterAsuransi" onchange="renderPeriodeList()">
+                <option value="">-- Semua Asuransi --</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Cari Periode</label>
+              <div class="search-wrap" style="position:relative;">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);"><circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.6"/><path d="M17 17L13.5 13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                <input type="text" id="periodeSearch" placeholder="mis. 2026-09..." oninput="renderPeriodeList()" style="padding-left:32px;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- toolbar: template, tambah asuransi, upload inline, daftar gagal, hapus -->
+      <div class="panel" style="padding:18px 20px; margin-bottom:14px;">
+        <div class="toolbar" style="margin-bottom:0;">
+          <button class="btn btn-outline" onclick="downloadTemplate()">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 3v10M10 13L6 9M10 13L14 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15v1.5C3 17.3 3.7 18 4.5 18h11c.8 0 1.5-.7 1.5-1.5V15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            Template Kesehatan
+          </button>
+          <button class="btn btn-success" onclick="openAsuransiManager()">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#fff" stroke-width="1.6"/><path d="M10 6v8M6 10h8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+            Tambah Asuransi
+          </button>
+          <input type="month" id="upPeriode" title="Periode">
+          <select id="upAsuransi" title="Nama Asuransi"><option value="">-- Pilih Asuransi --</option></select>
+          <select id="upSite" title="Site"><option value="">-- Pilih Site --</option></select>
+          <input type="file" id="upFile" accept=".xlsx,.xls">
+          <button class="btn btn-primary" id="btnUpload" onclick="submitUpload()">Upload</button>
+          <div class="spacer"></div>
+          <button class="btn btn-outline" onclick="openGagalModal()">Daftar Upload Gagal</button>
+          <button class="btn btn-danger" onclick="hapusDariForm()">Hapus</button>
+        </div>
+        <div class="status-msg" id="upStatus"></div>
+      </div>
+
+      <div class="panel">
+        <table class="dt">
+          <thead>
+            <tr>
+              <th>Periode</th>
+              <th>Nama Asuransi</th>
+              <th>Site Bisnis</th>
+              <th>NPP Kesehatan</th>
+              <th>Diupload</th>
+              <th class="cell-num">Karyawan</th>
+              <th class="cell-num">Total Dibayarkan</th>
+              <th style="text-align:right">#</th>
+            </tr>
+          </thead>
+          <tbody id="periodeTbody">
+            <tr><td colspan="8" class="empty">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== VIEW: DETAIL ===== -->
+    <div id="detailView" style="display:none">
+      <button class="back-link" onclick="backToList()">&larr; Kembali ke daftar periode</button>
+      <div class="hero-banner compact">
+        <div class="hero-body">
+          <div>
+            <div class="page-title" id="detailTitle">Detail Periode</div>
+            <div class="page-sub" id="detailSub"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrap" style="position:relative; flex:1; max-width:320px;">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);"><circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.6"/><path d="M17 17L13.5 13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <input type="text" id="detailSearch" placeholder="Cari NIK, nama, atau NO KIS..." style="width:100%; padding-left:32px; border:1px solid var(--line); border-radius:8px; padding-top:9px; padding-bottom:9px; font-size:13px; font-family:inherit; background:#fff; color:var(--ink);">
+        </div>
+        <div class="spacer"></div>
+        <button class="btn btn-outline" onclick="exportDetail()">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 3v10M10 13L6 9M10 13L14 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15v1.5C3 17.3 3.7 18 4.5 18h11c.8 0 1.5-.7 1.5-1.5V15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Export Data
+        </button>
+      </div>
+
+      <div class="panel" style="overflow-x:auto">
+        <table class="dt">
+          <thead>
+            <tr>
+              <th>NIK KTP</th>
+              <th>Nama Karyawan</th>
+              <th>NO KIS</th>
+              <th>Site Bisnis</th>
+              <th>NPP Kesehatan</th>
+              <th class="cell-num">Pembayaran Perusahaan</th>
+              <th class="cell-num">Pembayaran Karyawan</th>
+            </tr>
+          </thead>
+          <tbody id="detailTbody">
+            <tr><td colspan="7" class="empty">Memuat data...</td></tr>
+          </tbody>
+        </table>
+        <div class="pagination" id="detailPagination"></div>
+      </div>
+    </div>
+
+    <!-- ===== VIEW: MANAJEMEN ASURANSI ===== -->
+    <div id="asuransiView" style="display:none">
+      <button class="back-link" onclick="backToList()">&larr; Kembali ke daftar periode</button>
+      <div class="hero-banner compact">
+        <div class="hero-body">
+          <div>
+            <div class="page-title">Manajemen Nama Asuransi</div>
+            <div class="page-sub">Kelola daftar nama asuransi kesehatan yang tersedia saat upload data.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn btn-primary" onclick="openAddAsuransiModal()">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#fff" stroke-width="1.6"/><path d="M10 6v8M6 10h8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Tambah Asuransi Kesehatan
+        </button>
+      </div>
+
+      <div class="panel">
+        <table class="dt">
+          <thead>
+            <tr>
+              <th style="width:60px">No</th>
+              <th>Nama Asuransi</th>
+              <th style="text-align:right">#</th>
+            </tr>
+          </thead>
+          <tbody id="asuransiTbody">
+            <tr><td colspan="3" class="empty">Memuat...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL DAFTAR UPLOAD GAGAL -->
+<div class="overlay" id="gagalModal">
+  <div class="mbox" style="max-width:520px">
+    <h3>Daftar Upload Gagal</h3>
+    <p>Baris dari file Excel yang di-upload terakhir di sesi ini, tapi gagal disimpan (NIK KTP dan Nama Karyawan kosong, atau header kolom tidak cocok dengan template).</p>
+    <div id="gagalListWrap" style="max-height:320px;overflow-y:auto">
+      <div class="empty">Belum ada upload gagal di sesi ini.</div>
+    </div>
+    <div class="mactions">
+      <button class="btn btn-outline" onclick="closeModal('gagalModal')" style="flex:none;width:100%">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TAMBAH ASURANSI -->
+<div class="overlay" id="addAsuransiModal">
+  <div class="mbox">
+    <h3 id="addAsuransiTitle">Tambah Nama Asuransi</h3>
+    <div class="mfield"><label>Nama Asuransi</label><input type="text" id="inputNamaAsuransi" placeholder="mis. PRUDENTIAL"></div>
+    <div class="status-msg" id="addAsuransiStatus"></div>
+    <div class="mactions">
+      <button class="btn btn-outline" onclick="closeModal('addAsuransiModal')">Batal</button>
+      <button class="btn btn-primary" id="btnSaveAsuransi" onclick="saveAsuransi()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HAPUS -->
+<div class="overlay" id="deleteModal">
+  <div class="mbox">
+    <h3>Hapus data ini?</h3>
+    <p id="deleteMsgText">Tindakan ini tidak bisa dibatalkan.</p>
+    <div class="mactions">
+      <button class="btn btn-outline" onclick="closeModal('deleteModal')">Batal</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Ya, Hapus</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var BASE_URL = '<?!= baseUrl ?>';
+var TOKEN = '<?!= token ?>';
+var TEMPLATE_HEADERS = ['NIK KTP','Nama Karyawan','NO KIS','Site Bisnis','NPP Kesehatan','Pembayaran Perusahaan','Pembayaran Karyawan'];
+var HEADER_TO_KEY = {
+  'nik ktp':'nikKtp','nama karyawan':'namaKaryawan','no kis':'noKis',
+  'site bisnis':'siteBisnis','npp kesehatan':'nppKesehatan',
+  'pembayaran perusahaan':'pembayaranPerusahaan','pembayaran karyawan':'pembayaranKaryawan'
+};
+
+var allPeriode=[]; var asuransiList=[]; var siteList=[];
+var curPeriode=null; var curAsuransi=null; var curSite=null;
+var detailPage=1; var detailSearch='';
+var editAsuransiId=null;
+var deleteTarget=null;
+var lastUploadGagal=[];
+
+function rp(n){
+  n=Math.round(Number(n)||0);
+  return 'Rp '+n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+}
+function esc(s){if(!s)return'';return s.toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function bulan(p){
+  if(!p)return'-';
+  var nm=['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  var x=p.split('-');return (nm[parseInt(x[1],10)]||x[1])+' '+x[0];
+}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ===== INIT =====
+function init(){
+  // load sites
+  google.script.run.withSuccessHandler(function(raw){
+    var d=JSON.parse(raw||'[]');
+    siteList=d;
+    var fSite=document.getElementById('filterSite');
+    var upSite=document.getElementById('upSite');
+    d.forEach(function(s){
+      fSite.innerHTML+='<option value="'+esc(s.kode)+'">'+esc(s.kode)+' — '+esc(s.nama)+'</option>';
+      upSite.innerHTML+='<option value="'+esc(s.kode)+'">'+esc(s.kode)+' — '+esc(s.nama)+'</option>';
+    });
+  }).getPayksSites();
+
+  // load asuransi
+  loadAsuransiList();
+
+  // load periode
+  loadPeriodeList();
+}
+
+// ===== ASURANSI =====
+function loadAsuransiList(){
+  google.script.run.withSuccessHandler(function(raw){
+    asuransiList=JSON.parse(raw||'[]');
+    // isi semua dropdown asuransi
+    var opts='<option value="">-- Pilih Asuransi --</option>';
+    asuransiList.forEach(function(a){ opts+='<option value="'+esc(a.nama)+'">'+esc(a.nama)+'</option>'; });
+    document.getElementById('filterAsuransi').innerHTML='<option value="">-- Semua Asuransi --</option>'+
+      asuransiList.map(function(a){return'<option value="'+esc(a.nama)+'">'+esc(a.nama)+'</option>';}).join('');
+    document.getElementById('upAsuransi').innerHTML=opts;
+    renderAsuransiTable();
+  }).getAsuransiKesehatanList();
+}
+function renderAsuransiTable(){
+  var tb=document.getElementById('asuransiTbody');
+  if(!asuransiList.length){tb.innerHTML='<tr><td colspan="3" class="empty">Belum ada asuransi.</td></tr>';return;}
+  tb.innerHTML=asuransiList.map(function(a,i){
+    return'<tr>'+
+      '<td class="cell-muted">'+(i+1)+'</td>'+
+      '<td class="cell-strong">'+esc(a.nama)+'</td>'+
+      '<td style="text-align:right">'+
+        '<button class="btn btn-outline btn-sm" onclick="openEditAsuransi(\''+a.id+'\',\''+esc(a.nama)+'\')">Ubah</button> '+
+        '<button class="btn btn-danger btn-sm" onclick="openDeleteAsuransi(\''+a.id+'\',\''+esc(a.nama)+'\')">Hapus</button>'+
+      '</td>'+
+    '</tr>';
+  }).join('');
+}
+function openAsuransiManager(){
+  document.getElementById('listView').style.display='none';
+  document.getElementById('detailView').style.display='none';
+  document.getElementById('asuransiView').style.display='';
+  renderAsuransiTable();
+}
+function openAddAsuransiModal(){
+  editAsuransiId=null;
+  document.getElementById('addAsuransiTitle').textContent='Tambah Nama Asuransi';
+  document.getElementById('inputNamaAsuransi').value='';
+  document.getElementById('addAsuransiStatus').className='status-msg';
+  openModal('addAsuransiModal');
+}
+function openEditAsuransi(id,nama){
+  editAsuransiId=id;
+  document.getElementById('addAsuransiTitle').textContent='Ubah Nama Asuransi';
+  document.getElementById('inputNamaAsuransi').value=nama;
+  document.getElementById('addAsuransiStatus').className='status-msg';
+  openModal('addAsuransiModal');
+}
+function saveAsuransi(){
+  var nama=document.getElementById('inputNamaAsuransi').value.trim();
+  if(!nama){showStatus('addAsuransiStatus','Nama wajib diisi.','err');return;}
+  var btn=document.getElementById('btnSaveAsuransi');
+  btn.disabled=true; btn.textContent='Menyimpan...';
+  var fn=editAsuransiId ?
+    function(cb){ google.script.run.withSuccessHandler(cb).withFailureHandler(function(e){cb({success:false,error:e.message});}).updateAsuransiKesehatan(editAsuransiId,nama); } :
+    function(cb){ google.script.run.withSuccessHandler(cb).withFailureHandler(function(e){cb({success:false,error:e.message});}).addAsuransiKesehatan(nama); };
+  fn(function(res){
+    btn.disabled=false; btn.textContent='Simpan';
+    if(res.success){ closeModal('addAsuransiModal'); loadAsuransiList(); }
+    else showStatus('addAsuransiStatus',res.error||'Gagal.','err');
+  });
+}
+function openDeleteAsuransi(id,nama){
+  deleteTarget={type:'asuransi',id:id};
+  document.getElementById('deleteMsgText').textContent='Hapus asuransi "'+nama+'"? Tindakan ini tidak bisa dibatalkan.';
+  openModal('deleteModal');
+}
+
+// ===== PERIODE LIST =====
+function loadPeriodeList(){
+  document.getElementById('periodeTbody').innerHTML='<tr><td colspan="8" class="empty">Memuat data...</td></tr>';
+  google.script.run.withSuccessHandler(function(raw){
+    allPeriode=JSON.parse(raw||'[]');
+    renderPeriodeList();
+  }).withFailureHandler(function(e){
+    document.getElementById('periodeTbody').innerHTML='<tr><td colspan="8" class="empty">Gagal: '+e.message+'</td></tr>';
+  }).getPaymentKesehatanPeriodeList();
+}
+function renderPeriodeList(){
+  var site=document.getElementById('filterSite').value;
+  var asi=document.getElementById('filterAsuransi').value;
+  var term=(document.getElementById('periodeSearch').value||'').toLowerCase().trim();
+  var rows=allPeriode.filter(function(r){
+    return (!site||r.site===site)&&(!asi||r.namaAsuransi===asi)&&(!term||r.periode.indexOf(term)!==-1);
+  });
+  var tb=document.getElementById('periodeTbody');
+  if(!rows.length){
+    tb.innerHTML='<tr><td colspan="8" class="empty">'+(allPeriode.length?'Tidak ada data yang cocok.':'Belum ada data. Isi form upload di atas untuk mulai.')+'</td></tr>';
+    return;
+  }
+  tb.innerHTML=rows.map(function(r){
+    return'<tr>'+
+      '<td class="cell-strong">'+esc(bulan(r.periode))+'</td>'+
+      '<td><span class="badge badge-violet">'+esc(r.namaAsuransi||'-')+'</span></td>'+
+      '<td><span class="badge badge-blue">'+esc(r.site||'-')+'</span></td>'+
+      '<td class="cell-muted">'+esc(r.npp||'-')+'</td>'+
+      '<td class="cell-muted">'+esc(r.timestampUpload)+'</td>'+
+      '<td class="cell-num">'+r.jumlahKaryawan+' org</td>'+
+      '<td class="cell-num cell-strong">'+esc(r.totalDibayarkanFormatted)+'</td>'+
+      '<td style="text-align:right;white-space:nowrap">'+
+        '<button class="btn btn-outline btn-sm" onclick="openDetail(\''+esc(r.periode)+'\',\''+esc(r.namaAsuransi)+'\',\''+esc(r.site)+'\')">Detail</button> '+
+        '<button class="btn btn-danger btn-sm" onclick="openDeletePeriode(\''+esc(r.periode)+'\',\''+esc(r.namaAsuransi)+'\',\''+esc(r.site)+'\')">Hapus</button>'+
+      '</td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ===== UPLOAD (inline) =====
+function downloadTemplate(){
+  var ws=XLSX.utils.aoa_to_sheet([TEMPLATE_HEADERS]);
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Template');
+  XLSX.writeFile(wb,'Template_Kesehatan.xlsx');
+}
+function submitUpload(){
+  var p=document.getElementById('upPeriode').value;
+  var a=document.getElementById('upAsuransi').value;
+  var s=document.getElementById('upSite').value;
+  var f=document.getElementById('upFile').files;
+  if(!p){showStatus('upStatus','Pilih periode.','err');return;}
+  if(!a){showStatus('upStatus','Pilih nama asuransi.','err');return;}
+  if(!s){showStatus('upStatus','Pilih site bisnis.','err');return;}
+  if(!f||!f[0]){showStatus('upStatus','Pilih file Excel.','err');return;}
+  var btn=document.getElementById('btnUpload');
+  btn.disabled=true; btn.textContent='Membaca...';
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=new Uint8Array(e.target.result);
+      var wb=XLSX.read(data,{type:'array'});
+      var raw=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+      lastUploadGagal=[];
+      var rows=raw.map(function(r,idx){
+        var obj={};
+        Object.keys(r).forEach(function(h){
+          var k=HEADER_TO_KEY[h.toString().trim().toLowerCase()];
+          if(k) obj[k]=r[h];
+        });
+        obj.__baris=idx+2;
+        return obj;
+      }).filter(function(o){
+        if(o.nikKtp||o.namaKaryawan) return true;
+        lastUploadGagal.push({baris:o.__baris,alasan:'NIK KTP dan Nama Karyawan kosong'});
+        return false;
+      });
+      if(!rows.length){btn.disabled=false;btn.textContent='Upload';showStatus('upStatus','Semua baris gagal / header tidak cocok template. Cek Daftar Upload Gagal.','err');return;}
+      btn.textContent='Menyimpan...';
+      google.script.run
+        .withSuccessHandler(function(res){
+          btn.disabled=false;btn.textContent='Upload';
+          if(res.success){
+            var pesan=res.jumlahBaris+' baris berhasil disimpan.'+(lastUploadGagal.length?(' '+lastUploadGagal.length+' baris gagal, cek Daftar Upload Gagal.'):'');
+            showStatus('upStatus',pesan,'ok');
+            document.getElementById('upFile').value='';
+            loadPeriodeList();
+          }
+          else showStatus('upStatus',res.error||'Gagal.','err');
+        })
+        .withFailureHandler(function(e){btn.disabled=false;btn.textContent='Upload';showStatus('upStatus',e.message,'err');})
+        .savePaymentKesehatanRows(p,a,s,rows);
+    }catch(e){btn.disabled=false;btn.textContent='Upload';showStatus('upStatus','Gagal baca file: '+e.message,'err');}
+  };
+  reader.readAsArrayBuffer(f[0]);
+}
+
+// ===== DAFTAR UPLOAD GAGAL =====
+function openGagalModal(){
+  var wrap=document.getElementById('gagalListWrap');
+  if(lastUploadGagal.length===0){
+    wrap.innerHTML='<div class="empty">Belum ada upload gagal di sesi ini.</div>';
+  } else {
+    wrap.innerHTML='<table class="dt"><thead><tr><th>Baris Excel #</th><th>Alasan</th></tr></thead><tbody>'+
+      lastUploadGagal.map(function(g){return'<tr><td>'+g.baris+'</td><td class="cell-muted">'+esc(g.alasan)+'</td></tr>';}).join('')+
+      '</tbody></table>';
+  }
+  openModal('gagalModal');
+}
+
+// ===== DETAIL =====
+function openDetail(periode,asuransi,site){
+  curPeriode=periode;curAsuransi=asuransi;curSite=site;
+  detailPage=1;detailSearch='';
+  document.getElementById('detailSearch').value='';
+  document.getElementById('detailTitle').textContent='Detail — '+bulan(periode);
+  document.getElementById('detailSub').textContent='Asuransi: '+asuransi+' · Site: '+site;
+  document.getElementById('listView').style.display='none';
+  document.getElementById('detailView').style.display='';
+  loadDetailPage();
+}
+function backToList(){
+  document.getElementById('detailView').style.display='none';
+  document.getElementById('asuransiView').style.display='none';
+  document.getElementById('listView').style.display='';
+  loadPeriodeList();
+}
+function loadDetailPage(){
+  document.getElementById('detailTbody').innerHTML='<tr><td colspan="7" class="empty">Memuat...</td></tr>';
+  google.script.run
+    .withSuccessHandler(function(raw){
+      var res=JSON.parse(raw||'{}');
+      renderDetailTable(res);
+    })
+    .withFailureHandler(function(e){
+      document.getElementById('detailTbody').innerHTML='<tr><td colspan="7" class="empty">Gagal: '+e.message+'</td></tr>';
+    })
+    .getPaymentKesehatanDetail(curPeriode,curAsuransi,curSite,detailSearch,detailPage,15);
+}
+function renderDetailTable(res){
+  var rows=res.rows||[];
+  var tb=document.getElementById('detailTbody');
+  if(!rows.length){tb.innerHTML='<tr><td colspan="7" class="empty">Tidak ada data.</td></tr>';document.getElementById('detailPagination').innerHTML='';return;}
+  tb.innerHTML=rows.map(function(r){
+    return'<tr>'+
+      '<td class="cell-muted">'+esc(r.nikKtp)+'</td>'+
+      '<td class="cell-strong">'+esc(r.namaKaryawan)+'</td>'+
+      '<td class="cell-muted">'+esc(r.noKis)+'</td>'+
+      '<td>'+esc(r.siteBisnis)+'</td>'+
+      '<td class="cell-muted">'+esc(r.nppKesehatan)+'</td>'+
+      '<td class="cell-num">'+rp(r.pembayaranPerusahaan)+'</td>'+
+      '<td class="cell-num">'+rp(r.pembayaranKaryawan)+'</td>'+
+    '</tr>';
+  }).join('');
+  var totalPages=Math.max(1,Math.ceil(res.total/res.pageSize));
+  document.getElementById('detailPagination').innerHTML=
+    '<div>'+res.total+' karyawan · Hal '+res.page+' dari '+totalPages+'</div>'+
+    '<div class="pg-btns">'+
+      '<button '+(res.page<=1?'disabled':'')+' onclick="changeDetailPage('+(res.page-1)+')">← Sebelumnya</button>'+
+      '<button '+(res.page>=totalPages?'disabled':'')+' onclick="changeDetailPage('+(res.page+1)+')">Selanjutnya →</button>'+
+    '</div>';
+}
+function changeDetailPage(p){detailPage=p;loadDetailPage();}
+var dbt;
+document.getElementById('detailSearch').addEventListener('input',function(e){
+  clearTimeout(dbt);var v=e.target.value;
+  dbt=setTimeout(function(){detailSearch=v;detailPage=1;loadDetailPage();},350);
+});
+
+// ===== HAPUS =====
+function openDeletePeriode(periode,asuransi,site){
+  deleteTarget={type:'periode',periode:periode,asuransi:asuransi,site:site};
+  document.getElementById('deleteMsgText').textContent='Hapus semua data periode '+bulan(periode)+' ('+asuransi+' · '+site+')? Tidak bisa dibatalkan.';
+  openModal('deleteModal');
+}
+function hapusDariForm(){
+  var p=document.getElementById('upPeriode').value;
+  var a=document.getElementById('upAsuransi').value;
+  var s=document.getElementById('upSite').value;
+  if(!p||!a||!s){alert('Pilih Periode, Nama Asuransi, dan Site di form upload dulu, baru Hapus.');return;}
+  openDeletePeriode(p,a,s);
+}
+function confirmDelete(){
+  if(!deleteTarget)return;
+  if(deleteTarget.type==='periode'){
+    google.script.run
+      .withSuccessHandler(function(res){closeModal('deleteModal');if(res.success)loadPeriodeList();else alert('Gagal: '+(res.error||''));})
+      .withFailureHandler(function(e){closeModal('deleteModal');alert('Gagal: '+e.message);})
+      .deletePaymentKesehatanPeriode(deleteTarget.periode,deleteTarget.asuransi,deleteTarget.site);
+  } else if(deleteTarget.type==='asuransi'){
+    google.script.run
+      .withSuccessHandler(function(res){closeModal('deleteModal');if(res.success)loadAsuransiList();else alert('Gagal: '+(res.error||''));})
+      .withFailureHandler(function(e){closeModal('deleteModal');alert('Gagal: '+e.message);})
+      .deleteAsuransiKesehatan(deleteTarget.id);
+  }
+  deleteTarget=null;
+}
+
+// ===== EXPORT =====
+function exportDetail(){
+  google.script.run
+    .withSuccessHandler(function(raw){
+      var rows=JSON.parse(raw||'[]');
+      var ws=XLSX.utils.aoa_to_sheet(rows);
+      var wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb,ws,'Detail');
+      XLSX.writeFile(wb,'Kesehatan_'+curAsuransi+'_'+curSite+'_'+curPeriode+'.xlsx');
+    })
+    .withFailureHandler(function(e){alert('Gagal export: '+e.message);})
+    .getPaymentKesehatanDetailExport(curPeriode,curAsuransi,curSite);
+}
+
+// ===== UTIL =====
+function showStatus(id,msg,type){
+  var el=document.getElementById(id);
+  el.textContent=msg;el.className='status-msg '+type;
+}
+
+// klik luar modal = tutup
+['addAsuransiModal','deleteModal','gagalModal'].forEach(function(id){
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeModal(id);});
+});
+
+function logout(){
+  try {
+    localStorage.removeItem('kk_admin_token');
+    localStorage.removeItem('kk_admin_email');
+    sessionStorage.removeItem('kk_admin_token');
+    sessionStorage.removeItem('kk_admin_email');
+  } catch(e){}
+  window.__go(BASE_URL + '?page=logout&token=' + encodeURIComponent(TOKEN));
+}
+
+init();
+</script>
+</body>
+</html>

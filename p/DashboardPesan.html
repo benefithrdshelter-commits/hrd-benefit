@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pesan Masuk</title>
+<style>
+  .pesan-head h1{font-size:19px;font-weight:700;margin:0 0 4px}
+  .pesan-head p{font-size:12.5px;color:var(--muted);margin:0}
+  .chat-shell{--red:#E4483A;display:grid;grid-template-columns:320px 1fr;height:calc(100vh - 150px);min-height:440px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .clist{border-right:1px solid var(--line);overflow-y:auto}
+  .ci{display:flex;gap:11px;padding:13px 14px;cursor:pointer;border-bottom:1px solid var(--line)}
+  .ci:hover,.ci.on{background:var(--blue-tint)}
+  .av{width:40px;height:40px;border-radius:50%;background:var(--blue-tint);color:var(--blue-deep);display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+  .ci .m{flex:1;min-width:0}
+  .ci .r1,.ci .r2{display:flex;justify-content:space-between;gap:8px}
+  .ci .r2{margin-top:3px}
+  .ci .nm{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ci .tm{font-size:11px;color:var(--muted);flex:none}
+  .ci .pv{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ub{background:var(--red);color:#fff;font-size:10.5px;font-weight:700;border-radius:99px;padding:1px 7px;flex:none}
+  .gh{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:8px;background:#EEF4FB;color:var(--navy-1);font-size:11px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:8px 14px;border-bottom:1px solid var(--line)}
+  .ci .sb{font-size:11px;color:var(--blue-deep);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+  .pane{display:flex;flex-direction:column;min-width:0}
+  .ph{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+  .ph .t{flex:1;min-width:0}
+  .ph .t b{display:block;font-size:14px}
+  .ph .t span{display:block;font-size:11.5px;color:var(--muted);line-height:1.5}
+  .ib{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 11px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit}
+  .ib:hover{background:var(--blue-tint);color:var(--blue-deep)}
+  .ib.danger:hover{background:#FDECEA;color:var(--red)}
+  .back{display:none}
+  .msgs{flex:1;overflow-y:auto;padding:16px;background:#F4F7FC;display:flex;flex-direction:column;gap:6px}
+  .dsep{align-self:center;font-size:11px;color:var(--muted);background:#fff;border-radius:99px;padding:3px 12px;margin:8px 0}
+  .b{max-width:72%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word;position:relative}
+  .b.k{align-self:flex-start;background:#fff;border:1px solid var(--line)}
+  .b.a{align-self:flex-end;background:#D9EBFF}
+  .b .tt{display:block;font-size:10.5px;color:var(--muted);text-align:right;margin-top:3px}
+  .b .x{display:none;position:absolute;top:-8px;right:-6px;border:1px solid var(--line);background:#fff;border-radius:50%;width:20px;height:20px;line-height:17px;font-size:13px;cursor:pointer;color:var(--red);padding:0}
+  .b:hover .x{display:block}
+  .cmp{display:flex;gap:10px;padding:12px 14px;border-top:1px solid var(--line);align-items:flex-end}
+  .cmp textarea{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13px;resize:none;max-height:110px}
+  .cmp textarea:focus{outline:none;border-color:var(--blue)}
+  .send{background:var(--blue-deep);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-weight:700;cursor:pointer;font-family:inherit}
+  .send:disabled{opacity:.6}
+  .empty{margin:auto;text-align:center;color:var(--muted);font-size:13px;padding:30px}
+  .btn-logout{display:inline-flex;align-items:center;gap:8px;background:#E4483A;color:#fff !important;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;box-shadow:0 8px 18px -8px rgba(228,72,58,.6)}
+  .btn-logout:hover{background:#C93A2D}
+  @media(max-width:900px){.chat-shell{grid-template-columns:1fr;height:calc(100vh - 200px)}.pane{display:none}.chat-shell.open .clist{display:none}.chat-shell.open .pane{display:flex}.back{display:inline-block}}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <?!= sidebarHtml ?>
+  <div class="app-content">
+
+    <div class="hero-banner compact">
+      <div class="topbar">
+        <div class="spacer"></div>
+        <a class="btn-logout" href="<?!= baseUrl ?>?page=logout&token=<?!= token ?>" target="_top">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M7.5 17.5H4.5C3.7 17.5 3 16.8 3 16V4C3 3.2 3.7 2.5 4.5 2.5H7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M13 14L17 10L13 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 10H7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Keluar
+        </a>
+      </div>
+      <div class="hero-body">
+        <div>
+          <div class="page-title">Pesan Masuk</div>
+          <div class="page-sub">Dengarkan pertanyaan, pahami kebutuhan, dan hadir untuk membantu.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-shell" id="shell">
+      <div class="clist" id="clist"><div class="empty">Memuat...</div></div>
+      <div class="pane">
+        <div class="ph" id="ph" style="display:none">
+          <button class="ib back" id="back">&lsaquo; Kembali</button>
+          <div class="av" id="phav"></div>
+          <div class="t"><b id="phn"></b><span id="phk"></span></div>
+          <button class="ib danger" id="delAll">Hapus chat</button>
+        </div>
+        <div class="msgs" id="msgs"><div class="empty">Pilih percakapan di sebelah kiri.</div></div>
+        <div class="cmp" id="cmp" style="display:none">
+          <textarea id="txt" rows="1" placeholder="Tulis balasan..." maxlength="1000"></textarea>
+          <button class="send" id="btnSend">Kirim</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var TOKEN = "<?= token ?>", CUR = null, CURNAMA = '', LJ = '', MJ = '', MR = 0, LIST = [];
+function $(id){ return document.getElementById(id); }
+function esc(s){ return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function P(raw){ try{ var o = JSON.parse(raw); return (o && o.error) ? null : o; }catch(e){ return null; } }
+function ini(n,k){ return String(n && n!=='-' ? n : (k||'?')).trim().charAt(0).toUpperCase(); }
+function run(fn,args,ok){
+  var r = google.script.run.withSuccessHandler(ok).withFailureHandler(function(e){ alert('Gagal: ' + (e && e.message ? e.message : e)); });
+  r[fn].apply(r,args);
+}
+function refreshAll(){ MJ=''; LJ=''; loadChat(true); loadList(); if(window.refreshBadgePesan) refreshBadgePesan(); }
+
+function markRead(){
+  if(!CUR || Date.now()-MR < 8000) return; MR = Date.now();
+  run('adminMarkChatRead',[TOKEN,CUR],function(){ LJ=''; loadList(); if(window.refreshBadgePesan) refreshBadgePesan(); });
+}
+
+function loadList(){
+  run('adminGetChatList',[TOKEN],function(raw){
+    if(raw === LJ) return; LJ = raw;
+    var l = P(raw) || []; LIST = l; if(CUR) $('phk').textContent = info(CUR);
+    var groups = [], gi = {};
+    l.forEach(function(c){
+      var g = c.badan || 'Belum mengisi data';
+      if(!(g in gi)){ gi[g] = groups.length; groups.push({name:g, items:[], unread:0}); }
+      var G = groups[gi[g]]; G.items.push(c); G.unread += c.unread || 0;
+    });
+    $('clist').innerHTML = l.length ? groups.map(function(G){
+      return '<div class="gh"><span>'+esc(G.name)+'</span>'+(G.unread ? '<span class="ub">'+G.unread+'</span>' : '')+'</div>'
+        + G.items.map(function(c){
+          var sub = [c.site, c.bidang].filter(Boolean).join(' \u00b7 ');
+          return '<div class="ci'+(c.nik===CUR?' on':'')+'" data-nik="'+esc(c.nik)+'" data-nama="'+esc(c.nama)+'">'
+            + '<div class="av">'+esc(ini(c.nama,c.nik))+'</div><div class="m">'
+            + '<div class="r1"><span class="nm">'+esc(c.nama || ('NIK '+c.nik))+'</span><span class="tm">'+esc(c.lastTime)+'</span></div>'
+            + (sub ? '<div class="sb">'+esc(sub)+'</div>' : '')
+            + '<div class="r2"><span class="pv">'+esc(c.last)+'</span>'+(c.unread ? '<span class="ub">'+c.unread+'</span>' : '')+'</div>'
+            + '</div></div>';
+        }).join('');
+    }).join('') : '<div class="empty">Belum ada pesan masuk.</div>';
+    var cur = l.filter(function(c){ return c.nik === CUR; })[0];
+    if(cur && cur.unread > 0) markRead();
+  });
+}
+
+function info(nik){ var c = LIST.filter(function(x){ return x.nik === nik; })[0] || {}; return ['NIK '+nik, c.badan, c.site, c.bidang].filter(Boolean).join(' \u00b7 '); }
+function openChat(nik,nama){
+  CUR = nik; CURNAMA = nama; MJ = '';
+  [].forEach.call(document.querySelectorAll('.ci'),function(e){ e.classList.toggle('on', e.getAttribute('data-nik') === nik); });
+  $('ph').style.display = 'flex'; $('cmp').style.display = 'flex';
+  $('phn').textContent = nama || ('NIK '+nik); $('phk').textContent = info(nik); $('phav').textContent = ini(nama,nik);
+  $('shell').classList.add('open');
+  $('msgs').innerHTML = '<div class="empty">Memuat...</div>';
+  loadChat(true); MR = 0; markRead();
+}
+
+function loadChat(force){
+  if(!CUR) return; var nik = CUR;
+  run('adminGetChat',[TOKEN,nik],function(raw){
+    if(nik !== CUR || (raw === MJ && !force)) return; MJ = raw;
+    var d = P(raw), ms = (d && d.msgs) || [], el = $('msgs');
+    var near = el.scrollHeight - el.scrollTop - el.clientHeight < 80, h = '', last = '';
+    ms.forEach(function(m){
+      if(m.date !== last){ last = m.date; h += '<div class="dsep">'+esc(m.date)+'</div>'; }
+      h += '<div class="b '+(m.from==='Admin'?'a':'k')+'">'+esc(m.text)+'<span class="tt">'+esc(m.time)+'</span><button class="x" data-id="'+esc(m.id)+'" title="Hapus pesan">&times;</button></div>';
+    });
+    el.innerHTML = h || '<div class="empty">Belum ada pesan.</div>';
+    if(near || force) el.scrollTop = el.scrollHeight;
+  });
+}
+
+function send(){
+  var t = $('txt').value.trim(); if(!t || !CUR) return;
+  var b = $('btnSend'); b.disabled = true;
+  run('adminReplyChat',[TOKEN,CUR,t],function(res){
+    b.disabled = false;
+    if(res && res.success){ $('txt').value = ''; refreshAll(); } else alert((res && res.error) || 'Gagal mengirim.');
+  });
+}
+
+$('clist').addEventListener('click',function(e){ var c = e.target.closest('.ci'); if(c) openChat(c.getAttribute('data-nik'), c.getAttribute('data-nama')); });
+$('msgs').addEventListener('click',function(e){
+  var id = e.target.getAttribute && e.target.getAttribute('data-id'); if(!id) return;
+  if(!confirm('Hapus pesan ini? Pesan hilang permanen.')) return;
+  run('adminDeleteMessage',[TOKEN,id],refreshAll);
+});
+$('delAll').onclick = function(){
+  if(!CUR || !confirm('Hapus seluruh chat dengan ' + (CURNAMA || CUR) + '? Tidak bisa dikembalikan.')) return;
+  run('adminDeleteChat',[TOKEN,CUR],function(){
+    CUR = null; $('ph').style.display = 'none'; $('cmp').style.display = 'none'; $('shell').classList.remove('open');
+    $('msgs').innerHTML = '<div class="empty">Pilih percakapan di sebelah kiri.</div>';
+    LJ = ''; loadList(); if(window.refreshBadgePesan) refreshBadgePesan();
+  });
+};
+$('back').onclick = function(){ $('shell').classList.remove('open'); };
+$('btnSend').onclick = send;
+$('txt').addEventListener('keydown',function(e){ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
+
+loadList();
+setInterval(function(){ loadList(); loadChat(false); }, 15000);
+</script>
+</body>
+</html>
