@@ -519,14 +519,23 @@ function filterList(){
 }
 function argsOf(r){ return CFG.jenis === 'ks' ? [r.periode, r.namaAsuransi || '', r.site || ''] : [r.periode, r.site || '']; }
 function itemsOf(r){ return r.items || [r]; }
-function ambilGabung(items, ok, fail){
-  var n = items.length, got = new Array(n), done = 0, err = false;
-  items.forEach(function(it, i){
-    call(CFG.fnExport, argsOf(it), function(raw){
-      got[i] = J(raw, []); done++;
-      if(done === n){ var h = [], rows = []; got.forEach(function(g){ if(!h.length && g.length) h = g[0]; rows = rows.concat(g.slice(1)); }); ok([h].concat(rows)); }
-    }, function(e){ if(!err){ err = true; if(fail) fail(e); } });
+function ambilSatu(it, ok, fail, n){
+  call(CFG.fnExport, argsOf(it), ok, function(e){
+    n = n || 0;
+    if(n < 3) setTimeout(function(){ ambilSatu(it, ok, fail, n + 1); }, 700 * (n + 1));
+    else if(fail) fail(e);
   });
+}
+function ambilGabung(items, ok, fail){
+  var got = [], i = 0;
+  (function nxt(){
+    if(i >= items.length){
+      var h = [], rows = [];
+      got.forEach(function(g){ if(!h.length && g.length) h = g[0]; rows = rows.concat(g.slice(1)); });
+      ok([h].concat(rows)); return;
+    }
+    ambilSatu(items[i++], function(raw){ got.push(J(raw, [])); nxt(); }, fail);
+  })();
 }
 function namaFile(r){ return CFG.prefix + '_' + r.periode + (r.namaAsuransi ? '_' + r.namaAsuransi : '') + (r.site ? '_' + r.site : (r.items && r.items.length > 1 ? '_Semua-Site' : '')) + '.xlsx'; }
 function onList(act, r){
