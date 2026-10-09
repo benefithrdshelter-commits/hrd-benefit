@@ -59,6 +59,92 @@
     color:#FFD166; letter-spacing:.01em;
   }
   .tagline-box .hl{color:#7FE3FF;}
+
+  /* ================= DASHBOARD BARU ================= */
+  .tagline-box{position:relative; display:inline-flex; align-items:center; gap:10px; padding:7px 20px 7px 7px; border-radius:999px; font-style:normal; font-weight:800; font-size:13px; letter-spacing:.02em; color:#fff; line-height:1.2;
+    border:1.5px solid transparent;
+    background:linear-gradient(rgba(8,22,50,.66),rgba(8,22,50,.66)) padding-box, linear-gradient(110deg,#7FE3FF,#3FE0A8,#FFD166,#7FE3FF) border-box;
+    background-size:100% 100%, 300% 100%; animation:tgFlow 7s linear infinite;
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); box-shadow:0 10px 28px rgba(0,0,0,.30), inset 0 0 22px rgba(127,227,255,.10); overflow:hidden;}
+  .tagline-box .tg-ic{width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:none; color:#06284f; background:linear-gradient(135deg,#7FE3FF,#3FE0A8); box-shadow:0 0 0 4px rgba(127,227,255,.16);}
+  .tagline-box .tg-tx b{background:linear-gradient(90deg,#7FE3FF,#3FE0A8); -webkit-background-clip:text; background-clip:text; color:transparent; font-weight:900;}
+  .tagline-box::after{content:''; position:absolute; top:0; left:-60%; width:40%; height:100%; background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent); transform:skewX(-20deg); animation:tgShine 4.5s ease-in-out infinite;}
+  @keyframes tgFlow{to{background-position:0 0, 300% 0;}}
+  @keyframes tgShine{0%,55%{left:-60%;} 100%{left:130%;}}
+
+  .hero-chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;}
+  .hero-chips .chip{display:inline-flex; align-items:center; gap:7px; padding:6px 13px; border-radius:999px; font-size:12px; font-weight:700; color:#fff; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.26); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);}
+  .hero-chips .chip i{width:8px; height:8px; border-radius:50%; background:#3FE0A8; box-shadow:0 0 0 0 rgba(63,224,168,.6); animation:pulse 1.8s infinite;}
+  .hero-chips .chip.warn i{background:#FFB454; box-shadow:0 0 0 0 rgba(255,180,84,.6); animation-name:pulseW;}
+  @keyframes pulse{70%{box-shadow:0 0 0 7px rgba(63,224,168,0);} 100%{box-shadow:0 0 0 0 rgba(63,224,168,0);}}
+  @keyframes pulseW{70%{box-shadow:0 0 0 7px rgba(255,180,84,0);} 100%{box-shadow:0 0 0 0 rgba(255,180,84,0);}}
+
+  .stat-grid.kpi{grid-template-columns:repeat(3,1fr);}
+  @media (min-width:1750px){ .stat-grid.kpi{grid-template-columns:repeat(6,1fr);} }
+  @media (max-width:640px){ .stat-grid.kpi{grid-template-columns:repeat(2,1fr);} }
+  .stat-card{transition:transform .2s ease, box-shadow .2s ease;}
+  .stat-card:hover{transform:translateY(-3px); box-shadow:0 14px 30px rgba(15,31,51,.10);}
+  .stat-card::before{content:''; position:absolute; left:0; top:0; right:0; height:3px; background:var(--kc,#3D7BD9); opacity:.9;}
+  .stat-card.c-blue{--kc:#3D7BD9;} .stat-card.c-amber{--kc:#E07A2E;} .stat-card.c-green{--kc:#22B573;} .stat-card.c-purple{--kc:#9B5FE0;}
+  .stat-card.c-teal{--kc:#14B8A6;} .stat-card.c-teal .ic{background:#DDF7F3; color:#0F9F8F;}
+  .stat-card.c-rose{--kc:#F0568A;} .stat-card.c-rose .ic{background:#FFE6EF; color:#E03E78;}
+  .stat-card .num{font-size:26px; letter-spacing:-.01em;}
+  .stat-card svg.spark{right:16px; top:62px; bottom:auto; width:96px; height:36px;}
+
+  .dgrid{display:grid; gap:16px; margin-bottom:16px;}
+  .dg-a{grid-template-columns:1.7fr 1fr;} .dg-b{grid-template-columns:1.5fr 1fr;} .dg-c{grid-template-columns:1fr 1fr;}
+  @media (max-width:1100px){ .dg-a,.dg-b,.dg-c{grid-template-columns:1fr;} }
+  .panel{box-shadow:0 1px 2px rgba(15,31,51,.04); transition:box-shadow .2s;}
+  .panel:hover{box-shadow:0 10px 28px rgba(15,31,51,.08);}
+  .panel .sub{font-size:11.5px; color:var(--muted); margin:-12px 0 14px 42px;}
+  .chart-box{position:relative; height:290px;}
+  .chart-box.sm{height:250px;}
+  .legend-row{display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:12px; font-size:11.5px; color:var(--muted);}
+  .legend-row span{display:inline-flex; align-items:center; gap:6px;} .legend-row i{width:9px; height:9px; border-radius:3px; display:inline-block;}
+  .empty{display:none; text-align:center; color:var(--muted); font-size:12.5px; padding:56px 0;}
+
+  .st-list{display:flex; flex-direction:column; gap:10px; margin-top:6px;}
+  .st-row{display:flex; align-items:center; gap:10px; font-size:12.5px;}
+  .st-row i{width:10px; height:10px; border-radius:3px; flex:none;} .st-row b{margin-left:auto; font-size:13px;}
+
+  .mod-list{display:flex; flex-direction:column; gap:16px;}
+  .mod-row .mr-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px; font-size:12.5px;}
+  .mod-row .mr-top b{font-size:13px;} .mod-row .mr-top span{color:var(--muted); font-size:11.5px;}
+  .mod-bar{height:9px; border-radius:99px; background:#EDF1F6; overflow:hidden; display:flex;}
+  .mod-bar i{display:block; height:100%; width:0; transition:width .9s cubic-bezier(.2,.8,.2,1);}
+
+  .feed{display:flex; flex-direction:column;}
+  .fd{display:flex; align-items:center; gap:12px; padding:11px 2px; border-bottom:1px solid #F0F3F7;}
+  .fd:last-child{border-bottom:0;}
+  .fd .av{width:36px; height:36px; border-radius:11px; flex:none; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:13px;}
+  .fd .tx{min-width:0; flex:1;} .fd .tx b{display:block; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .fd .tx span{display:block; font-size:11.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .fd .rt{text-align:right; flex:none;} .fd .rt small{display:block; font-size:10.5px; color:var(--muted); margin-top:3px;}
+  .pill{display:inline-block; font-size:10.5px; font-weight:800; padding:3px 9px; border-radius:99px;}
+  .pill.diajukan{background:#FFF1E6; color:#C2540A;} .pill.diproses{background:#E7F0FF; color:#2F63B8;} .pill.selesai{background:#E3F7EC; color:#17824F;}
+
+  .brand-ban{position:relative; overflow:hidden; border-radius:20px; padding:38px 40px; color:#fff; margin:6px 0 22px; display:grid; grid-template-columns:1.25fr 1fr; gap:30px; align-items:center;
+    background:radial-gradient(800px 320px at 92% -10%,rgba(63,224,168,.38),transparent 60%), radial-gradient(700px 340px at -5% 110%,rgba(0,181,252,.45),transparent 60%), linear-gradient(135deg,#0B255A 0%,#1E3E7A 52%,#0B7FC7 100%);
+    box-shadow:0 18px 44px rgba(11,37,90,.28);}
+  .brand-ban::before,.brand-ban::after{content:''; position:absolute; border-radius:50%; border:1px solid rgba(255,255,255,.14); pointer-events:none; animation:spinr 40s linear infinite;}
+  .brand-ban::before{width:420px; height:420px; right:-120px; top:-170px; border-style:dashed;}
+  .brand-ban::after{width:260px; height:260px; left:36%; bottom:-150px; animation-direction:reverse;}
+  @keyframes spinr{to{transform:rotate(360deg);}}
+  .brand-ban .bb-k{display:inline-flex; align-items:center; gap:8px; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#7FE3FF; margin-bottom:12px;}
+  .brand-ban .bb-k::before{content:''; width:26px; height:2px; background:linear-gradient(90deg,#7FE3FF,transparent);}
+  .brand-ban h2{font-size:clamp(28px,3.6vw,44px); line-height:1.08; font-weight:800; margin:0 0 14px; letter-spacing:-.015em; color:#fff;}
+  .brand-ban h2 .g{background:linear-gradient(90deg,#7FE3FF,#3FE0A8); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .brand-ban p{margin:0 0 20px; font-size:13.5px; line-height:1.65; color:rgba(255,255,255,.82); max-width:46ch;}
+  .brand-ban .bb-btn{display:inline-flex; align-items:center; gap:8px; background:#fff; color:#0B5FA3; font-weight:800; font-size:13px; text-decoration:none; padding:11px 20px; border-radius:11px; box-shadow:0 8px 20px rgba(0,0,0,.2); transition:transform .15s;}
+  .brand-ban .bb-btn:hover{transform:translateY(-2px);}
+  .bb-pil{display:grid; gap:10px; position:relative; z-index:1;}
+  .bb-pil div{display:flex; align-items:center; gap:14px; padding:13px 16px; border-radius:14px; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.2); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);}
+  .bb-pil .pi{width:40px; height:40px; border-radius:12px; flex:none; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#7FE3FF,#3FE0A8); color:#06284f;}
+  .bb-pil b{display:block; font-size:14px;} .bb-pil span{font-size:12px; color:rgba(255,255,255,.75);}
+  @media (max-width:900px){ .brand-ban{grid-template-columns:1fr; padding:28px 22px;} }
+  #dashErr{display:none; margin-bottom:14px; padding:12px 16px; border-radius:12px; background:#FFF4E5; color:#B45309; font-size:13px; font-weight:600;}
+  #dashErr button{margin-left:10px; border:0; background:#B45309; color:#fff; padding:5px 12px; border-radius:8px; cursor:pointer; font-weight:700;}
+  @media (prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important;} }
 </style>
 </head>
 <body>
@@ -69,7 +155,7 @@
   <div class="app-content">
     <div class="hero-banner">
             <div class="topbar">
-        <div class="tagline-box">Kerja <span class="hl">Aman</span>, Masa Depan Nyaman</div>
+        <div class="tagline-box"><span class="tg-ic"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 2L16.5 4.6V9.6C16.5 13.4 13.8 16.6 10 18C6.2 16.6 3.5 13.4 3.5 9.6V4.6L10 2Z" fill="currentColor" opacity=".18"/><path d="M10 2L16.5 4.6V9.6C16.5 13.4 13.8 16.6 10 18C6.2 16.6 3.5 13.4 3.5 9.6V4.6L10 2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M7 10L9.2 12.2L13.2 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="tg-tx">Kerja <b>Aman</b>, Masa Depan <b>Nyaman</b></span></div>
         <div class="spacer"></div>
         <div class="topbar-actions">
           <div class="bell" id="notifBell" title="Notifikasi">
@@ -94,50 +180,58 @@
           <div class="eyebrow">Jaminan Sosial Ketenagakerjaan</div>
           <h1>Melindungi Pekerja, Menguatkan <span class="accent">Indonesia</span></h1>
           <p>Bersama SHELTER, kelola dan pantau seluruh program Jaminan Sosial Ketenagakerjaan dengan lebih mudah, cepat, dan transparan.</p>
+          <div class="hero-chips" id="heroChips"></div>
         </div>
       </div>
     </div>
 
 
-    <div class="stat-grid">
+    <div id="dashErr">Data dashboard belum bisa dimuat. <button type="button" onclick="muatDash()">Coba lagi</button></div>
+
+    <div class="stat-grid kpi">
       <div class="stat-card c-blue">
-        <div class="top-row">
-          <div class="ic"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="4" y="3" width="12" height="14" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M7 7H13M7 10.5H13M7 14H10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
-          <div class="trend" id="trendTotal"></div>
-        </div>
+        <div class="top-row"><div class="ic"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><rect x="4" y="3" width="12" height="14" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M7 7H13M7 10.5H13M7 14H10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><div class="trend flat" id="trTotal"></div></div>
         <div class="num" id="statTotal">&ndash;</div>
-        <div class="label">Total Kasus</div>
-        <div class="compare" id="compareTotal"></div>
+        <div class="label">Total Pengajuan</div>
+        <div class="compare" id="cpTotal"></div>
+        <svg class="spark" id="spTotal" viewBox="0 0 92 34" preserveAspectRatio="none"></svg>
       </div>
       <div class="stat-card c-amber">
-        <div class="top-row">
-          <div class="ic"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M10 6V10L12.5 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <div class="trend" id="trendBelum"></div>
-        </div>
+        <div class="top-row"><div class="ic"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M10 6V10L12.5 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="trend flat" id="trBelum"></div></div>
         <div class="num" id="statBelum">&ndash;</div>
-        <div class="label">Belum Diproses</div>
-        <div class="compare" id="compareBelum"></div>
+        <div class="label">Menunggu Diproses</div>
+        <div class="compare" id="cpBelum"></div>
+        <svg class="spark" id="spBelum" viewBox="0 0 92 34" preserveAspectRatio="none"></svg>
       </div>
       <div class="stat-card c-green">
-        <div class="top-row">
-          <div class="ic"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M6.5 10L9 12.5L13.5 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <div class="trend" id="trendSelesai"></div>
-        </div>
+        <div class="top-row"><div class="ic"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M6.5 10L9 12.5L13.5 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="trend flat" id="trSelesai"></div></div>
         <div class="num" id="statSelesai">&ndash;</div>
         <div class="label">Selesai</div>
-        <div class="compare" id="compareSelesai"></div>
+        <div class="compare" id="cpSelesai"></div>
+        <svg class="spark" id="spSelesai" viewBox="0 0 92 34" preserveAspectRatio="none"></svg>
       </div>
       <div class="stat-card c-purple">
-        <div class="top-row">
-          <div class="ic"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="7" cy="7" r="2.6" stroke="currentColor" stroke-width="1.6"/><circle cx="14" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M2.8 16C3.2 13 5 11.3 7.2 11.3C9.4 11.3 11.1 13 11.5 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12.5 12C14.7 12 16.3 13.5 16.8 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-          <div class="trend flat" id="trendKaryawan"></div>
-        </div>
+        <div class="top-row"><div class="ic"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><circle cx="7" cy="7" r="2.6" stroke="currentColor" stroke-width="1.6"/><circle cx="14" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M2.8 16C3.2 13 5 11.3 7 11.3C9 11.3 10.8 13 11.2 16M12.4 12C13.9 12 15.8 13 16.4 15.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><div class="trend flat" id="trKar"></div></div>
         <div class="num" id="statKaryawan">&ndash;</div>
-        <div class="label">Total Karyawan</div>
-        <div class="compare">Total submission tercatat</div>
+        <div class="label">Karyawan Aktif</div>
+        <div class="compare" id="cpKar"></div>
+        <svg class="spark" id="spKar" viewBox="0 0 92 34" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="stat-card c-teal">
+        <div class="top-row"><div class="ic"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="14" height="11" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 8.5H17M13 12.5H14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><div class="trend flat" id="trTk"></div></div>
+        <div class="num" id="statTk">&ndash;</div>
+        <div class="label">Iuran Ketenagakerjaan</div>
+        <div class="compare" id="cpTk"></div>
+        <svg class="spark" id="spTk" viewBox="0 0 92 34" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="stat-card c-rose">
+        <div class="top-row"><div class="ic"><svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M10 16.5C10 16.5 3.5 12.6 3.5 7.9C3.5 5.7 5.2 4.2 7.1 4.2C8.4 4.2 9.5 4.9 10 5.9C10.5 4.9 11.6 4.2 12.9 4.2C14.8 4.2 16.5 5.7 16.5 7.9C16.5 12.6 10 16.5 10 16.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div><div class="trend flat" id="trKs"></div></div>
+        <div class="num" id="statKs">&ndash;</div>
+        <div class="label">Iuran Kesehatan</div>
+        <div class="compare" id="cpKs"></div>
+        <svg class="spark" id="spKs" viewBox="0 0 92 34" preserveAspectRatio="none"></svg>
       </div>
     </div>
-
 
     <div class="panel" style="margin-bottom:16px;">
       <div class="panel-head">
@@ -177,41 +271,59 @@
     </div>
 
 
-    <div class="lower-grid">
+
+    <div class="dgrid dg-a">
       <div class="panel">
-        <div class="panel-head">
-          <div class="ph-icon" style="background:var(--blue-tint); color:var(--blue-deep);"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M3 16V4M3 16H17M7 16V9M11 16V6M15 16V11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <h3>Kasus per Bulan</h3>
-        </div>
-        <canvas id="chartPerBulan" height="150"></canvas>
+        <div class="panel-head"><div class="ph-icon" style="background:var(--blue-tint); color:var(--blue-deep);"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M3 16V4M3 16H17M7 16V9M11 16V6M15 16V11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><h3>Pengajuan 12 Bulan Terakhir</h3></div><div class="sub">Per modul, bulan demi bulan</div>
+        <div class="chart-box"><canvas id="chBulan"></canvas></div>
+        <div class="empty" id="emBulan">Belum ada data pengajuan</div>
+        <div class="legend-row" id="lgBulan"></div>
       </div>
       <div class="panel">
-        <div class="panel-head">
-          <div class="ph-icon" style="background:#F3E9FF; color:#9B5FE0;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M3 11L7 6L11 9L17 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <h3>Distribusi per Bisnis Unit</h3>
-        </div>
-        <canvas id="chartBisnisUnit" height="150"></canvas>
-        <div id="chartBisnisUnitEmpty" style="display:none; text-align:center; color:var(--muted); font-size:12.5px; padding:24px 0;">Belum ada data</div>
+        <div class="panel-head"><div class="ph-icon" style="background:var(--green-tint); color:#17824F;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M10 3V10H17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><h3>Status Pengajuan</h3></div><div class="sub">Semua modul digabung</div>
+        <div class="chart-box sm"><canvas id="chStatus"></canvas></div>
+        <div class="empty" id="emStatus">Belum ada data</div>
+        <div class="st-list" id="stList"></div>
       </div>
     </div>
 
-
-    <div class="lower-grid" style="margin-top:16px;">
+    <div class="dgrid dg-b">
       <div class="panel">
-        <div class="panel-head">
-          <div class="ph-icon" style="background:var(--green-tint); color:var(--green);"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M6.5 10L9 12.5L13.5 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <h3>Status Kasus</h3>
-        </div>
-        <canvas id="chartStatus" height="140"></canvas>
-        <div id="chartStatusEmpty" style="display:none; text-align:center; color:var(--muted); font-size:12.5px; padding:24px 0;">Belum ada data</div>
+        <div class="panel-head"><div class="ph-icon" style="background:#DDF7F3; color:#0F9F8F;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M3 15L8 10L11 13L17 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 5H17V9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h3>Tren Iuran BPJS</h3></div><div class="sub">Total iuran per periode (juta rupiah)</div>
+        <div class="chart-box"><canvas id="chIuran"></canvas></div>
+        <div class="empty" id="emIuran">Belum ada data payment. Upload di menu Payment.</div>
       </div>
-      <div class="cta-panel">
-        <h3>Kerja Aman Masa Depan Nyaman</h3>
-        <p>Jaminan sosial ketenagakerjaan untuk seluruh pekerja Indonesia.</p>
-        <a class="cta-btn" href="<?!= baseUrl ?>?page=admin&jenis=payment-kesehatan&token=<?!= token ?>" target="_top">Pelajari Lebih Lanjut &rarr;</a>
+      <div class="panel">
+        <div class="panel-head"><div class="ph-icon" style="background:#F3E9FF; color:#9B5FE0;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="11" y="3" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="11" width="14" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg></div><h3>Penyelesaian per Modul</h3></div><div class="sub">Persentase selesai</div>
+        <div class="mod-list" id="modList"></div>
       </div>
     </div>
 
+    <div class="dgrid dg-c">
+      <div class="panel">
+        <div class="panel-head"><div class="ph-icon" style="background:#FFEDE0; color:#E07A2E;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M10 18C10 18 4.5 12.5 4.5 8.5C4.5 5.5 7 3 10 3C13 3 15.5 5.5 15.5 8.5C15.5 12.5 10 18 10 18Z" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="8.5" r="2" stroke="currentColor" stroke-width="1.6"/></svg></div><h3>Pengajuan per Site</h3></div><div class="sub">8 site teratas</div>
+        <div class="chart-box sm"><canvas id="chSite"></canvas></div>
+        <div class="empty" id="emSite">Belum ada data site</div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="ph-icon" style="background:#FFE6EF; color:#E03E78;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M2.5 10H6L8 5L12 15L14 10H17.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h3>Aktivitas Terbaru</h3></div><div class="sub">Pengajuan masuk paling akhir</div>
+        <div class="feed" id="feed"><div class="empty" style="display:block">Memuat…</div></div>
+      </div>
+    </div>
+
+    <div class="brand-ban">
+      <div style="position:relative; z-index:1;">
+        <div class="bb-k">SHELTER &middot; Jaminan Sosial</div>
+        <h2>Kerja <span class="g">Aman</span>,<br>Masa Depan <span class="g">Nyaman</span></h2>
+        <p>Jaminan sosial ketenagakerjaan untuk seluruh pekerja Indonesia. Setiap pengajuan tercatat, setiap iuran terpantau, setiap pekerja terlindungi.</p>
+        <a class="bb-btn" href="<?!= baseUrl ?>?page=admin&jenis=payment-ketenagakerjaan&token=<?!= token ?>" target="_top">Lihat Payment BPJS <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
+      <div class="bb-pil">
+        <div><span class="pi"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L16.5 4.6V9.6C16.5 13.4 13.8 16.6 10 18C6.2 16.6 3.5 13.4 3.5 9.6V4.6L10 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><p style="margin:0"><b>Aman</b><span>Data karyawan terlindungi dan terkontrol</span></p></div>
+        <div><span class="pi"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M11 2L4 11H9L8 18L16 8H11L11 2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span><p style="margin:0"><b>Cepat</b><span>Proses pengajuan dan PDF dalam hitungan detik</span></p></div>
+        <div><span class="pi"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M1.8 10C3.6 6.4 6.6 4.5 10 4.5C13.4 4.5 16.4 6.4 18.2 10C16.4 13.6 13.4 15.5 10 15.5C6.6 15.5 3.6 13.6 1.8 10Z" stroke="currentColor" stroke-width="1.7"/></svg></span><p style="margin:0"><b>Transparan</b><span>Status dan iuran bisa dipantau kapan saja</span></p></div>
+      </div>
+    </div>
 
     <section id="menuPengajuan" style="margin-top:22px;">
       <div class="section-head"><h2>Menu Pengajuan</h2></div>
@@ -248,6 +360,15 @@
           </div>
           <svg class="m-arrow" width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M7.5 4.5L13 10L7.5 15.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
+      
+        <a class="module-row" href="<?!= baseUrl ?>?page=admin&jenis=keluarga&token=<?!= token ?>" target="_top">
+          <div class="m-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="7" cy="7" r="2.6" stroke="currentColor" stroke-width="1.6"/><circle cx="14" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M2.8 16C3.2 13 5 11.3 7 11.3C9 11.3 10.8 13 11.2 16M12.4 12C13.9 12 15.8 13 16.4 15.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <div class="m-body">
+            <div class="m-title">Penggabungan Keluarga</div>
+            <div class="m-desc">Proses pengajuan penggabungan data keluarga dari karyawan, ubah status, lalu generate PDF.</div>
+          </div>
+          <svg class="m-arrow" width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M7.5 4.5L13 10L7.5 15.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
       </div>
     </section>
   </div>
@@ -259,132 +380,167 @@ var BASE_URL = '<?!= baseUrl ?>';
 var TOKEN = '<?!= token ?>';
 
 
-Chart.defaults.font.family = "'Public Sans', sans-serif";
+Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
 Chart.defaults.color = '#667085';
 
+var WARNA = { saldo:'#3D7BD9', koreksi:'#14B8A6', kecelakaan:'#F97316', npp:'#9B5FE0', keluarga:'#22B573' };
+var NAMA = { saldo:'Penggabungan Saldo', koreksi:'Koreksi Tenaga Kerja', kecelakaan:'Kecelakaan Kerja', npp:'Perbaikan NPP', keluarga:'Penggabungan Keluarga' };
+var BLN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+var charts = {};
+function $(i){ return document.getElementById(i); }
+function esc(x){ return String(x == null ? '' : x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function rpS(n){ n = Number(n) || 0; if(n >= 1e9) return 'Rp ' + (n/1e9).toFixed(2).replace('.',',') + ' M'; if(n >= 1e6) return 'Rp ' + (n/1e6).toFixed(1).replace('.',',') + ' jt'; return 'Rp ' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
+function blnLabel(k){ var p = String(k).split('-'); return (BLN[(+p[1]||1)-1] || '') + (p[0] ? " '" + String(p[0]).slice(2) : ''); }
+function periodeLabel(k){ var p = String(k).split('-'); return (BLN[(+p[1]||1)-1] || '') + ' ' + p[0]; }
+function hitung(el, to, fmt){
+  fmt = fmt || function(v){ return Math.round(v).toLocaleString('id-ID'); };
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce || !to){ el.textContent = fmt(to); return; }
+  var t0 = null, dur = 900;
+  function f(t){ if(!t0) t0 = t; var k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(to * e); if(k < 1) requestAnimationFrame(f); else el.textContent = fmt(to); }
+  requestAnimationFrame(f);
+}
+function trend(el, cur, prev, unit){
+  if(!prev && !cur){ el.className = 'trend flat'; el.textContent = ''; return; }
+  if(!prev){ el.className = 'trend up'; el.textContent = '↑ baru'; return; }
+  var pct = Math.round((cur - prev) / prev * 100);
+  el.className = 'trend ' + (pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat');
+  el.textContent = pct > 0 ? '↑ ' + pct + '%' : pct < 0 ? '↓ ' + Math.abs(pct) + '%' : 'Sama';
+}
+function spark(id, arr, color){
+  var s = $(id); if(!s) return; arr = (arr || []).map(Number);
+  if(arr.length < 2 || !arr.some(function(v){ return v > 0; })){ s.innerHTML = ''; return; }
+  var mx = Math.max.apply(null, arr), mn = Math.min.apply(null, arr), r = (mx - mn) || 1, w = 92, h = 34, st = w / (arr.length - 1);
+  var pts = arr.map(function(v, i){ return [i * st, h - 4 - ((v - mn) / r) * (h - 10)]; });
+  var d = pts.map(function(p, i){ return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
+  var gid = 'g' + id;
+  s.innerHTML = '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + color + '" stop-opacity=".28"/><stop offset="1" stop-color="' + color + '" stop-opacity="0"/></linearGradient></defs>' +
+    '<path d="' + d + ' L' + w + ' ' + h + ' L0 ' + h + ' Z" fill="url(#' + gid + ')"/><path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '<circle cx="' + pts[pts.length-1][0].toFixed(1) + '" cy="' + pts[pts.length-1][1].toFixed(1) + '" r="2.6" fill="' + color + '"/>';
+}
+function grad(ctx, c1, c2, h){ var g = ctx.createLinearGradient(0, 0, 0, h || 300); g.addColorStop(0, c1); g.addColorStop(1, c2); return g; }
+function buat(id, cfg){ if(charts[id]){ charts[id].destroy(); } charts[id] = new Chart($(id), cfg); return charts[id]; }
+var TIP = { backgroundColor:'#0F1F33', titleColor:'#fff', bodyColor:'#DCE6F2', padding:11, cornerRadius:10, boxPadding:5, titleFont:{ weight:'700' }, displayColors:true };
 
-function fmtTrend(el, curr, prev){
-  if(prev === 0 && curr === 0){ el.className = 'trend flat'; el.textContent = '–'; return; }
-  if(prev === 0){ el.className = 'trend up'; el.textContent = '↑ baru'; return; }
-  var pct = Math.round(((curr - prev) / prev) * 100);
-  if(pct > 0){ el.className = 'trend up'; el.textContent = '↑ ' + pct + '%'; }
-  else if(pct < 0){ el.className = 'trend down'; el.textContent = '↓ ' + Math.abs(pct) + '%'; }
-  else { el.className = 'trend flat'; el.textContent = 'Sama'; }
+function isiDash(d){
+  $('dashErr').style.display = 'none';
+  var T = d.total || {}, bl = d.bulan || [], seri = d.seri || {};
+  var keys = ['saldo','koreksi','kecelakaan','npp','keluarga'];
+  var tot12 = bl.map(function(_, i){ return keys.reduce(function(a, k){ return a + ((seri[k] || [])[i] || 0); }, 0); });
+  var belum = (T.diajukan || 0) + (T.diproses || 0);
+
+  hitung($('statTotal'), T.total || 0); hitung($('statBelum'), belum); hitung($('statSelesai'), T.selesai || 0);
+  trend($('trTotal'), tot12[tot12.length-1] || 0, tot12[tot12.length-2] || 0);
+  $('cpTotal').textContent = (tot12[tot12.length-1] || 0) + ' pengajuan bulan ini';
+  var tb = $('trBelum'); tb.className = 'trend ' + (belum ? 'down' : 'up'); tb.textContent = belum ? belum + ' tertunda' : 'Aman';
+  $('cpBelum').textContent = (T.diajukan || 0) + ' diajukan · ' + (T.diproses || 0) + ' diproses';
+  var ts = $('trSelesai'); ts.className = 'trend up'; ts.textContent = T.total ? Math.round((T.selesai || 0) / T.total * 100) + '%' : '';
+  $('cpSelesai').textContent = 'dari total pengajuan';
+  spark('spTotal', tot12, '#3D7BD9'); spark('spBelum', tot12, '#E07A2E'); spark('spSelesai', tot12, '#22B573');
+
+  var K = d.karyawan || {};
+  hitung($('statKaryawan'), K.aktif || 0); $('cpKar').textContent = (K.site || 0) + ' site aktif'; $('trKar').textContent = '';
+  var tk = d.payTk || [], ks = d.payKs || [];
+  function payKpi(arr, num, tr, cp, sp, col){
+    if(!arr.length){ $(num).textContent = '-'; $(cp).textContent = 'Belum ada data'; return; }
+    var last = arr[arr.length-1], prev = arr[arr.length-2];
+    $(num).textContent = rpS(last.total); $(cp).textContent = periodeLabel(last.periode) + ' · ' + last.karyawan + ' karyawan';
+    trend($(tr), last.total, prev ? prev.total : 0); spark(sp, arr.map(function(x){ return x.total; }), col);
+  }
+  payKpi(tk, 'statTk', 'trTk', 'cpTk', 'spTk', '#14B8A6'); payKpi(ks, 'statKs', 'trKs', 'cpKs', 'spKs', '#F0568A');
+
+  // alur
+  $('flowDiajukan').textContent = (T.total || 0) + ' kasus'; $('flowVerifikasi').textContent = (T.diajukan || 0) + ' kasus';
+  $('flowDiproses').textContent = (T.diproses || 0) + ' kasus'; $('flowSelesai').textContent = (T.selesai || 0) + ' kasus';
+
+  // hero chips
+  var ch = '';
+  ch += '<span class="chip' + (belum ? ' warn' : '') + '"><i></i>' + (belum ? belum + ' pengajuan menunggu' : 'Semua pengajuan beres') + '</span>';
+  if(K.aktif) ch += '<span class="chip">' + K.aktif.toLocaleString('id-ID') + ' karyawan aktif · ' + (K.site || 0) + ' site</span>';
+  $('heroChips').innerHTML = ch;
+
+  // grafik bulanan (stacked)
+  if(!T.total){ $('emBulan').style.display = 'block'; $('chBulan').parentNode.style.display = 'none'; }
+  else {
+    $('emBulan').style.display = 'none'; $('chBulan').parentNode.style.display = '';
+    var cv = $('chBulan').getContext('2d');
+    buat('chBulan', { type:'bar',
+      data:{ labels: bl.map(blnLabel), datasets: keys.map(function(k){
+        return { label: NAMA[k], data: seri[k] || [], backgroundColor: grad(cv, WARNA[k], WARNA[k] + 'AA', 300), borderRadius:5, borderSkipped:false, maxBarThickness:30, stack:'s' };
+      }) },
+      options:{ responsive:true, maintainAspectRatio:false, animation:{ duration:900, easing:'easeOutQuart' }, interaction:{ mode:'index', intersect:false },
+        plugins:{ legend:{ display:false }, tooltip: TIP },
+        scales:{ x:{ stacked:true, grid:{ display:false } }, y:{ stacked:true, beginAtZero:true, ticks:{ precision:0 }, grid:{ color:'#EEF1F4' }, border:{ display:false } } } } });
+    $('lgBulan').innerHTML = keys.map(function(k){ return '<span><i style="background:' + WARNA[k] + '"></i>' + NAMA[k] + '</span>'; }).join('');
+  }
+
+  // status doughnut
+  if(!T.total){ $('emStatus').style.display = 'block'; $('chStatus').parentNode.style.display = 'none'; }
+  else {
+    $('emStatus').style.display = 'none'; $('chStatus').parentNode.style.display = '';
+    var SW = ['#F59E0B','#3D7BD9','#22B573'], SL = ['Diajukan','Diproses','Selesai'], SV = [T.diajukan || 0, T.diproses || 0, T.selesai || 0];
+    buat('chStatus', { type:'doughnut', data:{ labels:SL, datasets:[{ data:SV, backgroundColor:SW, borderWidth:3, borderColor:'#fff', hoverOffset:6 }] },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:'72%', animation:{ animateRotate:true, duration:1000 }, plugins:{ legend:{ display:false }, tooltip: TIP, ct:{ big: String(T.total) } } },
+      plugins:[{ id:'ct', afterDraw:function(c){ var a = c.chartArea, x = (a.left + a.right) / 2, y = (a.top + a.bottom) / 2, x2 = c.ctx; x2.save(); x2.textAlign = 'center'; x2.fillStyle = '#131B24'; x2.font = '800 30px "Plus Jakarta Sans", sans-serif'; x2.fillText(c.options.plugins.ct.big, x, y + 6); x2.font = '600 11px "Plus Jakarta Sans", sans-serif'; x2.fillStyle = '#667085'; x2.fillText('pengajuan', x, y + 24); x2.restore(); } }] });
+    $('stList').innerHTML = SL.map(function(l, i){ return '<div class="st-row"><i style="background:' + SW[i] + '"></i>' + l + '<b>' + SV[i] + '</b></div>'; }).join('');
+  }
+
+  // tren iuran
+  var pr = {}; tk.concat(ks).forEach(function(x){ pr[x.periode] = 1; });
+  var per = Object.keys(pr).sort();
+  if(!per.length){ $('emIuran').style.display = 'block'; $('chIuran').parentNode.style.display = 'none'; }
+  else {
+    $('emIuran').style.display = 'none'; $('chIuran').parentNode.style.display = '';
+    var cv2 = $('chIuran').getContext('2d');
+    function seriP(arr){ var m = {}; arr.forEach(function(x){ m[x.periode] = x.total / 1e6; }); return per.map(function(p){ return m[p] == null ? null : Math.round(m[p] * 10) / 10; }); }
+    buat('chIuran', { type:'line',
+      data:{ labels: per.map(periodeLabel), datasets:[
+        { label:'Ketenagakerjaan', data: seriP(tk), borderColor:'#14B8A6', backgroundColor: grad(cv2, 'rgba(20,184,166,.32)', 'rgba(20,184,166,0)', 290), fill:true, tension:.38, borderWidth:3, pointRadius:4, pointBackgroundColor:'#fff', pointBorderColor:'#14B8A6', pointBorderWidth:2, spanGaps:true },
+        { label:'Kesehatan', data: seriP(ks), borderColor:'#F0568A', backgroundColor: grad(cv2, 'rgba(240,86,138,.24)', 'rgba(240,86,138,0)', 290), fill:true, tension:.38, borderWidth:3, pointRadius:4, pointBackgroundColor:'#fff', pointBorderColor:'#F0568A', pointBorderWidth:2, spanGaps:true } ] },
+      options:{ responsive:true, maintainAspectRatio:false, animation:{ duration:1000 }, interaction:{ mode:'index', intersect:false },
+        plugins:{ legend:{ position:'top', align:'end', labels:{ usePointStyle:true, boxWidth:8, font:{ size:11.5 } } }, tooltip: Object.assign({}, TIP, { callbacks:{ label:function(c){ return ' ' + c.dataset.label + ': Rp ' + (c.parsed.y == null ? '-' : c.parsed.y.toLocaleString('id-ID') + ' jt'); } } }) },
+        scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true, grid:{ color:'#EEF1F4' }, border:{ display:false }, ticks:{ callback:function(v){ return v + ' jt'; } } } } } });
+  }
+
+  // progres per modul
+  $('modList').innerHTML = (d.modul || []).map(function(m){
+    var pc = m.total ? Math.round(m.selesai / m.total * 100) : 0, wS = m.total ? m.selesai / m.total * 100 : 0, wP = m.total ? m.diproses / m.total * 100 : 0, wA = m.total ? m.diajukan / m.total * 100 : 0;
+    return '<div class="mod-row"><div class="mr-top"><b>' + esc(m.label) + '</b><span>' + m.selesai + ' / ' + m.total + ' selesai · ' + pc + '%</span></div>' +
+      '<div class="mod-bar" title="Selesai ' + m.selesai + ' · Diproses ' + m.diproses + ' · Diajukan ' + m.diajukan + '"><i data-w="' + wS + '" style="background:' + WARNA[m.key] + '"></i><i data-w="' + wP + '" style="background:' + WARNA[m.key] + '66"></i><i data-w="' + wA + '" style="background:#E6EBF1"></i></div></div>';
+  }).join('');
+  setTimeout(function(){ Array.prototype.forEach.call(document.querySelectorAll('#modList .mod-bar i'), function(i){ i.style.width = i.getAttribute('data-w') + '%'; }); }, 60);
+
+  // top site
+  var ts2 = d.topSite || [];
+  if(!ts2.length){ $('emSite').style.display = 'block'; $('chSite').parentNode.style.display = 'none'; }
+  else {
+    $('emSite').style.display = 'none'; $('chSite').parentNode.style.display = '';
+    var cv3 = $('chSite').getContext('2d'), g3 = cv3.createLinearGradient(0, 0, 400, 0); g3.addColorStop(0, '#F97316'); g3.addColorStop(1, '#FDBA74');
+    buat('chSite', { type:'bar', data:{ labels: ts2.map(function(x){ return x.site.length > 24 ? x.site.slice(0, 23) + '…' : x.site; }), datasets:[{ data: ts2.map(function(x){ return x.total; }), backgroundColor:g3, borderRadius:7, maxBarThickness:20 }] },
+      options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, animation:{ duration:900 }, plugins:{ legend:{ display:false }, tooltip: TIP },
+        scales:{ x:{ beginAtZero:true, ticks:{ precision:0 }, grid:{ color:'#EEF1F4' }, border:{ display:false } }, y:{ grid:{ display:false } } } } });
+  }
+
+  // aktivitas terbaru
+  var fd = d.terbaru || [];
+  $('feed').innerHTML = fd.length ? fd.map(function(x){
+    var ini = String(x.nama).trim().split(/\s+/).slice(0, 2).map(function(w){ return w.charAt(0); }).join('').toUpperCase();
+    return '<a class="fd" style="text-decoration:none;color:inherit" target="_top" href="' + BASE_URL + '?page=admin&jenis=' + encodeURIComponent(x.jenis) + '&token=' + TOKEN + '"><div class="av" style="background:' + (WARNA[x.jenis] || '#3D7BD9') + '">' + esc(ini) + '</div>' +
+      '<div class="tx"><b>' + esc(x.nama) + '</b><span>' + esc(x.label) + (x.site ? ' · ' + esc(x.site) : '') + '</span></div><div class="rt"><span class="pill ' + x.status + '">' + (x.status.charAt(0).toUpperCase() + x.status.slice(1)) + '</span><small>' + esc(x.waktu) + '</small></div></a>';
+  }).join('') : '<div class="empty" style="display:block">Belum ada pengajuan</div>';
 }
 
-
-google.script.run
-  .withSuccessHandler(function(json){
-    var rows = [];
-    try { rows = JSON.parse(json) || []; } catch(e){ rows = []; }
-    var selesai = rows.filter(function(r){ return r.status === 'Selesai'; }).length;
-    var belum = rows.length - selesai;
-    document.getElementById('statTotal').textContent = rows.length;
-    document.getElementById('statSelesai').textContent = selesai;
-    document.getElementById('statBelum').textContent = belum;
-    document.getElementById('flowDiajukan').textContent = rows.length + ' kasus';
-    document.getElementById('flowSelesai').textContent = selesai + ' kasus';
-
-
-    var BULAN_SINGKAT = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-    var now = new Date();
-    var tahunIni = now.getFullYear();
-    var bulanIni = now.getMonth();
-    var perBulan = new Array(12).fill(0);
-    rows.forEach(function(r){
-      if(!r.tanggalKecelakaan) return;
-      var parts = r.tanggalKecelakaan.split('-');
-      if(parts.length !== 3) return;
-      if(parseInt(parts[0],10) === tahunIni){
-        perBulan[parseInt(parts[1],10) - 1]++;
-      }
-    });
-    // trend: bulan ini vs bulan lalu (khusus kasus per bulan)
-    var curMonthCount = perBulan[bulanIni] || 0;
-    var prevMonthCount = bulanIni > 0 ? (perBulan[bulanIni - 1] || 0) : 0;
-    fmtTrend(document.getElementById('trendTotal'), curMonthCount, prevMonthCount);
-    document.getElementById('compareTotal').textContent = 'Dibanding bulan lalu';
-    fmtTrend(document.getElementById('trendSelesai'), selesai, selesai); // belum ada histori status per-bulan
-    document.getElementById('trendSelesai').className = 'trend flat';
-    document.getElementById('trendSelesai').textContent = selesai ? Math.round(selesai/rows.length*100)+'% dari total' : '–';
-    document.getElementById('compareSelesai').textContent = '';
-    document.getElementById('trendBelum').className = 'trend flat';
-    document.getElementById('trendBelum').textContent = belum === 0 ? 'Aman' : belum + ' tertunda';
-    document.getElementById('compareBelum').textContent = '';
-
-
-    new Chart(document.getElementById('chartPerBulan'), {
-      type: 'bar',
-      data: { labels: BULAN_SINGKAT, datasets: [{ data: perBulan, backgroundColor: '#3D7BD9', borderRadius: 4, maxBarThickness: 26 }] },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#EEF1F4' } },
-          x: { grid: { display: false } }
-        }
-      }
-    });
-
-
-    if(rows.length === 0){
-      document.getElementById('chartStatusEmpty').style.display = 'block';
-      document.getElementById('chartStatus').style.display = 'none';
-    } else {
-      new Chart(document.getElementById('chartStatus'), {
-        type: 'doughnut',
-        data: { labels: ['Selesai', 'Belum Diproses'], datasets: [{ data: [selesai, belum], backgroundColor: ['#22B573', '#E07A2E'], borderWidth: 0 }] },
-        options: { responsive: true, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 9, font: { size: 11 } } } } }
-      });
-    }
-
-
-    // Distribusi per Bisnis Unit / site (dari field namaSite kalau ada)
-    var siteCounts = {};
-    rows.forEach(function(r){
-      var key = r.namaSite || r.kopKey || 'Lainnya';
-      siteCounts[key] = (siteCounts[key] || 0) + 1;
-    });
-    var siteLabels = Object.keys(siteCounts);
-    if(siteLabels.length === 0){
-      document.getElementById('chartBisnisUnitEmpty').style.display = 'block';
-      document.getElementById('chartBisnisUnit').style.display = 'none';
-    } else {
-      var siteData = siteLabels.map(function(k){ return siteCounts[k]; });
-      new Chart(document.getElementById('chartBisnisUnit'), {
-        type: 'bar',
-        data: { labels: siteLabels, datasets: [{ data: siteData, backgroundColor: '#9B5FE0', borderRadius: 4, maxBarThickness: 20 }] },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#EEF1F4' } },
-            y: { grid: { display: false } }
-          }
-        }
-      });
-    }
-  })
-  .withFailureHandler(function(){
-    document.getElementById('statTotal').textContent = '-';
-    document.getElementById('statBelum').textContent = '-';
-    document.getElementById('statSelesai').textContent = '-';
-  })
-  .getKecelakaanCases();
-
-
-// Total Karyawan: dari submission Penggabungan Saldo (getSubmissions). Kalau modul lain (Koreksi dll)
-// punya sumber data karyawan sendiri, gabungkan di sini juga.
-google.script.run
-  .withSuccessHandler(function(json){
-    var rows = [];
-    try { rows = JSON.parse(json) || []; } catch(e){ rows = []; }
-    document.getElementById('statKaryawan').textContent = rows.length;
-    document.getElementById('trendKaryawan').textContent = '';
-  })
-  .withFailureHandler(function(){ document.getElementById('statKaryawan').textContent = '-'; })
-  .getSubmissions();
+function muatDash(){
+  $('dashErr').style.display = 'none';
+  google.script.run
+    .withSuccessHandler(function(d){
+      if(d && d.success){ isiDash(d); }
+      else { $('dashErr').style.display = 'block'; $('dashErr').firstChild.textContent = (d && d.error === 'SESI_HABIS') ? 'Sesi habis. Silakan login ulang. ' : 'Data dashboard belum bisa dimuat' + (d && d.error ? ' (' + d.error + '). ' : '. '); }
+    })
+    .withFailureHandler(function(e){ $('dashErr').style.display = 'block'; })
+    .getDashboardData(TOKEN);
+}
+muatDash();
 
 
 /* ===================== NOTIFIKASI LONCENG (polling, bunyi kalau tab ini terbuka) =====================
