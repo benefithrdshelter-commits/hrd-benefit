@@ -1134,7 +1134,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   function keluar(){
     var s0 = S.get('sesi') || {};
     if(s0.peran === 'admin' && s0.token){ try{ api('logoutAdmin', { token: s0.token }).catch(function(){}); }catch(x){} }
-    S.del('adm'); ADM = null; $('adm').hidden = true;
+    S.del('adm'); ADM = null; $('adm').hidden = true; try{ aprReset(); AP.cache = {}; APR_JALAN = false; }catch(x){}
     S.del('sesi'); S.del('profil'); S.del('riwayat'); S.del('chat'); S.del('chprof'); S.del('isian'); RW = null; CH = null; CP = null; chatAktif(false);
     ['saldo','koreksi','keluarga'].forEach(fmReset);
     tutupWeb(true);
@@ -2035,6 +2035,39 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
       return r;
     });
   }
+
+  // ---- Cache respons admin: tampil seketika dari cache, lalu diperbarui di belakang ----
+  var APR = (function(){ try{ return JSON.parse(localStorage.getItem('hrd_apraw') || '{}') || {}; }catch(e){ return {}; } })();
+  function aprKey(a, d){ return a + '|' + JSON.stringify(d || {}); }
+  function aprSimpan(){ try{ var t = JSON.stringify(APR); if(t.length < 1800000) localStorage.setItem('hrd_apraw', t); }catch(e){} }
+  function aprReset(){ APR = {}; try{ localStorage.removeItem('hrd_apraw'); }catch(e){} }
+  function apSWR(aksi, data, ok, gagal){
+    var key = aprKey(aksi, data), ada = APR[key];
+    if(ada){ try{ ok(ada, true); }catch(e){} }
+    apPanggil(aksi, data).then(function(r){
+      if(r && r.success){ APR[key] = r; aprSimpan(); ok(r, false); }
+      else if(!ada) ok(r, false);
+      else { var rf = $('apRef'); if(rf) rf.classList.remove('putar'); }
+    }).catch(function(e){ if(gagal && !ada) gagal(e); else { var rf = $('apRef'); if(rf) rf.classList.remove('putar'); } });
+  }
+  var APR_JALAN = false;
+  function aprPrefetch(){
+    if(APR_JALAN || !admSesi()) return; APR_JALAN = true;
+    var q = [['adminDaftar',{jenis:'saldo'}],['adminDaftar',{jenis:'koreksi'}],['adminDaftar',{jenis:'keluarga'}],['adminDaftar',{jenis:'kecelakaan'}],['adminDaftar',{jenis:'npp'}],['adminPayTkList',{}],['adminPayKsAwal',{}],['adminAnonimList',{}]];
+    if(!admViewer()) q.push(['adminChatList',{}]);
+    function lanjut(){
+      var it = q.shift(); if(!it || !admSesi()){ if(!it) APR_JALAN = false; return; }
+      var k = it[0] === 'adminDaftar' ? it[1].jenis : null;
+      apPanggil(it[0], it[1]).then(function(r){
+        if(r && r.success){
+          APR[aprKey(it[0], it[1])] = r;
+          if(k && k !== 'npp' && !AP.cache[k]) AP.cache[k] = { rows: r.rows, bisa: r.bisaUbah };
+        }
+      }).catch(function(){}).then(function(){ setTimeout(lanjut, 100); });
+    }
+    lanjut(); lanjut();
+    setTimeout(function(){ aprSimpan(); }, 8000);
+  }
   function apBack(){ return '<button class="icb" id="apBack" aria-label="Kembali"><span>' + IC.back + '</span></button>'; }
   function apSel(row, j, ro){
     var n = apTahap(row.status);
@@ -2069,6 +2102,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   // ----- Daftar pengajuan (saldo, keluarga, kecelakaan) -----
   function apMuatDaftar(k, diam){
     var ada = AP.cache[k];
+    if(!ada){ var rr = APR[aprKey('adminDaftar', { jenis: k })]; if(rr){ AP.cache[k] = ada = { rows: rr.rows, bisa: rr.bisaUbah }; } }
     if(ada){ apRenderDaftar(); }
     var ref = $('apRef'); if(ref) ref.classList.add('putar');
     apPanggil('adminDaftar', { jenis: k }).then(function(r){
@@ -2076,6 +2110,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
       if(ref) ref.classList.remove('putar');
       if(!r || !r.success){ if(!ada) $('apIsi').innerHTML = '<div class="rw-empty"><b>Belum bisa dimuat</b>' + esc((r && r.error) || 'Coba lagi.') + '</div>'; return; }
       AP.cache[k] = { rows: r.rows, bisa: r.bisaUbah };
+      APR[aprKey('adminDaftar', { jenis: k })] = r; aprSimpan();
       apRenderDaftar();
     }).catch(function(e){
       if(AP.k !== k) return;
@@ -2261,7 +2296,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   function apMuatPesan(){
     AP.chat = null;
     var ref = $('apRef'); if(ref) ref.classList.add('putar');
-    apPanggil('adminChatList').then(function(r){
+    apSWR('adminChatList', {}, function(r){
       if(AP.k !== 'pesan' || AP.chat) return;
       if(ref) ref.classList.remove('putar');
       if(!r || !r.success){ $('apIsi').innerHTML = '<div class="rw-empty"><b>Belum bisa dimuat</b>' + esc((r && r.error) || 'Coba lagi.') + '</div>'; return; }
@@ -2271,7 +2306,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
         return '<div class="ap-row" data-ch="' + i + '"><div class="c c-n"><span class="av2">' + esc(apInisial(c.nama)) + '</span><div><b>' + esc(c.nama || c.nik) + '</b><small>' + esc((c.last || '').slice(0, 70)) + '</small></div></div>' +
           '<div class="tm">' + esc(c.lastTime || '') + (c.unread ? '<br><i class="bdg" style="display:inline-flex;margin-top:4px;min-width:21px;height:21px;padding:0 6px;border-radius:99px;background:#F0506E;color:#fff;font-size:11.5px;font-style:normal;align-items:center;justify-content:center">' + c.unread + '</i>' : '') + '</div></div>';
       }).join('') + '</div>' : '<div class="rw-empty"><b>Belum ada pesan</b>Pesan dari karyawan akan muncul di sini.</div>';
-    }).catch(function(){ if(ref) ref.classList.remove('putar'); });
+    }, function(){ if(ref) ref.classList.remove('putar'); });
   }
   function apBukaChat(i){
     var c = AP.cache.pesan[i]; if(!c) return;
@@ -2302,7 +2337,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   // ----- Kritik & saran anonim -----
   function apMuatAnonim(){
     var ref = $('apRef'); if(ref) ref.classList.add('putar');
-    apPanggil('adminAnonimList').then(function(r){
+    apSWR('adminAnonimList', {}, function(r){
       if(AP.k !== 'anonim') return;
       if(ref) ref.classList.remove('putar');
       if(!r || !r.success){ $('apIsi').innerHTML = '<div class="rw-empty"><b>Belum bisa dimuat</b>' + esc((r && r.error) || 'Coba lagi.') + '</div>'; return; }
@@ -2314,7 +2349,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
         return '<div class="ap-row an" data-an="' + esc(m.id) + '"><div class="meta">' + (m.status !== 'Sudah Dibaca' ? '<i class="an-dot"></i>' : '') + esc(m.date) + ' · ' + esc(m.time) + '<span class="sp"></span>' +
           (m.status !== 'Sudah Dibaca' ? '<button class="ap-btn" data-baca="' + esc(m.id) + '">Tandai dibaca</button>' : '') + (ro ? '' : '<button class="ap-btn d" data-hapusan="' + esc(m.id) + '">Hapus</button>') + '</div><p>' + esc(m.text) + '</p></div>';
       }).join('') + '</div>' : '<div class="rw-empty"><b>Belum ada masukan</b>Kritik & saran anonim dari karyawan muncul di sini.</div>';
-    }).catch(function(){ if(ref) ref.classList.remove('putar'); });
+    }, function(){ if(ref) ref.classList.remove('putar'); });
   }
 
   // ================= Koreksi, NPP, Payment, Hapus =================
@@ -2383,7 +2418,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   // ----- Perbaikan NPP -----
   function apMuatNpp(){
     var ref = $('apRef'); if(ref) ref.classList.add('putar');
-    apPanggil('adminDaftar', { jenis: 'npp' }).then(function(r){
+    apSWR('adminDaftar', { jenis: 'npp' }, function(r){
       if(AP.k !== 'perbaikan-npp') return;
       if(ref) ref.classList.remove('putar');
       if(!r || !r.success){ $('apIsi').innerHTML = '<div class="rw-empty"><b>Belum bisa dimuat</b>' + esc((r && r.error) || '') + '</div>'; return; }
@@ -2400,7 +2435,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
       $('apIsi').innerHTML = (ro ? '' : '<div style="margin-bottom:12px"><button class="ap-btn p" id="nppBaru">+ Buat surat baru</button></div>') +
         '<p class="ap-note" style="margin:0 0 12px">PDF surat langsung diunduh saat dibuat dan tidak disimpan di Drive.</p>' +
         (r.rows.length ? '<div class="ap-wrap">' + head + isi + '</div>' : '<div class="rw-empty"><b>Belum ada surat</b>Buat surat pertama dengan tombol di atas.</div>');
-    }).catch(function(){ if(ref) ref.classList.remove('putar'); });
+    }, function(){ if(ref) ref.classList.remove('putar'); });
   }
   var NPP_OPSI = null;
   function nppForm(){
@@ -2478,14 +2513,13 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   function payCfg(){ return PAY[AP.k]; }
   function apMuatPay(){
     var c = payCfg(), ref = $('apRef'); if(ref) ref.classList.add('putar');
-    var p = c.n === 'tk' ? apPanggil('adminPayTkList') : apPanggil('adminPayKsAwal');
-    p.then(function(r){
+    apSWR(c.n === 'tk' ? 'adminPayTkList' : 'adminPayKsAwal', {}, function(r){
       if(AP.k !== 'payment-ketenagakerjaan' && AP.k !== 'payment-kesehatan') return;
       if(ref) ref.classList.remove('putar');
       if(!r || !r.success){ $('apIsi').innerHTML = '<div class="rw-empty"><b>Belum bisa dimuat</b>' + esc((r && r.error) || '') + '</div>'; return; }
       AP.pay = { rows: r.rows, sites: r.sites || [], asuransi: r.asuransi || (AP.pay && AP.pay.asuransi) || [] };
       apRenderPay();
-    }).catch(function(){ if(ref) ref.classList.remove('putar'); });
+    }, function(){ if(ref) ref.classList.remove('putar'); });
   }
   function apRenderPay(){
     var c = payCfg(), d = AP.pay, ro = admViewer(), ks = c.n === 'ks';
@@ -2660,7 +2694,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
       if(res && res.success){
         ADM = res; S.set('adm', res);
         if(res.role && res.role !== x.role){ x.role = res.role; S.set('sesi', x); }
-        admRender();
+        admRender(); aprPrefetch();
       } else if(res && res.error === 'SESI_HABIS'){ keluar(); toast('Sesi berakhir, silakan masuk lagi.'); }
     }).catch(function(){ admMuatSedang = false; });
   }
