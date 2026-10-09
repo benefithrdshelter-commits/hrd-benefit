@@ -517,7 +517,21 @@ function dlBuat(rowNumber, opsi){
   google.script.run
     .withSuccessHandler(function(res){
       delete dlBusy[rowNumber];
-      if(res && res.success){ loadCases(function(){}); }
+      if(res && res.success){
+        // Di halaman Apps Script asli, PDF datang sebagai base64 dan harus diunduh di sini.
+        // (Di d.html laptop sudah otomatis terunduh dan pdfBase64 dikosongkan, jadi tidak terunduh dua kali.)
+        if(res.pdfBase64){
+          try{
+            var bin = atob(res.pdfBase64), u8 = new Uint8Array(bin.length);
+            for(var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+            var url = URL.createObjectURL(new Blob([u8], { type: 'application/pdf' }));
+            var a = document.createElement('a'); a.href = url; a.download = res.fileName || 'Laporan_Kecelakaan.pdf';
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+          }catch(e){ alert('PDF sudah dibuat tapi gagal diunduh: ' + e.message); }
+        }
+        loadCases(function(){});
+      }
       else { renderTable(); alert('Gagal membuat PDF: ' + (res && res.error ? res.error : 'Terjadi kesalahan.')); }
     })
     .withFailureHandler(function(err){
