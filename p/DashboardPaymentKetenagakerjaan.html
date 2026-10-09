@@ -172,15 +172,15 @@ input.cb{width:20px;height:20px;border:2px solid #868e96;border-radius:4px;curso
 <script>
 
 var CFG = {"jenis": "tk", "nama": "Ketenagakerjaan", "prefix": "Ketenagakerjaan", "nppLabel": "NPP Ketenagakerjaan", "sub": "Rekap pembayaran BPJS Ketenagakerjaan per periode. Template per site sudah terisi NIK karyawan aktif.", "fnList": "getPaymentPeriodeList", "fnExport": "getPaymentDetailForExport", "fnDelete": "deletePaymentPeriode"};
-var VIEWER = <?!= isViewer ? 'true' : 'false' ?>;
+var VIEWER = (typeof IS_VIEWER!=='undefined' && IS_VIEWER) ? true : false;
 var BASE_URL = '<?!= baseUrl ?>';
 var TOKEN = '<?!= token ?>';
-var HH = (window.parent && window.parent !== window && window.parent.__host) || null;
+var HH = null; try{ HH = (window.parent && window.parent !== window && window.parent.__host) || null; }catch(e){ HH = null; }
 
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function rp(n){ n = Math.round(Number(n) || 0); return 'Rp ' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
-function toast(m, t){ if(HH && HH.toast) HH.toast(m, t); else try{ alert(m); }catch(e){} }
-function ask(msg, fn){ if(HH && HH.confirm) HH.confirm(msg, fn, {danger:true}); else if(window.confirm(msg)) fn(); }
+function toast(m, t){ if(HH && HH.toast) return HH.toast(m, t); var d=document.createElement('div'); d.textContent=m; d.style.cssText='position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:99999;padding:11px 18px;border-radius:10px;color:#fff;font:600 13px Inter,Arial,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25);background:'+(t==='error'||t==='err'?'#dc2626':'#16a34a'); document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 3200); }
+function ask(msg, fn){ if(HH && HH.confirm) return HH.confirm(msg, fn, {danger:true}); var o=document.createElement('div'); o.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:99998;display:flex;align-items:center;justify-content:center;padding:16px'; o.innerHTML='<div style="background:#fff;border-radius:14px;padding:22px;max-width:380px;width:100%;font-family:Inter,Arial,sans-serif;box-shadow:0 20px 50px rgba(0,0,0,.3)"><div style="font-size:14px;color:#0f172a;line-height:1.5;margin-bottom:18px"></div><div style="display:flex;gap:8px;justify-content:flex-end"><button data-n style="padding:9px 16px;border:1px solid #cbd5e1;background:#fff;border-radius:8px;cursor:pointer;font-weight:600">Batal</button><button data-y style="padding:9px 16px;border:0;background:#dc2626;color:#fff;border-radius:8px;cursor:pointer;font-weight:700">Ya, lanjut</button></div></div>'; o.querySelector('div div').textContent=msg; document.body.appendChild(o); o.querySelector('[data-n]').onclick=function(){ o.remove(); }; o.querySelector('[data-y]').onclick=function(){ o.remove(); fn(); }; }
 function $(id){ return document.getElementById(id); }
 function call(fn, args, ok, fail){
   var r = google.script.run.withSuccessHandler(function(x){ ok && ok(x); }).withFailureHandler(function(e){ (fail || function(er){ toast(String((er && er.message) || er), 'err'); })(e); });
@@ -571,7 +571,7 @@ function mulai(){
 }
 function logout(){
   try{ localStorage.removeItem('kk_admin_token'); localStorage.removeItem('kk_admin_email'); sessionStorage.removeItem('kk_admin_token'); sessionStorage.removeItem('kk_admin_email'); }catch(e){}
-  window.__go(BASE_URL + '?page=logout&token=' + encodeURIComponent(TOKEN));
+  var u = BASE_URL + '?page=logout&token=' + encodeURIComponent(TOKEN); if(window.__go) window.__go(u); else window.top.location.href = u;
 }
 mulai();
 
