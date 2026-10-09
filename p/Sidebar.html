@@ -325,6 +325,129 @@
   }
 </style>
 
+<style id="tabelPro">
+/* ============ GAYA TABEL & DAFTAR (dipakai semua halaman admin, laptop) ============ */
+@media (min-width:769px){
+  html body .app-content{font-family:'Plus Jakarta Sans',-apple-system,'Segoe UI',Arial,sans-serif; font-feature-settings:'tnum' 1,'cv11' 1;}
+
+  /* kartu pembungkus tabel */
+  html body .app-content .panel-table,
+  html body .app-content .card:has(> table), html body .app-content .card:has(#listBody table), html body .app-content .card:has(table.ht){
+    background:#fff !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+    border:1px solid #E1E8F5 !important; border-radius:22px !important; overflow:hidden;
+    box-shadow:0 1px 2px rgba(11,42,107,.04), 0 22px 44px -28px rgba(11,42,107,.38) !important;
+  }
+  html body .app-content .table-toolbar, html body .app-content .list-toolbar{
+    padding:16px 22px !important; background:linear-gradient(180deg,#fff,#FAFCFF) !important; border-bottom:1px solid #EAF0FA !important;
+  }
+  html body .app-content .row-count{font-size:12px !important; color:#7A89A6 !important; font-weight:500;}
+
+  /* tab filter: segmented */
+  html body .app-content .tabs{display:inline-flex !important; gap:2px !important; padding:4px !important; background:#EEF3FB !important; border-radius:14px !important; border:0 !important;}
+  html body .app-content .tabs .tab-btn, html body .app-content .tabs .tab{
+    display:inline-flex; align-items:center; gap:8px; border:0 !important; background:transparent !important; color:#5A6B8C !important;
+    font:600 12.5px 'Plus Jakarta Sans',sans-serif !important; padding:8px 15px !important; border-radius:10px !important; cursor:pointer; transition:all .2s;
+  }
+  html body .app-content .tabs .tab-btn:hover, html body .app-content .tabs .tab:hover{color:#0B3FA8 !important; background:rgba(255,255,255,.6) !important;}
+  html body .app-content .tabs .tab-btn.active, html body .app-content .tabs .tab.active{background:#fff !important; color:#0B3FA8 !important; box-shadow:0 4px 12px rgba(11,42,107,.14) !important;}
+  html body .app-content .tabs .cnt{background:#DCE6F8 !important; color:#35538a !important; font-size:10.5px !important; font-weight:700 !important; padding:2px 8px !important; border-radius:999px !important; min-width:22px; text-align:center;}
+  html body .app-content .tabs .active .cnt{background:linear-gradient(135deg,#0B3FA8,#1266E6) !important; color:#fff !important;}
+
+  /* tombol toolbar */
+  html body .app-content .btn-toolbar-action{display:inline-flex; align-items:center; gap:7px; border:1px solid #D8E3F5 !important; background:#fff !important; color:#25395F !important; font:600 12.5px 'Plus Jakarta Sans',sans-serif !important; padding:9px 15px !important; border-radius:11px !important; transition:all .2s;}
+  html body .app-content .btn-toolbar-action:hover{background:#F2F7FF !important; border-color:#9DBCEF !important; color:#0B3FA8 !important; transform:translateY(-1px); box-shadow:0 8px 16px -10px rgba(18,102,230,.6);}
+
+  /* tabel */
+  html body .app-content :is(table.data-table, table.ht, table:not(.ef-biaya-table):not(.biaya-table):not(.pv)){
+    width:100%; border-collapse:separate !important; border-spacing:0 !important; font-size:13px !important; color:#1B2740 !important; background:#fff;
+  }
+  html body .app-content :is(table.data-table, table.ht, table:not(.ef-biaya-table):not(.biaya-table):not(.pv)) thead th{
+    background:linear-gradient(180deg,#F8FAFE,#EFF4FC) !important; color:#5A6B8C !important;
+    font:700 10.5px/1.2 'Plus Jakarta Sans',sans-serif !important; letter-spacing:.09em !important; text-transform:uppercase !important;
+    padding:15px 20px !important; border:0 !important; border-bottom:1px solid #DCE5F4 !important; text-align:left; white-space:nowrap; vertical-align:middle;
+  }
+  html body .app-content :is(table.data-table, table.ht, table:not(.ef-biaya-table):not(.biaya-table):not(.pv)) tbody td{
+    padding:16px 20px !important; border:0 !important; border-bottom:1px solid #EEF2F9 !important; background:#fff !important;
+    font-size:13px !important; vertical-align:middle !important; color:#1B2740; transition:background .15s, box-shadow .15s;
+  }
+  html body .app-content :is(table.data-table, table.ht, table:not(.ef-biaya-table):not(.biaya-table):not(.pv)) tbody tr:last-child td{border-bottom:0 !important;}
+  html body .app-content :is(table.data-table, table.ht, table:not(.ef-biaya-table):not(.biaya-table):not(.pv)) tbody tr:hover td{background:#F4F8FF !important;}
+  html body .app-content :is(table.data-table, table.ht, table:not(.ef-biaya-table):not(.biaya-table):not(.pv)) tbody tr:hover td:first-child{box-shadow:inset 3px 0 0 #1266E6;}
+  html body .app-content :is(table.data-table, table.ht, table:not(.ef-biaya-table):not(.biaya-table):not(.pv)) td b{font-weight:700; color:#0F1B3D;}
+  html body .app-content :is(table.data-table, table.ht, table:not(.ef-biaya-table):not(.biaya-table):not(.pv)) .empty-row td,
+  html body .app-content :is(table.data-table, table.ht, table:not(.ef-biaya-table):not(.biaya-table):not(.pv)) td.empty,
+  html body .app-content :is(table.data-table, table.ht, table:not(.ef-biaya-table):not(.biaya-table):not(.pv)) td.loading{text-align:center !important; padding:56px 20px !important; color:#8A99B5 !important; font-size:13px !important;}
+  html body .app-content .card > .empty, html body .app-content #listBody > .empty{padding:56px 20px; text-align:center; color:#8A99B5;}
+  /* tabel payment: baris filter & pengurutan */
+  html body .app-content table.ht tr.flt td{background:#FAFCFF !important; padding:10px 14px !important;}
+  html body .app-content table.ht tr.flt input{border:1px solid #D5E0F3 !important; border-radius:10px !important; padding:7px 11px !important; background:#fff; font:500 12.5px 'Plus Jakarta Sans',sans-serif !important; outline:none;}
+  html body .app-content table.ht tr.flt input:focus{border-color:#1266E6 !important; box-shadow:0 0 0 3px rgba(18,102,230,.14);}
+  html body .app-content table.ht thead th.srt:after{color:#A9B6D0 !important;}
+  html body .app-content table.ht thead th.asc:after, html body .app-content table.ht thead th.desc:after{color:#1266E6 !important;}
+
+  /* sel nama + avatar warna-warni */
+  html body .app-content :is(.avatar-chip,.av){
+    width:40px !important; height:40px !important; border-radius:13px !important; border:0 !important; color:#fff !important;
+    font-family:'Plus Jakarta Sans',sans-serif !important; font-weight:800 !important; font-size:14px !important; flex:none; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg,#0B3FA8,#2B86F5) !important; box-shadow:0 8px 16px -8px rgba(18,102,230,.8);
+  }
+  html body .app-content tbody tr:nth-child(6n+2) :is(.avatar-chip,.av){background:linear-gradient(135deg,#7A2BD6,#B070F0) !important; box-shadow:0 8px 16px -8px rgba(122,43,214,.8);}
+  html body .app-content tbody tr:nth-child(6n+3) :is(.avatar-chip,.av){background:linear-gradient(135deg,#0C9E8A,#3DD6B4) !important; box-shadow:0 8px 16px -8px rgba(12,158,138,.8);}
+  html body .app-content tbody tr:nth-child(6n+4) :is(.avatar-chip,.av){background:linear-gradient(135deg,#E8590C,#FFA94D) !important; box-shadow:0 8px 16px -8px rgba(232,89,12,.8);}
+  html body .app-content tbody tr:nth-child(6n+5) :is(.avatar-chip,.av){background:linear-gradient(135deg,#D6336C,#FF7AA8) !important; box-shadow:0 8px 16px -8px rgba(214,51,108,.8);}
+  html body .app-content tbody tr:nth-child(6n+6) :is(.avatar-chip,.av){background:linear-gradient(135deg,#2B8A3E,#69DB7C) !important; box-shadow:0 8px 16px -8px rgba(43,138,62,.8);}
+  html body .app-content :is(.korban-cell,.who){display:flex; align-items:center; gap:14px;}
+  html body .app-content :is(.korban-name,.who b){font-size:13.5px !important; font-weight:700 !important; color:#0F1B3D !important; letter-spacing:-.005em; display:block;}
+  html body .app-content :is(.korban-sub,.who span){font-size:11.5px !important; color:#7A89A6 !important; display:block; margin-top:2px;}
+  html body .app-content .col-meta, html body .app-content .bu b{font-weight:600; color:#1B2740;}
+  html body .app-content .col-meta .sub, html body .app-content .bu span{display:block; font-size:11.5px; color:#7A89A6; font-weight:500; margin-top:2px;}
+
+  /* status */
+  html body .app-content .status-pill, html body .app-content select.stpick{
+    display:inline-flex; align-items:center; gap:7px; font:700 11px 'Plus Jakarta Sans',sans-serif !important; padding:6px 13px !important; border-radius:999px !important;
+    border:1px solid transparent; letter-spacing:.01em;
+  }
+  html body .app-content .status-selesai{background:#E4F7EC !important; color:#14804A !important; border-color:#BFEBD2 !important;}
+  html body .app-content .status-belum{background:#FFF3DC !important; color:#B26A00 !important; border-color:#FFE0A3 !important;}
+  html body .app-content .status-pill .dot{width:7px !important; height:7px !important;}
+
+  html body .app-content select.st-sel{font:700 11px 'Plus Jakarta Sans',sans-serif !important; padding:7px 28px 7px 13px !important; border:1px solid transparent !important; border-radius:999px !important; letter-spacing:.01em; transition:all .2s;}
+  html body .app-content select.st-sel.s1{background-color:#FFF3DC !important; color:#B26A00 !important; border-color:#FFE0A3 !important;}
+  html body .app-content select.st-sel.s2{background-color:#E6EFFF !important; color:#1456C8 !important; border-color:#C5D8FA !important;}
+  html body .app-content select.st-sel.s3{background-color:#E4F7EC !important; color:#14804A !important; border-color:#BFEBD2 !important;}
+  html body .app-content select.st-sel:hover{filter:brightness(.97); box-shadow:0 6px 14px -8px rgba(11,42,107,.5);}
+
+  /* tombol aksi */
+  html body .app-content :is(.btn-lihat,.btn-hapus,.btn-proses){font-family:'Plus Jakarta Sans',sans-serif !important; font-size:12px !important; font-weight:600 !important; border-radius:11px !important; padding:9px 15px !important; transition:all .2s; cursor:pointer;}
+  html body .app-content .btn-lihat{background:#F2F7FF !important; border:1px solid #CFE0FA !important; color:#0B3FA8 !important;}
+  html body .app-content .btn-lihat:hover{background:linear-gradient(135deg,#0B3FA8,#1266E6) !important; color:#fff !important; border-color:transparent !important; transform:translateY(-1px); box-shadow:0 10px 18px -8px rgba(18,102,230,.8);}
+  html body .app-content .btn-proses{background:linear-gradient(120deg,#0B3FA8,#1266E6 60%,#1E9BE8) !important; color:#fff !important; border:0 !important; box-shadow:0 10px 18px -8px rgba(18,102,230,.8);}
+  html body .app-content .btn-proses:hover{transform:translateY(-1px); box-shadow:0 14px 22px -8px rgba(18,102,230,.9);}
+  html body .app-content .btn-hapus{background:#fff !important; border:1px solid #F5CFCB !important; color:#D1362B !important;}
+  html body .app-content .btn-hapus:hover{background:#FDECEA !important; border-color:#E4483A !important; transform:translateY(-1px);}
+  html body .app-content :is(.aksi,.row-actions){display:flex; gap:8px; justify-content:flex-end; align-items:center;}
+}
+
+/* ============ JUDUL HALAMAN DI BANNER ============ */
+html body .app-content .hero-banner.compact{position:relative;}
+html body .app-content .hero-banner.compact::after{content:""; position:absolute; inset:0; z-index:0; pointer-events:none; border-radius:inherit;
+  background:linear-gradient(90deg,rgba(5,24,80,.72) 0%,rgba(5,24,80,.38) 40%,rgba(5,24,80,0) 70%);}
+html body .app-content .hero-banner.compact > *{position:relative; z-index:1;}
+html body .app-content .hero-banner.compact .hero-body{padding:10px 30px 24px !important; min-height:0 !important;}
+html body .app-content .hero-banner.compact .hero-body > div{position:relative; padding-left:18px;}
+html body .app-content .hero-banner.compact .hero-body > div::before{
+  content:""; position:absolute; left:0; top:4px; bottom:4px; width:4px; border-radius:6px;
+  background:linear-gradient(180deg,#7FE9FF,#2B86F5); box-shadow:0 0 16px rgba(79,214,232,.8);
+}
+html body .app-content .hero-banner.compact .page-title{
+  font-family:'Plus Jakarta Sans',sans-serif !important; font-size:clamp(21px,1.9vw,27px) !important; font-weight:800 !important;
+  letter-spacing:-.02em; line-height:1.15; color:#fff !important; margin:0 0 6px !important; text-shadow:0 4px 22px rgba(0,16,70,.55);
+}
+html body .app-content .hero-banner.compact .page-sub{
+  font-family:'Plus Jakarta Sans',sans-serif !important; font-size:13.5px !important; font-weight:500; line-height:1.55;
+  color:rgba(255,255,255,.88) !important; max-width:62ch; margin:0 !important; text-shadow:0 2px 14px rgba(0,16,70,.6);
+}
+</style>
 <div class="app-sidebar" id="appSidebar">
   <div class="brand">
     <span class="brand-mark"><img src="data:image/jpeg;base64,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" alt="SHELTER"></span>
