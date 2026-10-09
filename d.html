@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SHELTER</title>
+<link rel="icon" href="icons/favicon-32.png">
+<style>
+  html,body{margin:0;height:100%;background:#eef1f6;overflow:hidden}
+  #stage{position:fixed;inset:0}
+  iframe.fr{position:absolute;inset:0;width:100%;height:100%;border:0;display:none;background:#eef1f6}
+  iframe.fr.on{display:block}
+  #boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#eef1f6;z-index:5;transition:opacity .2s}
+  #boot.off{opacity:0;pointer-events:none}
+  #boot i{width:34px;height:34px;border-radius:50%;border:3px solid #cdd7ea;border-top-color:#2563eb;animation:r .7s linear infinite}
+  @keyframes r{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="boot"><i></i></div>
+<div id="stage"></div>
+
+<script>
+/* ---- Dialog konfirmasi & toast (dipakai bersama) ---- */
+(function(w){
+  if(w.__nbUI) return; w.__nbUI = true;
+  var d = w.document;
+  var css = d.createElement('style');
+  css.textContent =
+  '.nb-ov{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(12,24,52,.48);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);opacity:0;transition:opacity .18s}' +
+  '.nb-ov.on{opacity:1}' +
+  '.nb-card{width:100%;max-width:400px;background:#fff;border-radius:20px;padding:28px 26px 22px;text-align:center;box-shadow:0 28px 70px rgba(12,24,52,.32);transform:translateY(14px) scale(.96);transition:transform .22s cubic-bezier(.2,.9,.3,1.2);font-family:Inter,"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,sans-serif}' +
+  '.nb-ov.on .nb-card{transform:none}' +
+  '.nb-ic{width:60px;height:60px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;background:#E8F0FF;color:#2563EB;box-shadow:0 0 0 9px rgba(37,99,235,.07)}' +
+  '.nb-ic.d{background:#FFF0F2;color:#D9364B;box-shadow:0 0 0 9px rgba(217,54,75,.07)}' +
+  '.nb-card h3{margin:0 0 8px;font-size:18px;line-height:1.35;font-weight:800;color:#0F1B3D}' +
+  '.nb-card p{margin:0 0 22px;font-size:13.5px;line-height:1.6;color:#5B6B88}' +
+  '.nb-card h3:last-of-type{margin-bottom:22px}' +
+  '.nb-card p+.nb-act,.nb-card h3+.nb-act{margin-top:0}' +
+  '.nb-act{display:flex;gap:10px}' +
+  '.nb-b{flex:1;border-radius:12px;padding:13px 14px;font:700 14px/1 inherit;font-family:inherit;cursor:pointer;border:1px solid transparent;transition:transform .12s,background .15s}' +
+  '.nb-b:active{transform:scale(.97)}' +
+  '.nb-b.c{background:#fff;color:#1B2A4E;border-color:#D8E0EF}.nb-b.c:hover{background:#F3F6FC}' +
+  '.nb-b.d{background:#D9364B;color:#fff;box-shadow:0 8px 18px rgba(217,54,75,.28)}.nb-b.d:hover{background:#C22C40}' +
+  '.nb-b.p{background:#2563EB;color:#fff;box-shadow:0 8px 18px rgba(37,99,235,.28)}.nb-b.p:hover{background:#1D54CF}' +
+  '.nb-b:focus-visible{outline:3px solid rgba(37,99,235,.35);outline-offset:2px}' +
+  '.nb-tw{position:fixed;top:18px;right:18px;z-index:100000;display:flex;flex-direction:column;gap:10px;pointer-events:none}' +
+  '.nb-t{pointer-events:auto;display:flex;align-items:center;gap:12px;min-width:270px;max-width:380px;background:#fff;border-radius:14px;padding:13px 16px;font:600 13.5px/1.4 Inter,system-ui,sans-serif;color:#0F1B3D;box-shadow:0 14px 36px rgba(12,24,52,.2);border-left:5px solid #16A34A;opacity:0;transform:translateX(24px);transition:opacity .22s,transform .25s cubic-bezier(.2,.9,.3,1.1)}' +
+  '.nb-t.on{opacity:1;transform:none}.nb-t.err{border-left-color:#D9364B}' +
+  '.nb-t i{flex:none;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#DCFCE7;color:#16A34A;font-style:normal;font-weight:800}' +
+  '.nb-t.err i{background:#FFE4E8;color:#D9364B}' +
+  '@media (max-width:600px){.nb-tw{left:14px;right:14px;top:auto;bottom:90px}.nb-t{min-width:0;max-width:none}}' +
+  '@media (prefers-reduced-motion:reduce){.nb-ov,.nb-card,.nb-t{transition:none!important}}';
+  (d.head || d.documentElement).appendChild(css);
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  var TRASH = '<svg width="26" height="26" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M8 6V4.5c0-.3.2-.5.5-.5h3c.3 0 .5.2.5.5V6M6 6l.7 9.6c0 .5.5.9 1 .9h4.6c.5 0 1-.4 1-.9L14 6M8.5 9v4.5M11.5 9v4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var QUES = '<svg width="26" height="26" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.2" stroke="currentColor" stroke-width="1.6"/><path d="M8 7.8a2.1 2.1 0 1 1 3 1.9c-.7.4-1 .8-1 1.5M10 13.6v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  w.__nbConfirm = function(msg, ok, opt){
+    var parts = String(msg || '').split(/\n+/).filter(Boolean), title = parts[0] || 'Yakin?', body = parts.slice(1).join(' ');
+    if(!body){ var m = title.match(/^(.*?[?!])\s+(.+)$/); if(m){ title = m[1]; body = m[2]; } }
+    var danger = (opt && opt.danger != null) ? opt.danger : /hapus|buang|delete|remove/i.test(title);
+    var ov = d.createElement('div'); ov.className = 'nb-ov';
+    ov.innerHTML = '<div class="nb-card" role="alertdialog" aria-modal="true"><div class="nb-ic' + (danger ? ' d' : '') + '">' + (danger ? TRASH : QUES) + '</div>' +
+      '<h3>' + esc(title) + '</h3>' + (body ? '<p>' + esc(body) + '</p>' : '') +
+      '<div class="nb-act"><button type="button" class="nb-b c">Batal</button><button type="button" class="nb-b ' + (danger ? 'd' : 'p') + '">' + (danger ? 'Ya, hapus' : 'Ya, lanjut') + '</button></div></div>';
+    d.body.appendChild(ov);
+    var bs = ov.querySelectorAll('.nb-b');
+    function tutup(){ ov.classList.remove('on'); setTimeout(function(){ ov.remove(); }, 200); d.removeEventListener('keydown', kd, true); }
+    function kd(e){ if(e.key === 'Escape'){ e.stopPropagation(); tutup(); } }
+    bs[0].onclick = tutup;
+    bs[1].onclick = function(){ tutup(); try{ ok && ok(); }catch(e){ console.error(e); } };
+    ov.addEventListener('click', function(e){ if(e.target === ov) tutup(); });
+    d.addEventListener('keydown', kd, true);
+    requestAnimationFrame(function(){ ov.classList.add('on'); bs[0].focus(); });
+  };
+  w.__nbToast = function(msg, tipe){
+    var tw = d.querySelector('.nb-tw');
+    if(!tw){ tw = d.createElement('div'); tw.className = 'nb-tw'; tw.setAttribute('aria-live', 'polite'); d.body.appendChild(tw); }
+    var t = d.createElement('div'); t.className = 'nb-t' + (tipe === 'err' ? ' err' : '');
+    t.innerHTML = '<i>' + (tipe === 'err' ? '!' : '&#10003;') + '</i><span>' + esc(msg) + '</span>';
+    tw.appendChild(t);
+    requestAnimationFrame(function(){ t.classList.add('on'); });
+    setTimeout(function(){ t.classList.remove('on'); setTimeout(function(){ t.remove(); }, 260); }, tipe === 'err' ? 4600 : 3200);
+  };
+  // confirm() bawaan browser diganti dialog bagus: dialog muncul, lalu aksi diulang otomatis setelah "Ya"
+  var last = null, oke = false;
+  d.addEventListener('click', function(e){ if(!oke) last = e.target; }, true);
+  w.confirm = function(msg){
+    if(oke){ oke = false; return true; }
+    var el = last;
+    w.__nbConfirm(msg, function(){ oke = true; if(el && el.click) el.click(); setTimeout(function(){ oke = false; }, 400); });
+    return false;
+  };
+})(window);
+
+</script>
+
+<script type="text/plain" id="shim">
+(function(){
+  var H = parent.__host; if(!H) return;
+  window.__host = H;
+  window.__go = function(u){ H.go(u); };
+  function mk(st){
+    return new Proxy({}, { get: function(_, p){
+      if(p === 'withSuccessHandler') return function(f){ return mk({ ok: f, err: st.err, uo: st.uo }); };
+      if(p === 'withFailureHandler') return function(f){ return mk({ ok: st.ok, err: f, uo: st.uo }); };
+      if(p === 'withUserObject') return function(o){ return mk({ ok: st.ok, err: st.err, uo: o }); };
+      if(typeof p !== 'string' || p === 'then') return undefined;
+      return function(){ H.call(window, p, Array.prototype.slice.call(arguments), st); };
+    }});
+  }
+  window.google = { script: {
+    run: mk({}),
+    host: { close: function(){}, setHeight: function(){}, setWidth: function(){}, origin: '' },
+    history: { push: function(){}, replace: function(){}, setChangeHandler: function(){} }
+  }};
+  document.addEventListener('click', function(e){
+    var a = e.target && e.target.closest && e.target.closest('a[href]'); if(!a) return;
+    var h = a.getAttribute('href') || '';
+    if(h.indexOf(H.base + '?') === 0 || h.indexOf(H.base) === 0 && h.length === H.base.length){ e.preventDefault(); H.go(h); }
+  }, true);
+
+
+  /* confirm() / alert() bawaan diganti dialog & notifikasi bagus (ditampilkan di jendela utama) */
+  (function(){
+    var last = null, oke = false;
+    document.addEventListener('click', function(e){ if(!oke) last = e.target; }, true);
+    window.confirm = function(msg){
+      if(oke){ oke = false; return true; }
+      var el = last;
+      H.confirm(msg, function(){ oke = true; if(el && el.click) el.click(); setTimeout(function(){ oke = false; }, 400); });
+      return false;
+    };
+    window.alert = function(m){ H.toast(String(m), /gagal|error|tidak (bisa|ada|valid|dapat)|salah|kesalahan|belum|wajib|pilih|isi /i.test(String(m)) ? 'err' : 'ok'); };
+  })();
+  /* Unduh PDF: dibuat ulang dari data tersimpan, langsung terunduh ke laptop (tidak disimpan di Drive) */
+  window.__ulangPdf = function(jenis, row, btn){
+    var t = btn && btn.innerHTML;
+    function pulih(){ if(btn){ btn.disabled = false; btn.innerHTML = t; } }
+    if(btn){ btn.disabled = true; btn.innerHTML = 'Membuat PDF…'; }
+    google.script.run.withSuccessHandler(function(r){
+      pulih();
+      if(r && r.success) H.toast('PDF sudah diunduh ke laptop kamu', 'ok'); else H.toast((r && r.error) || 'Gagal membuat PDF.', 'err');
+    }).withFailureHandler(function(e){ pulih(); H.toast((e && e.message) || 'Gagal membuat PDF.', 'err'); }).unduhUlangPdf(jenis, row);
+  };
+
+  /* ---- Dropdown status (Diajukan / Diproses / Selesai) untuk semua halaman pengajuan admin ---- */
+  function stNorm(v){ v = String(v || ''); return /selesai/i.test(v) ? 3 : (/proses|verifikasi/i.test(v) && !/belum/i.test(v) ? 2 : 1); }
+  var ST = ['', 'Diajukan', 'Diproses', 'Selesai'];
+  var css = document.createElement('style');
+  css.textContent = '.st-sel{appearance:none;-webkit-appearance:none;border:0;border-radius:999px;padding:6px 26px 6px 12px;font:700 11px/1 inherit;font-family:inherit;cursor:pointer;outline:none;' +
+    "background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23667085' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 9px center}" +
+    '.st-sel.s1{background-color:#FEF0DC;color:#B45F06}.st-sel.s2{background-color:#E3EEFF;color:#1D5FD1}.st-sel.s3{background-color:#DDF5E8;color:#12804A}' +
+    '.st-sel:disabled{opacity:.6;cursor:wait}.st-sel:focus-visible{box-shadow:0 0 0 2px #93b4f0}';
+  (document.head || document.documentElement).appendChild(css);
+  window.__stSel = function(jenis, row, cur){
+    var n = stNorm(cur);
+    return '<select class="st-sel s' + n + '" data-j="' + jenis + '" data-r="' + row + '" data-p="' + n + '" onclick="event.stopPropagation()" onchange="__stChange(this)" aria-label="Status">' +
+      [1, 2, 3].map(function(i){ return '<option' + (i === n ? ' selected' : '') + '>' + ST[i] + '</option>'; }).join('') + '</select>';
+  };
+  window.__stChange = function(sel){
+    var jenis = sel.getAttribute('data-j'), row = Number(sel.getAttribute('data-r')), val = sel.value, prev = Number(sel.getAttribute('data-p'));
+    sel.disabled = true;
+    function balik(){ sel.disabled = false; sel.value = ST[prev]; sel.className = 'st-sel s' + prev; }
+    google.script.run.withSuccessHandler(function(r){
+      sel.disabled = false;
+      if(!r || !r.success){ balik(); alert((r && r.error) || 'Gagal mengubah status.'); return; }
+      var n = ST.indexOf(val); sel.className = 'st-sel s' + n; sel.setAttribute('data-p', n);
+      try{ if(window.__stDone) window.__stDone(jenis, row, val); }catch(e){}
+    }).withFailureHandler(function(e){ balik(); alert((e && e.message) || 'Gagal mengubah status.'); }).ubahStatusPengajuan(jenis, row, val);
+  };
+  window.addEventListener('keydown', function(e){ if(e.key === 'F5'){ e.preventDefault(); H.refresh(window); } });
+})();
+</script>
+
+<script>
+(function(){
+  var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-nnJ9icZYDpZQungzNqzvzK4v2ZuKpkga8PKEgEncF6/exec';
+  function S(k){ try{ return JSON.parse(localStorage.getItem('hrd_' + k)); }catch(e){ return null; } }
+  function pulang(){ location.replace('index.html'); }
+
+  var sesi = S('sesi');
+  if(!sesi || !sesi.token || window.innerWidth < 900){ pulang(); return; }
+  window.addEventListener('resize', function(){ if(window.innerWidth < 880) pulang(); });
+
+  var ADMIN = sesi.peran === 'admin';
+  var profil = S('profil') || {};
+  var BASE = location.origin + location.pathname;
+  var SHIM = document.getElementById('shim').textContent;
+
+  var CTX = {
+    baseUrl: BASE, token: ADMIN ? sesi.token : '', nik: ADMIN ? '' : (profil.nik || ''),
+    namaKaryawan: profil.nama || '', userEmail: sesi.email || '', userRole: sesi.role || 'SUPERADMIN',
+    isViewer: ADMIN && sesi.role === 'ADMIN', rejectedToken: '', nikError: '',
+    tempatLahir: profil.tempatLahir || '', tanggalLahir: profil.tanggalLahir || '', jenisKelamin: profil.jenisKelamin || '',
+    alamat: profil.alamat || '', agama: profil.agama || '', noKpj: profil.noKpj || '', npp: profil.npp || '', noJkn: profil.noJkn || ''
+  };
+
+  // ---------- Template Apps Script (<?= ?> dan <?!= ?>) ----------
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+  function evalTpl(src, ctx){
+    return src.replace(/<\?(!?)=\s*([\s\S]*?)\s*\?>/g, function(_, raw, expr){
+      try{
+        var v = new Function('ctx', 'with(ctx){ return (' + expr + '); }')(ctx);
+        return raw ? (v == null ? '' : String(v)) : esc(v);
+      }catch(e){ return ''; }
+    });
+  }
+
+  // ---------- Peta halaman ----------
+  var TADM = { '': 'LandingAdmin', saldo: 'Dashboard', koreksi: 'DashboardKoreksi', kecelakaan: 'DashboardKecelakaan',
+    'kecelakaan|baru': 'FormKecelakaan', 'perbaikan-npp': 'DashboardPerbaikanNPP', keluarga: 'DashboardKeluargaAdmin',
+    'payment-ketenagakerjaan': 'DashboardPaymentKetenagakerjaan', 'payment-kesehatan': 'DashboardPaymentKesehatan',
+    pesan: 'DashboardPesan', anonim: 'DashboardKritikSaran' };
+  var TKRY = { '': 'DashboardKaryawan', identitas: 'Identitas', requestquestion: 'RequestQuestionKaryawan', anonim: 'KritikSaranAnonimKaryawan',
+    saldo: 'RiwayatSaldoKaryawan', 'saldo|baru': 'FormKaryawan', keluarga: 'RiwayatKeluargaKaryawan', 'keluarga|baru': 'FormKeluargaKaryawan',
+    koreksi: 'RiwayatKoreksiKaryawan', 'koreksi|baru': 'FormKoreksi' };
+
+  function rute(url){
+    var q; try{ q = new URL(url, location.href).searchParams; }catch(e){ q = new URLSearchParams(''); }
+    var page = q.get('page') || '', jenis = q.get('jenis') || '', aksi = q.get('aksi') || '';
+    if(page === 'logout' || page === 'login') return { keluar: true };
+    if(ADMIN){
+      if(page !== 'admin') return rute('?page=admin');
+      var t = TADM[jenis + (aksi ? '|' + aksi : '')] || TADM[jenis] || TADM[''];
+      if(jenis === 'kecelakaan' && aksi !== 'baru') t = TADM.kecelakaan;
+      var tampil = t === TADM[jenis] || t === TADM['kecelakaan|baru'] ? jenis : '';
+      var k = Object.keys(TADM).filter(function(x){ return TADM[x] === t; })[0] || '';
+      var act = k.split('|')[0] || 'dashboard';
+      return { key: t, tpl: t, active: act, q: k ? '?page=admin' + (k ? '&jenis=' + k.split('|')[0] : '') + (k.indexOf('|baru') > 0 ? '&aksi=baru' : '') : '?page=admin' };
+    }
+    var kj = '';
+    if(page === 'karyawan-identitas') kj = 'identitas';
+    else if(page === 'karyawan-RequestQuestion') kj = 'requestquestion';
+    else if(page === 'karyawan-anonim') kj = 'anonim';
+    else if(page === 'karyawan') kj = jenis + (aksi === 'baru' ? '|baru' : '');
+    var tp = TKRY[kj] || TKRY[''];
+    var kk = Object.keys(TKRY).filter(function(x){ return TKRY[x] === tp; })[0] || '';
+    var qq = kk === 'identitas' ? '?page=karyawan-identitas' : kk === 'requestquestion' ? '?page=karyawan-RequestQuestion' : kk === 'anonim' ? '?page=karyawan-anonim' :
+             '?page=karyawan' + (kk ? '&jenis=' + kk.split('|')[0] : '') + (kk.indexOf('|baru') > 0 ? '&aksi=baru' : '');
+    return { key: tp, tpl: tp, active: kk, q: qq };
+  }
+
+  // ---------- Jaringan (antrian + sesi) ----------
+  var aktifNet = 0, antri = [];
+  function jalan(){
+    while(aktifNet < 4 && antri.length){
+      (function(it){
+        aktifNet++;
+        fetch(API_URL, { method: 'POST', body: JSON.stringify(it.body) })
+          .then(function(r){ if(!r.ok) throw new Error('Server tidak menjawab (' + r.status + ')'); return r.json(); })
+          .then(function(j){ aktifNet--; it.res(j); jalan(); })
+          .catch(function(e){ aktifNet--; it.rej(e); jalan(); });
+      })(antri.shift());
+    }
+  }
+  function net(body, depan){
+    return new Promise(function(res, rej){
+      var it = { body: body, res: res, rej: rej };
+      if(depan) antri.unshift(it); else antri.push(it);
+      jalan();
+    });
+  }
+  function keluarSesi(){
+    if(ADMIN){ try{ fetch(API_URL, { method: 'POST', body: JSON.stringify({ aksi: 'logoutAdmin', token: sesi.token }) }); }catch(e){} }
+    ['sesi','profil','adm','riwayat','chat','chprof','isian','dcache','apraw'].forEach(function(k){ try{ localStorage.removeItem('hrd_' + k); }catch(e){} });
+    setTimeout(pulang, 60);
+  }
+
+  // ---------- Cache data (tampil seketika, lalu diperbarui) ----------
+  var BACA = {};
+  ['getSubmissions','getKeluargaSubmissions','getKoreksiSubmissions','getKecelakaanCases','getNppTemplateOptions','getPerbaikanNppList',
+   'getPaymentPeriodeList','getPayksSites','getAsuransiKesehatanList','getPaymentKesehatanPeriodeList','adminGetChatList','adminGetChat',
+   'adminGetAnonim','getUnreadRequestQuestionCount','getUnreadAnonimCount','getNotificationCounts','getSubmissionsByNik',
+   'getKoreksiSubmissionsByNik','getKeluargaSubmissionsByNik','getMyChat'].forEach(function(n){ BACA[n] = 1; });
+  var cache = (function(){ try{ return JSON.parse(localStorage.getItem('hrd_dcache') || '{}') || {}; }catch(e){ return {}; } })();
+  var simpanT = 0;
+  function simpan(){
+    clearTimeout(simpanT);
+    simpanT = setTimeout(function(){ try{ var t = JSON.stringify(cache); if(t.length < 2500000) localStorage.setItem('hrd_dcache', t); }catch(e){} }, 800);
+  }
+  function kunci(fn, args){
+    return fn + '|' + JSON.stringify(args.filter(function(a){ return !(a && typeof a === 'object' && a.__t && Object.keys(a).length === 1); }));
+  }
+
+  // ---------- PDF base64 -> unduhan ----------
+  function olahPdf(v){
+    try{
+      if(v && typeof v === 'object' && v.pdfBase64){
+        var bin = atob(v.pdfBase64), u8 = new Uint8Array(bin.length);
+        for(var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+        var url = URL.createObjectURL(new Blob([u8], { type: 'application/pdf' }));
+        v.url = url; v.pdfUrl = url; v.pdfBase64 = '';
+        var a = document.createElement('a'); a.href = url; a.download = v.fileName || 'dokumen.pdf';
+        document.body.appendChild(a); a.click(); a.remove();
+      }
+    }catch(e){}
+    return v;
+  }
+
+  // ---------- Jembatan google.script.run ----------
+  var reg = [];      // panggilan baca yang bisa di-refresh
+  function kirim(fn, args, depan){
+    var body = { aksi: 'run', fn: fn, args: args };
+    if(ADMIN) body.token = sesi.token; else body.ktoken = sesi.token;
+    return net(body, depan);
+  }
+  function kena(ent, v, dariCache){
+    if(!ent.win || ent.win.closed || !ent.win.document) return;
+    try{ if(ent.st.ok) ent.st.ok(v, ent.st.uo); }catch(e){ try{ console.error(e); }catch(x){} }
+  }
+  function gagal(ent, err){
+    try{ if(ent.st.err) ent.st.err(err, ent.st.uo); else console.error(err); }catch(e){}
+  }
+  function jawab(ent, j, dariCache, k){
+    if(!j.success){
+      if(j.error === 'SESI_HABIS'){ keluarSesi(); return; }
+      var m = j.gwError || j.error || 'Terjadi kesalahan.';
+      gagal(ent, new Error(m)); return;
+    }
+    var v = j.result;
+    if(ent.baca){
+      var s = JSON.stringify(v), ada = cache[k];
+      if(ada && ada.s === s && dariCache) { ent.sudah = true; return; }
+      cache[k] = { s: s, v: v }; simpan();
+      if(ada && ada.s === s && ent.sudah) return;      // sama dengan yang sudah ditampilkan
+    } else {
+      v = olahPdf(v); bust();
+      var ok = !(v && typeof v === 'object' && v.success === false);
+      if(ok){
+        var ps = pesanTulis(ent.fn);
+        if(ps) window.__nbToast(ps, 'ok');
+      }
+    }
+    ent.sudah = true; kena(ent, v, false);
+  }
+  function pesanTulis(fn){
+    if(/^adminDelete/.test(fn)) return 'Berhasil dihapus';                       // halaman lain sudah punya notifikasi sendiri
+    if(/^(generate|regenerate)/.test(fn)) return 'PDF berhasil dibuat dan diunduh ke laptop kamu';
+    if(fn === 'ubahStatusPengajuan') return 'Status diperbarui';
+    return '';
+  }
+  function bust(){ cache = {}; try{ localStorage.removeItem('hrd_dcache'); }catch(e){} }
+
+  function call(win, fn, args, st){
+    var baca = !!BACA[fn], k = kunci(fn, args);
+    var ent = { win: win, fn: fn, args: args, st: st, baca: baca, k: k, sudah: false };
+    if(baca){
+      reg = reg.filter(function(x){ return !(x.win === win && x.k === k); });
+      reg.push(ent);
+      var c = cache[k];
+      if(c){ ent.sudah = true; setTimeout(function(){ kena(ent, c.v, true); }, 0); }
+    }
+    kirim(fn, args, win === aktifWin).then(function(j){
+      jawab(ent, j, false, k);
+    }).catch(function(e){ if(!(baca && ent.sudah)) gagal(ent, e); });
+  }
+
+  function segarkan(win){
+    reg.filter(function(x){ return x.win === win && x.baca; }).forEach(function(ent){
+      kirim(ent.fn, ent.args, true).then(function(j){
+        if(!j.success){ if(j.error === 'SESI_HABIS') keluarSesi(); return; }
+        var s = JSON.stringify(j.result), ada = cache[ent.k];
+        cache[ent.k] = { s: s, v: j.result }; simpan();
+        if(ada && ada.s === s) return;
+        kena(ent, j.result, false);
+      }).catch(function(){});
+    });
+  }
+
+  // ---------- Bingkai halaman ----------
+  var stage = document.getElementById('stage'), boot = document.getElementById('boot');
+  var frames = {}, aktifWin = null, aktifKey = null, sidebarTxt = null, teksCache = {};
+  function ambil(nama){
+    if(teksCache[nama]) return Promise.resolve(teksCache[nama]);
+    return fetch('p/' + nama + '.html').then(function(r){
+      if(!r.ok) throw new Error('Halaman tidak ditemukan (' + nama + ')');
+      return r.text();
+    }).then(function(t){ teksCache[nama] = t; return t; });
+  }
+  function bikin(r){
+    if(frames[r.key]) return frames[r.key].promise;
+    var f = { el: null, tgl: 0 };
+    f.promise = Promise.all([ambil(r.tpl).catch(function(){ return null; }), ADMIN ? ambil('Sidebar') : Promise.resolve('')]).then(function(a){
+      var tpl = a[0];
+      var html;
+      if(tpl == null){
+        html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Halaman</title><style>body{font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#eef1f6;color:#334}div{text-align:center}a{color:#2563eb}</style></head><body><div><h2>Halaman belum tersedia</h2><p>File halaman ini belum dipasang.</p><a href="' + BASE + (ADMIN ? '?page=admin' : '?page=karyawan') + '">Kembali ke beranda</a></div></body></html>';
+      } else {
+        var ctx = Object.assign({}, CTX, { activeKey: r.active });
+        if(ADMIN) ctx.sidebarHtml = evalTpl(a[1], ctx);
+        html = evalTpl(tpl, ctx);
+      }
+      html = html.replace(/<head[^>]*>/i, function(m){ return m + '<script>' + SHIM.replace(/<\/script>/gi, '<\\/script>') + '<\/script>'; });
+      var el = document.createElement('iframe'); el.className = 'fr'; el.setAttribute('data-k', r.key);
+      f.el = el; stage.appendChild(el);
+      return new Promise(function(res){ el.addEventListener('load', function(){ f.tgl = Date.now(); res(f); }, { once: true }); el.srcdoc = html; });
+    });
+    frames[r.key] = f;
+    return f.promise;
+  }
+  function tampil(r, dorong){
+    if(r.keluar){ keluarSesi(); return; }
+    bikin(r).then(function(f){
+      if(aktifKey && frames[aktifKey] && frames[aktifKey].el) frames[aktifKey].el.classList.remove('on');
+      f.el.classList.add('on'); aktifKey = r.key; aktifWin = f.el.contentWindow;
+      try{ document.title = f.el.contentDocument.title || 'SHELTER'; }catch(e){}
+      boot.classList.add('off');
+      if(Date.now() - f.tgl > 4000) segarkan(aktifWin);
+      f.tgl = Date.now();
+      if(dorong) history.pushState({ k: r.key }, '', BASE + (r.q || (ADMIN ? '?page=admin' : '?page=karyawan')));
+    });
+  }
+
+  var RUTE_ADMIN = ['', 'saldo', 'koreksi', 'kecelakaan', 'perbaikan-npp', 'keluarga', 'payment-ketenagakerjaan', 'payment-kesehatan', 'pesan', 'anonim'];
+  var RUTE_KRY = ['', 'identitas', 'requestquestion', 'anonim', 'saldo', 'keluarga', 'koreksi', 'saldo|baru', 'keluarga|baru', 'koreksi|baru'];
+  function praMuat(){
+    var daftar = (ADMIN ? RUTE_ADMIN.map(function(j){ return rute('?page=admin' + (j ? '&jenis=' + j : '')); })
+                        : RUTE_KRY.map(function(k){
+                            var p = k.split('|'), j = p[0], a = p[1];
+                            if(j === 'identitas') return rute('?page=karyawan-identitas');
+                            if(j === 'requestquestion') return rute('?page=karyawan-RequestQuestion');
+                            if(j === 'anonim') return rute('?page=karyawan-anonim');
+                            return rute('?page=karyawan' + (j ? '&jenis=' + j : '') + (a ? '&aksi=baru' : ''));
+                          }));
+    var i = 0;
+    (function lagi(){
+      if(i >= daftar.length) return;
+      var r = daftar[i++];
+      if(frames[r.key]){ lagi(); return; }
+      bikin(r).then(function(){ setTimeout(lagi, 350); });
+    })();
+  }
+
+  window.__host = {
+    base: BASE,
+    confirm: function(m, f, o){ window.__nbConfirm(m, f, o); },
+    toast: function(m, t){ window.__nbToast(m, t); },
+    call: call,
+    go: function(u){ tampil(rute(u), true); },
+    refresh: function(win){ segarkan(win); }
+  };
+  window.addEventListener('popstate', function(){ tampil(rute(location.search ? location.href : BASE + '?page=' + (ADMIN ? 'admin' : 'karyawan')), false); });
+
+  // mulai
+  var awal = rute(location.search ? location.href : BASE + '?page=' + (ADMIN ? 'admin' : 'karyawan'));
+  tampil(awal, false);
+  history.replaceState({}, '', BASE + (awal.q || (ADMIN ? '?page=admin' : '?page=karyawan')));
+  setTimeout(praMuat, 900);
+})();
+</script>
+</body>
+</html>

@@ -800,7 +800,6 @@
         <a href="https://wa.me/6282123464603" target="_blank" rel="noopener"><i><svg viewBox="0 0 20 20" fill="none"><path d="M10 2.5A7.5 7.5 0 0 0 3.6 13.9L2.7 17.3L6.2 16.4A7.5 7.5 0 1 0 10 2.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.3 6.8C7.5 6.4 7.8 6.4 8 6.4H8.4C8.6 6.4 8.8 6.5 8.9 6.8L9.4 8C9.5 8.2 9.4 8.4 9.3 8.6L8.9 9C9.3 9.8 10 10.6 10.9 11.1L11.4 10.7C11.6 10.5 11.8 10.5 12 10.6L13.2 11.2C13.4 11.3 13.5 11.5 13.5 11.7V12.1C13.5 12.5 13.3 12.8 12.9 13C12.4 13.2 11.7 13.3 10.6 12.8C9.1 12.2 7.8 10.9 7.2 9.4C6.8 8.3 7 7.4 7.3 6.8Z" fill="currentColor"/></svg></i>0821-2346-4603 (Fariza)</a>
       </div>
     </div>
-    <div class="lg-ver">HRD_BENEFIT &middot; v1.0.0</div>
   </div>
 </section>
 
@@ -1014,6 +1013,80 @@
 <div class="toast" id="toast"></div>
 
 <script>
+/* ---- Dialog konfirmasi & toast (dipakai bersama) ---- */
+(function(w){
+  if(w.__nbUI) return; w.__nbUI = true;
+  var d = w.document;
+  var css = d.createElement('style');
+  css.textContent =
+  '.nb-ov{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(12,24,52,.48);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);opacity:0;transition:opacity .18s}' +
+  '.nb-ov.on{opacity:1}' +
+  '.nb-card{width:100%;max-width:400px;background:#fff;border-radius:20px;padding:28px 26px 22px;text-align:center;box-shadow:0 28px 70px rgba(12,24,52,.32);transform:translateY(14px) scale(.96);transition:transform .22s cubic-bezier(.2,.9,.3,1.2);font-family:Inter,"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,sans-serif}' +
+  '.nb-ov.on .nb-card{transform:none}' +
+  '.nb-ic{width:60px;height:60px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;background:#E8F0FF;color:#2563EB;box-shadow:0 0 0 9px rgba(37,99,235,.07)}' +
+  '.nb-ic.d{background:#FFF0F2;color:#D9364B;box-shadow:0 0 0 9px rgba(217,54,75,.07)}' +
+  '.nb-card h3{margin:0 0 8px;font-size:18px;line-height:1.35;font-weight:800;color:#0F1B3D}' +
+  '.nb-card p{margin:0 0 22px;font-size:13.5px;line-height:1.6;color:#5B6B88}' +
+  '.nb-card h3:last-of-type{margin-bottom:22px}' +
+  '.nb-card p+.nb-act,.nb-card h3+.nb-act{margin-top:0}' +
+  '.nb-act{display:flex;gap:10px}' +
+  '.nb-b{flex:1;border-radius:12px;padding:13px 14px;font:700 14px/1 inherit;font-family:inherit;cursor:pointer;border:1px solid transparent;transition:transform .12s,background .15s}' +
+  '.nb-b:active{transform:scale(.97)}' +
+  '.nb-b.c{background:#fff;color:#1B2A4E;border-color:#D8E0EF}.nb-b.c:hover{background:#F3F6FC}' +
+  '.nb-b.d{background:#D9364B;color:#fff;box-shadow:0 8px 18px rgba(217,54,75,.28)}.nb-b.d:hover{background:#C22C40}' +
+  '.nb-b.p{background:#2563EB;color:#fff;box-shadow:0 8px 18px rgba(37,99,235,.28)}.nb-b.p:hover{background:#1D54CF}' +
+  '.nb-b:focus-visible{outline:3px solid rgba(37,99,235,.35);outline-offset:2px}' +
+  '.nb-tw{position:fixed;top:18px;right:18px;z-index:100000;display:flex;flex-direction:column;gap:10px;pointer-events:none}' +
+  '.nb-t{pointer-events:auto;display:flex;align-items:center;gap:12px;min-width:270px;max-width:380px;background:#fff;border-radius:14px;padding:13px 16px;font:600 13.5px/1.4 Inter,system-ui,sans-serif;color:#0F1B3D;box-shadow:0 14px 36px rgba(12,24,52,.2);border-left:5px solid #16A34A;opacity:0;transform:translateX(24px);transition:opacity .22s,transform .25s cubic-bezier(.2,.9,.3,1.1)}' +
+  '.nb-t.on{opacity:1;transform:none}.nb-t.err{border-left-color:#D9364B}' +
+  '.nb-t i{flex:none;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#DCFCE7;color:#16A34A;font-style:normal;font-weight:800}' +
+  '.nb-t.err i{background:#FFE4E8;color:#D9364B}' +
+  '@media (max-width:600px){.nb-tw{left:14px;right:14px;top:auto;bottom:90px}.nb-t{min-width:0;max-width:none}}' +
+  '@media (prefers-reduced-motion:reduce){.nb-ov,.nb-card,.nb-t{transition:none!important}}';
+  (d.head || d.documentElement).appendChild(css);
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  var TRASH = '<svg width="26" height="26" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M8 6V4.5c0-.3.2-.5.5-.5h3c.3 0 .5.2.5.5V6M6 6l.7 9.6c0 .5.5.9 1 .9h4.6c.5 0 1-.4 1-.9L14 6M8.5 9v4.5M11.5 9v4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var QUES = '<svg width="26" height="26" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.2" stroke="currentColor" stroke-width="1.6"/><path d="M8 7.8a2.1 2.1 0 1 1 3 1.9c-.7.4-1 .8-1 1.5M10 13.6v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  w.__nbConfirm = function(msg, ok, opt){
+    var parts = String(msg || '').split(/\n+/).filter(Boolean), title = parts[0] || 'Yakin?', body = parts.slice(1).join(' ');
+    if(!body){ var m = title.match(/^(.*?[?!])\s+(.+)$/); if(m){ title = m[1]; body = m[2]; } }
+    var danger = (opt && opt.danger != null) ? opt.danger : /hapus|buang|delete|remove/i.test(title);
+    var ov = d.createElement('div'); ov.className = 'nb-ov';
+    ov.innerHTML = '<div class="nb-card" role="alertdialog" aria-modal="true"><div class="nb-ic' + (danger ? ' d' : '') + '">' + (danger ? TRASH : QUES) + '</div>' +
+      '<h3>' + esc(title) + '</h3>' + (body ? '<p>' + esc(body) + '</p>' : '') +
+      '<div class="nb-act"><button type="button" class="nb-b c">Batal</button><button type="button" class="nb-b ' + (danger ? 'd' : 'p') + '">' + (danger ? 'Ya, hapus' : 'Ya, lanjut') + '</button></div></div>';
+    d.body.appendChild(ov);
+    var bs = ov.querySelectorAll('.nb-b');
+    function tutup(){ ov.classList.remove('on'); setTimeout(function(){ ov.remove(); }, 200); d.removeEventListener('keydown', kd, true); }
+    function kd(e){ if(e.key === 'Escape'){ e.stopPropagation(); tutup(); } }
+    bs[0].onclick = tutup;
+    bs[1].onclick = function(){ tutup(); try{ ok && ok(); }catch(e){ console.error(e); } };
+    ov.addEventListener('click', function(e){ if(e.target === ov) tutup(); });
+    d.addEventListener('keydown', kd, true);
+    requestAnimationFrame(function(){ ov.classList.add('on'); bs[0].focus(); });
+  };
+  w.__nbToast = function(msg, tipe){
+    var tw = d.querySelector('.nb-tw');
+    if(!tw){ tw = d.createElement('div'); tw.className = 'nb-tw'; tw.setAttribute('aria-live', 'polite'); d.body.appendChild(tw); }
+    var t = d.createElement('div'); t.className = 'nb-t' + (tipe === 'err' ? ' err' : '');
+    t.innerHTML = '<i>' + (tipe === 'err' ? '!' : '&#10003;') + '</i><span>' + esc(msg) + '</span>';
+    tw.appendChild(t);
+    requestAnimationFrame(function(){ t.classList.add('on'); });
+    setTimeout(function(){ t.classList.remove('on'); setTimeout(function(){ t.remove(); }, 260); }, tipe === 'err' ? 4600 : 3200);
+  };
+  // confirm() bawaan browser diganti dialog bagus: dialog muncul, lalu aksi diulang otomatis setelah "Ya"
+  var last = null, oke = false;
+  d.addEventListener('click', function(e){ if(!oke) last = e.target; }, true);
+  w.confirm = function(msg){
+    if(oke){ oke = false; return true; }
+    var el = last;
+    w.__nbConfirm(msg, function(){ oke = true; if(el && el.click) el.click(); setTimeout(function(){ oke = false; }, 400); });
+    return false;
+  };
+})(window);
+
+</script>
+<script>
 // ======================= PENGATURAN =======================
 // Link /exec web app Apps Script (Deploy -> Manage deployments -> Web app URL)
 var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-nnJ9icZYDpZQungzNqzvzK4v2ZuKpkga8PKEgEncF6/exec';
@@ -1185,6 +1258,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   }
 
   function bukaKaryawan(profil){
+    if(window.innerWidth >= 900){ location.replace('d.html'); return; }   // laptop: tampilan web lama (d.html)
     isiProfil(profil);
     $('login').hidden = true; $('app').hidden = false;
     document.querySelector('meta[name="theme-color"]').content = '#F2F5FB';
@@ -2208,11 +2282,13 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
         kv('Email', esc(r.email), 1) + kv('TTL', esc(r.ttl)) + kv('Site', esc(r.namaSite)) + kv('Posisi / Bidang', esc(r.posisiBidang)) + kv('Diajukan', tgl(r.timestamp)) +
         kv('No. kartu lama', esc(r.noLama)) + kv('No. kartu baru', esc(r.noBaru)) + kv('Riwayat perusahaan', esc(String(r.riwayat || '').split('|').join(' • ')), 1) + '</div>';
       h += '<div class="ap-sec">Status</div>' + apSel(r, k, ro);
+      if(apTahap(r.status) === 3) h += '<div style="margin-top:12px"><button class="ap-btn p" data-ulang="saldo">Unduh PDF</button></div>';
       h += '<div class="ap-sec">Lampiran</div><div id="apLamp"><button class="ap-btn" id="apLampBtn">Tampilkan lampiran</button></div>';
       if(!ro) h += apFormProses(r);
     } else if(k === 'koreksi'){
       h += '<div class="ap-kv">' + kv('Nama TK', esc(r.namaTk)) + kv('Site', esc(r.namaSite)) + kv('WhatsApp', esc(r.noWhatsapp)) + kv('Email', esc(r.email)) + kv('Diajukan', tgl(r.timestamp)) + '</div>';
       h += '<div class="ap-sec">Status</div>' + apSel(r, k, ro);
+      if(apTahap(r.status) === 3) h += '<div style="margin-top:12px"><button class="ap-btn p" data-ulang="koreksi">Unduh PDF</button></div>';
       h += '<div class="ap-sec">Lampiran</div><div id="apLamp"><button class="ap-btn" id="apLampBtn">Tampilkan lampiran</button></div>';
       if(!ro) h += apFormKoreksi(r);
     } else if(k === 'keluarga'){
@@ -2225,6 +2301,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
     } else {
       h += '<div class="ap-kv">' + kv('Nama korban', esc(r.namaKorban)) + kv('NIK', esc(r.nikKorban)) + kv('Tanggal kecelakaan', esc(r.tanggalKecelakaan)) + kv('Diajukan', tgl(r.timestamp)) + '</div>';
       h += '<div class="ap-sec">Status</div>' + apSel(r, k, ro);
+      h += '<div style="margin-top:12px"><button class="ap-btn p" data-ulang="kecelakaan">Unduh PDF</button></div>';
       h += '<p class="ap-note">Edit data dan pembuatan surat kecelakaan kerja ada di halaman lengkap.</p><button class="ap-btn p" id="apBukaLama">Buka halaman lengkap</button>' + (ro ? '' : ' <button class="ap-btn d" id="kkBersih">Hapus lampiran dari Drive</button>');
     }
     if(!ro) h += '<div style="margin-top:22px;padding-top:14px;border-top:1px solid #EEF2F8"><button class="ap-btn d" id="apHapus">Hapus pengajuan</button></div>';
@@ -2430,7 +2507,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
         return '<div class="ap-row tb" style="--cols:' + cols + '"><div class="c" data-l="Jenis"><span class="bd ' + (x.jenis === 'BARU' ? 'bd-selesai' : 'bd-diproses') + '">' + esc(x.jenis) + '</span></div>' +
           '<div class="c c-n" style="grid-column:auto"><div><b>' + esc(x.noSurat) + '</b></div></div><div class="c" data-l="Perusahaan">' + esc(x.namaPerusahaan) + '</div><div class="c" data-l="NPP">' + esc(x.npp) + '</div>' +
           '<div class="c" data-l="Penandatangan">' + esc(x.pelapor) + '</div><div class="c" data-l="Tanggal">' + esc(x.tanggalSurat) + '</div>' +
-          '<div class="c c-a">' + (ro ? '' : '<button class="ap-btn d" data-nppdel="' + x.rowNumber + '">Hapus</button>') + '</div></div>';
+          '<div class="c c-a"><button class="ap-btn" data-ulang="npp" data-row="' + x.rowNumber + '">Unduh</button> ' + (ro ? '' : '<button class="ap-btn d" data-nppdel="' + x.rowNumber + '">Hapus</button>') + '</div></div>';
       }).join('');
       $('apIsi').innerHTML = (ro ? '' : '<div style="margin-bottom:12px"><button class="ap-btn p" id="nppBaru">+ Buat surat baru</button></div>') +
         '<p class="ap-note" style="margin:0 0 12px">PDF surat langsung diunduh saat dibuat dan tidak disimpan di Drive.</p>' +
@@ -2624,6 +2701,16 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
     if(t.closest('#apBack')){ getar(); if(AP.chat){ apKerangka('Pesan Masuk', ''); $('apIsi').innerHTML = '<div class="rw-sk"></div>'; apMuatPesan(); } else admTampil(window.matchMedia('(min-width:900px)').matches ? 'beranda' : 'layanan'); return; }
     if(t.closest('#apRef')){ getar(); if(AP.chat){ apBukaChat(AP.cache.pesan.indexOf(AP.chat)); } else if(AP.k === 'pesan') apMuatPesan(); else if(AP.k === 'anonim') apMuatAnonim(); else if(AP.k === 'perbaikan-npp') apMuatNpp(); else if(AP.k === 'payment-ketenagakerjaan' || AP.k === 'payment-kesehatan') apMuatPay(); else apMuatDaftar(AP.k); return; }
     var f = t.closest('.ap-chip'); if(f){ AP.f = f.getAttribute('data-f'); apRenderDaftar(); return; }
+    var ul = t.closest('[data-ulang]'); if(ul){
+      var jn = ul.getAttribute('data-ulang'), rw = Number(ul.getAttribute('data-row') || (AP.sheet && AP.sheet.row)), lb = ul.innerHTML;
+      ul.disabled = true; ul.innerHTML = 'Membuat PDF…';
+      apPanggil('adminUnduhUlang', { jenis: jn, row: rw }).then(function(r){
+        ul.disabled = false; ul.innerHTML = lb;
+        if(r && r.success && (r.pdfBase64 || r.base64)){ apUnduh(r.fileName || r.namaFile || 'dokumen.pdf', r.pdfBase64 || r.base64); __nbToast('PDF sudah diunduh ke perangkat kamu', 'ok'); }
+        else __nbToast((r && r.error) || 'Gagal membuat PDF', 'err');
+      }).catch(function(){ ul.disabled = false; ul.innerHTML = lb; __nbToast('Koneksi bermasalah', 'err'); });
+      return;
+    }
     var dt = t.closest('[data-det]'); if(dt){ apDetail(AP.k, dt.getAttribute('data-det')); return; }
     if(t.closest('#apLaporBaru') || t.closest('#apBukaLama')){ apSheetTutup(); admBukaLama(AP.k); return; }
     if(t.closest('#apLampBtn')){ apLampiran(); return; }
@@ -2714,6 +2801,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   });
 
   function bukaAdmin(){
+    if(window.innerWidth >= 900){ location.replace('d.html'); return; }   // laptop: tampilan web lama (d.html)
     $('login').hidden = true; $('app').hidden = true; $('adm').hidden = false;
     document.querySelector('meta[name="theme-color"]').content = '#F3F8FF';
     admRender(); admTampil('beranda'); admMuat();

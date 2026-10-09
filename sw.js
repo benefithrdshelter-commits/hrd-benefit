@@ -1,8 +1,9 @@
 // Service worker HRD Benefit: menyimpan tampilan aplikasi di HP supaya terbuka instan.
 // Data (Apps Script) TIDAK disimpan di sini, selalu diambil langsung dari server.
-var CACHE = 'hrd-benefit-v5';
+var CACHE = 'hrd-benefit-v8';
 var ASET = [
-  './', './index.html', './manifest.webmanifest',
+  './', './index.html', './d.html', './manifest.webmanifest',
+  './p/Dashboard.html', './p/DashboardKaryawan.html', './p/DashboardKecelakaan.html', './p/DashboardKeluargaAdmin.html', './p/DashboardKoreksi.html', './p/DashboardKritikSaran.html', './p/DashboardPaymentKesehatan.html', './p/Identitas.html', './p/RiwayatSaldoKaryawan.html', './p/DashboardPaymentKetenagakerjaan.html', './p/DashboardPerbaikanNPP.html', './p/DashboardPesan.html', './p/FormKaryawan.html', './p/FormKecelakaan.html', './p/FormKeluargaKaryawan.html', './p/FormKoreksi.html', './p/KritikSaranAnonimKaryawan.html', './p/LandingAdmin.html', './p/RequestQuestionKaryawan.html', './p/RiwayatKeluargaKaryawan.html', './p/RiwayatKoreksiKaryawan.html', './p/Sidebar.html',
   './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png',
   './icons/apple-touch-icon.png', './icons/favicon-32.png'
 ];
