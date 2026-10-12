@@ -783,8 +783,12 @@ function sippHasil(ctx, d){
     if(!res.rows.length) al.push('tidak ada baris F2A yang terbaca');
     if(res.npp && res.npp !== ctx.npp) al.push('NPP di PDF (' + res.npp + ') beda dengan ' + ctx.npp);
     if(res.periode && res.periode !== ctx.periode) al.push('periode di PDF (' + res.periode + ') beda dengan ' + ctx.periode);
-    if(res.pdfTotal == null) al.push('total di PDF tidak terbaca');
-    else if(Math.abs(res.pdfTotal - res.sumTotal) >= 1) al.push('total hitungan ' + rp(res.sumTotal) + ' beda dengan total PDF ' + rp(res.pdfTotal));
+    var ref = res.pdfTotal, sumber = 'PDF';
+    if(ref == null && d.f2a.nominal){ ref = d.f2a.nominal; sumber = 'tabel Mutasi Data SIPP'; spLog('Total tidak ada di PDF, dicocokkan dengan total di tabel SIPP (' + rp(ref) + ').', '#b45309'); }
+    res.refTotal = ref;
+    if(ref == null) al.push('total di PDF tidak terbaca' + ((res.dbg && res.dbg.length) ? ' (baris terkait: ' + res.dbg.join(' | ') + ')' : ''));
+    else if(Math.abs(ref - res.sumTotal) >= 1) al.push('total hitungan ' + rp(res.sumTotal) + ' beda dengan total ' + sumber + ' ' + rp(ref));
+    if(d.f2a.tk && res.rows.length !== d.f2a.tk) al.push('jumlah karyawan terbaca ' + res.rows.length + ' beda dengan SIPP (' + d.f2a.tk + ')');
     if(salah) al.push(salah + ' baris komponen tidak sama dengan total');
     if(res.bad.length) al.push(res.bad.length + ' baris tidak terbaca');
     if(al.length){ gagalSipp(ctx, al.join('; ')); return; }
@@ -831,7 +835,7 @@ function sippKuitansi(ctx, d, res){
     teksPdf1(f, function(t){
       var m = t.match(/BLTH\s*:?\s*(\d{2})\s*\/\s*(\d{4})/);
       if(m && (m[1] + '/' + m[2]) === blth){
-        var tot = Math.round(res.pdfTotal).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        var tot = Math.round(res.refTotal || res.pdfTotal || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         var skor = t.indexOf(tot) >= 0 ? 2 : 1;
         if(!terbaik || skor > terbaik.skor) terbaik = { f: f, b64: k.b64, tgl: k.tgl, skor: skor };
       }
@@ -959,7 +963,7 @@ function parseF2a(items){
   });
   lines.forEach(function(l){ l.it.sort(function(a, b){ return a.x - b.x; }); l.t = l.it.map(function(i){ return String(i.s).trim(); }).join(' ').replace(/\s+/g, ' ').trim(); });
 
-  var out = { npp: '', periode: '', unit: '', rows: [], pdfTotal: null, sumTotal: 0, bad: [] };
+  var out = { npp: '', periode: '', unit: '', rows: [], pdfTotal: null, sumTotal: 0, bad: [], dbg: [] };
   // ---- header
   for(var i = 0; i < lines.length; i++){
     if(/Nama\s+Perusahaan/i.test(lines[i].t) && /Periode/i.test(lines[i].t)){
@@ -978,8 +982,11 @@ function parseF2a(items){
   var prev = null;
   for(var k = 0; k < lines.length; k++){
     var L = lines[k], t = L.t;
-    if(/^Jumlah\s+Seluruhnya/i.test(t)){
-      var am = t.match(AMT); if(am && am.length){ out.pdfTotal = (out.pdfTotal || 0) + num(am[am.length - 1]); }
+    if(/jumlah|total/i.test(t) && out.dbg.length < 4 && !/\b\d{16}\b/.test(t)) out.dbg.push(t.slice(0, 90));
+    if(/Jumlah\s+Seluruhnya/i.test(t)){
+      var am = t.match(AMT);
+      for(var q2 = 1; (!am || !am.length) && q2 <= 2 && lines[k + q2]; q2++) am = lines[k + q2].t.match(AMT);
+      if(am && am.length){ out.pdfTotal = (out.pdfTotal || 0) + num(am[am.length - 1]); }
       prev = null; continue;
     }
     var nm = t.match(/\b(\d{16})\b/);
