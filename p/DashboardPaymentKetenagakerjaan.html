@@ -274,9 +274,11 @@ tr.sub>td{padding:0!important;background:#f8fafc}
 <div class="modal-o" id="mSipp"><div class="modal-b">
   <h3>Ambil F2A &amp; Kuitansi dari SIPP</h3>
   <p>Login SIPP dulu di tab Chrome lain (pakai ekstensi SHELTER-SIPP). Perintahnya selalu sama: ambil F2A + kuitansi untuk site dan periode di bawah.</p>
-  <div class="pv-info"><div class="pv-k"><span>Site</span><b id="spSite"></b></div><div class="pv-k"><span>Periode</span><b id="spPer"></b></div></div>
-  <label style="font-size:12.5px;font-weight:600;display:block;margin:10px 0 4px">NPP Ketenagakerjaan</label>
-  <input class="hi" id="spNpp" placeholder="NPP site ini" inputmode="numeric" style="width:100%">
+  <div class="pv-info"><div class="pv-k"><span>Periode</span><b id="spPer"></b></div></div>
+  <label style="font-size:12.5px;font-weight:600;display:block;margin:10px 0 4px">Nama site / perusahaan (ketik persis seperti di SIPP)</label>
+  <input class="hi" id="spNama" list="dlSipp" placeholder="mis. GLOBAL SECURINDO UTAMA UNIT MULTI DUTA UTARI" autocomplete="off" oninput="spNamaIsiNpp()" style="width:100%"><datalist id="dlSipp"></datalist>
+  <label style="font-size:12.5px;font-weight:600;display:block;margin:10px 0 4px">NPP <span style="font-weight:400;color:var(--muted)">(boleh kosong, diisi otomatis dari SIPP)</span></label>
+  <input class="hi" id="spNpp" placeholder="otomatis" inputmode="numeric" style="width:100%">
   <div id="spLog" style="margin-top:12px;font-size:12.5px;line-height:1.7;max-height:200px;overflow:auto"></div>
   <div style="display:flex;gap:10px;margin-top:16px"><button class="hb hb-gray" style="flex:1;justify-content:center" onclick="tutupSipp()">Tutup</button><button class="hb hb-green" id="spGo" style="flex:2;justify-content:center" onclick="jalankanSipp()">Mulai Ambil</button></div>
 </div></div>
@@ -685,23 +687,33 @@ function bukaGagalSipp(){
   $('mGS').classList.add('on');
 }
 function gsDel(i){ var a = gsMuat(); a.splice(i, 1); gsSimpan(a); bukaGagalSipp(); }
-function gsCoba(i){ var g = gsMuat()[i]; if(!g) return; $('upSite').value = g.site; $('upPeriode').value = g.periode; tutup('mGS'); bukaSipp(g.npp); }
+function gsCoba(i){ var g = gsMuat()[i]; if(!g) return; $('upPeriode').value = g.periode; tutup('mGS'); bukaSipp(g.npp, g.site); }
 function nppDariRiwayat(site){
-  var r = (all || []).filter(function(x){ return String(x.site || '').trim() === site && x.npp; });
+  var k = String(site || '').trim().toUpperCase().replace(/\s+/g, ' ');
+  if(!k) return '';
+  var r = (all || []).filter(function(x){ return String(x.site || '').trim().toUpperCase().replace(/\s+/g, ' ') === k && x.npp; });
   return r.length ? String(r[0].npp) : '';
+}
+function spNamaIsiNpp(){ var n = nppDariRiwayat($('spNama').value); if(n) $('spNpp').value = n; }
+function isiDlSipp(){
+  var seen = {}, a = [];
+  (all || []).forEach(function(x){ var n = String(x.site || '').trim(); if(n && !seen[n]){ seen[n] = 1; a.push(n); } });
+  $('dlSipp').innerHTML = a.sort().map(function(x){ return '<option value="' + esc(x) + '"></option>'; }).join('');
 }
 function spLog(t, cls){ var d = document.createElement('div'); d.textContent = t; if(cls) d.style.color = cls; var b = $('spLog'); b.appendChild(d); b.scrollTop = b.scrollHeight; }
 function tutupSipp(){ if(SIPP_BUSY && !confirm('Proses masih berjalan. Tutup jendela ini? (proses di ekstensi tetap lanjut)')) return; tutup('mSipp'); }
-function bukaSipp(nppPaksa){
+function bukaSipp(nppPaksa, namaPaksa){
   if(VIEWER) return;
-  var site = siteVal(), per = $('upPeriode').value;
-  if(!site){ toast('Pilih Site dulu.', 'err'); return; }
+  var per = $('upPeriode').value;
   if(!per){ toast('Pilih periode dulu.', 'err'); return; }
-  $('spSite').textContent = site; $('spPer').textContent = bulan(per);
-  $('spNpp').value = nppPaksa || nppDariRiwayat(site);
+  var nama = namaPaksa || ($('spNama').value || '').trim();
+  $('spPer').textContent = bulan(per);
+  isiDlSipp();
+  $('spNama').value = nama;
+  $('spNpp').value = nppPaksa || nppDariRiwayat(nama);
   $('spLog').innerHTML = ''; $('spGo').disabled = false; $('spGo').textContent = 'Mulai Ambil';
-  if(!$('spNpp').value) spLog('NPP site ini belum pernah tersimpan. Isi NPP-nya sekali (tersimpan otomatis setelah berhasil).', '#b45309');
   $('mSipp').classList.add('on');
+  setTimeout(function(){ try{ $('spNama').focus(); }catch(e){} }, 50);
 }
 function sippKirim(req, onMsg){
   var id = 's' + Date.now() + Math.random().toString(36).slice(2, 6); req.id = id;
@@ -721,13 +733,13 @@ function b64File(b64, name){
 }
 function jalankanSipp(){
   if(SIPP_BUSY) return;
-  var ctx = { site: siteVal(), periode: $('upPeriode').value, npp: ($('spNpp').value || '').replace(/\D/g, '') };
-  if(!ctx.npp){ toast('Isi NPP dulu.', 'err'); return; }
+  var ctx = { site: ($('spNama').value || '').trim().replace(/\s+/g, ' ').toUpperCase(), periode: $('upPeriode').value, npp: ($('spNpp').value || '').replace(/\D/g, '') };
+  if(!ctx.site){ toast('Ketik nama site / perusahaan seperti di SIPP.', 'err'); return; }
   SIPP_BUSY = true; $('spGo').disabled = true; $('spGo').textContent = 'Berjalan…'; $('spLog').innerHTML = '';
   sippPing(function(ada){
     if(!ada){ spLog('Ekstensi SHELTER-SIPP belum terdeteksi. Pasang dulu lalu refresh halaman ini.', '#dc2626'); sippBerhenti(); return; }
     spLog('Ekstensi terdeteksi. Memulai…');
-    var selesai = false, stop = sippKirim({ type: 'SHELTER_SIPP_REQ', npp: ctx.npp, periode: ctx.periode, site: ctx.site }, function(d){
+    var selesai = false, stop = sippKirim({ type: 'SHELTER_SIPP_REQ', npp: ctx.npp, nama: ctx.site, periode: ctx.periode, site: ctx.site }, function(d){
       if(d.kind === 'progress'){ spLog(d.text); return; }
       if(d.kind !== 'done' || selesai) return;
       selesai = true; stop();
@@ -739,7 +751,8 @@ function sippBerhenti(){ SIPP_BUSY = false; $('spGo').disabled = false; $('spGo'
 function gagalSipp(ctx, alasan){ gsTambah(ctx, alasan); spLog('GAGAL: ' + alasan, '#dc2626'); toast('Gagal: ' + ctx.site + ' (masuk Daftar Gagal Ambil SIPP)', 'err'); sippBerhenti(); }
 function sippHasil(ctx, d){
   if(!d.ok){ gagalSipp(ctx, d.error || 'Gagal mengambil dari SIPP.'); return; }
-  spLog('PDF diterima. Membaca F2A…');
+  if(d.npp) ctx.npp = String(d.npp);
+  spLog('PDF diterima (NPP ' + ctx.npp + '). Membaca F2A…');
   var f = b64File(d.f2a.b64, d.f2a.name);
   bacaPdf(f, function(res){
     var al = [], salah = res.rows.filter(function(r){ return !r.ok; }).length;
