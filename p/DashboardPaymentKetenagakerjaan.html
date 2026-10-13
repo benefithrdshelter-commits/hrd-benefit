@@ -224,6 +224,7 @@ tr.sub>td{padding:0!important;background:#f8fafc}
     <div class="hp-row">
       <div class="sp"></div>
       <button class="hb hb-blue only-tk" id="btnSipp" onclick="bukaSipp()">Ambil dari SIPP</button>
+      <button class="hb hb-blue only-tk" id="btnKartu" onclick="bukaSipp('','','kartu')">Ambil Kartu</button>
       <button class="hb hb-amber only-tk" onclick="bukaGagalSipp()">Gagal Ambil SIPP <span id="gsCount"></span></button>
       <button class="hb hb-green" onclick="bukaGagal()"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M10 3v10M10 13l-4-4M10 13l4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15v1.5c0 .8.7 1.5 1.5 1.5h11c.8 0 1.5-.7 1.5-1.5V15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> Daftar Upload Gagal</button>
       <button class="hb hb-red" onclick="hapusForm()"><svg width="15" height="15" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M8 6V4.5c0-.3.2-.5.5-.5h3c.3 0 .5.2.5.5V6M6 6l.7 9.6c0 .5.5.9 1 .9h4.6c.5 0 1-.4 1-.9L14 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Hapus</button>
@@ -272,15 +273,21 @@ tr.sub>td{padding:0!important;background:#f8fafc}
 
 
 <div class="modal-o" id="mSipp"><div class="modal-b">
-  <h3>Ambil F2A &amp; Kuitansi dari SIPP</h3>
-  <p>Login SIPP dulu di tab Chrome lain (pakai ekstensi SHELTER-SIPP). Perintahnya selalu sama: ambil F2A + kuitansi untuk site dan periode di bawah.</p>
-  <div class="pv-info"><div class="pv-k"><span>Periode</span><b id="spPer"></b></div></div>
+  <h3 id="spJudul">Ambil F2A &amp; Kuitansi dari SIPP</h3>
+  <p id="spInfo">Login SIPP dulu di tab Chrome lain (pakai ekstensi SHELTER-SIPP). Perintahnya selalu sama: ambil F2A + kuitansi untuk site dan periode di bawah.</p>
+  <div class="pv-info" id="spPerBox"><div class="pv-k"><span>Periode</span><b id="spPer"></b></div></div>
   <label style="font-size:12.5px;font-weight:600;display:block;margin:10px 0 4px">Nama site / perusahaan (ketik persis seperti di SIPP)</label>
   <input class="hi" id="spNama" list="dlSipp" placeholder="mis. GLOBAL SECURINDO UTAMA UNIT MULTI DUTA UTARI" autocomplete="off" oninput="spNamaIsiNpp()" style="width:100%"><datalist id="dlSipp"></datalist>
   <label style="font-size:12.5px;font-weight:600;display:block;margin:10px 0 4px">NPP <span style="font-weight:400;color:var(--muted)">(boleh kosong, diisi otomatis dari SIPP)</span></label>
   <input class="hi" id="spNpp" placeholder="otomatis" inputmode="numeric" style="width:100%">
+  <label id="spKartuWrap" style="display:flex;gap:8px;align-items:center;font-size:12.5px;margin-top:12px"><input type="checkbox" id="spKartuCb" checked> Sekalian ambil kartu peserta (yang sudah punya kartu dilewati)</label>
   <div id="spLog" style="margin-top:12px;font-size:12.5px;line-height:1.7;max-height:200px;overflow:auto"></div>
   <div style="display:flex;gap:10px;margin-top:16px"><button class="hb hb-gray" style="flex:1;justify-content:center" onclick="tutupSipp()">Tutup</button><button class="hb hb-green" id="spGo" style="flex:2;justify-content:center" onclick="jalankanSipp()">Mulai Ambil</button></div>
+</div></div>
+
+<div class="modal-o" id="mPdfV"><div class="modal-b" style="max-width:920px;height:90vh;max-height:90vh;padding:0;display:flex;flex-direction:column;overflow:hidden">
+  <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #e5e9f0;flex-shrink:0"><h3 id="pvJudul" style="flex:1;margin:0;font-size:14.5px"></h3><button class="hb hb-blue hb-sm" id="pvUnduh">Unduh</button><button class="hb hb-gray hb-sm" onclick="tutupPdfV()">Tutup</button></div>
+  <div id="pvBody" style="flex:1;overflow:auto;background:#e8ecf2;padding:14px;text-align:center"></div>
 </div></div>
 
 <div class="modal-o" id="mGS"><div class="modal-b wide">
@@ -513,7 +520,7 @@ function muatList(){
   call(CFG.fnList, [], function(raw){
     var rows = J(raw, []); if(!Array.isArray(rows)) rows = [];
     all = rows; filterList();
-    if(CFG.jenis === 'tk'){ call('getPaymentTkPdfKeys', [], function(k){ PDFKEYS = {}; J(k, []).forEach(function(x){ PDFKEYS[x] = 1; }); filterList(); }, function(){}); call('getPaymentTkKuitansiKeys', [], function(k){ KWKEYS = {}; J(k, []).forEach(function(x){ KWKEYS[x] = 1; }); filterList(); }, function(){}); }
+    if(CFG.jenis === 'tk'){ call('getPaymentTkPdfKeys', [], function(k){ PDFKEYS = {}; J(k, []).forEach(function(x){ PDFKEYS[x] = 1; }); filterList(); }, function(){}); call('getPaymentTkKuitansiKeys', [], function(k){ KWKEYS = {}; J(k, []).forEach(function(x){ KWKEYS[x] = 1; }); filterList(); }, function(){}); call('getPaymentTkKartuKeys', [], function(k){ KARTUKEYS = {}; J(k, []).forEach(function(x){ KARTUKEYS[x] = 1; }); }, function(){}); }
   }, function(e){ T1.fail('Gagal memuat: ' + String((e && e.message) || e)); });
 }
 function onField(){
@@ -626,17 +633,50 @@ function simpanPdfAsli(f, periode, site){
   };
   rd.readAsDataURL(f);
 }
+var PV_URL = null;
+function unduhBlob(url, nama){ var a = document.createElement('a'); a.href = url; a.download = nama || 'dokumen.pdf'; document.body.appendChild(a); a.click(); a.remove(); }
+function tutupPdfV(){ $('mPdfV').classList.remove('on'); $('pvBody').innerHTML = ''; if(PV_URL){ URL.revokeObjectURL(PV_URL); PV_URL = null; } }
+// tampilkan PDF di dalam halaman ini (tanpa tab baru); tombol Unduh menyimpan file-nya
+function tampilPdf(b64, judul, nama){
+  var bin = atob(b64), u = new Uint8Array(bin.length);
+  for(var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  if(PV_URL) URL.revokeObjectURL(PV_URL);
+  PV_URL = URL.createObjectURL(new Blob([u], { type: 'application/pdf' }));
+  var url = PV_URL, body = $('pvBody');
+  $('pvJudul').textContent = judul;
+  $('pvUnduh').onclick = function(){ unduhBlob(url, nama); };
+  body.innerHTML = '<div style="padding:40px;color:#64748b;font-size:13px">Memuat dokumen…</div>';
+  $('mPdfV').classList.add('on');
+  function gagal(){ body.innerHTML = '<div style="padding:40px;color:#b91c1c;font-size:13px">Dokumen tidak bisa ditampilkan di sini. Pakai tombol Unduh.</div>'; }
+  muatPdfJs(function(){
+    pdfjsLib.getDocument({ data: u.slice() }).promise.then(function(doc){
+      body.innerHTML = '';
+      var lebar = Math.max(320, Math.min(860, body.clientWidth - 28));
+      (function hal(n){
+        if(n > doc.numPages) return;
+        doc.getPage(n).then(function(pg){
+          var sc = lebar / pg.getViewport({ scale: 1 }).width, vp = pg.getViewport({ scale: sc * Math.min(2, window.devicePixelRatio || 1) });
+          var cv = document.createElement('canvas'); cv.width = vp.width; cv.height = vp.height;
+          cv.style.cssText = 'width:' + lebar + 'px;height:auto;display:block;margin:0 auto 12px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2)';
+          body.appendChild(cv);
+          return pg.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise.then(function(){ hal(n + 1); });
+        }).catch(gagal);
+      })(1);
+    }).catch(gagal);
+  }, gagal);
+}
 function bukaPdf(it, unduh){
   if(!it) return;
   toast('Mengambil PDF…');
   call('getPaymentTkPdf', [it.periode, it.site || ''], function(r){
     if(!r || !r.success){ toast((r && r.error) || 'PDF tidak ditemukan.', 'err'); return; }
-    var bin = atob(r.base64), u = new Uint8Array(bin.length);
-    for(var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
-    var url = URL.createObjectURL(new Blob([u], { type: 'application/pdf' }));
-    if(unduh){ var a = document.createElement('a'); a.href = url; a.download = r.nama; document.body.appendChild(a); a.click(); a.remove(); }
-    else if(!window.open(url, '_blank')){ toast('Pop-up diblokir browser. Izinkan pop-up, atau pakai tombol unduh.', 'err'); }
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+    if(unduh){
+      var bin = atob(r.base64), u = new Uint8Array(bin.length);
+      for(var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+      var url = URL.createObjectURL(new Blob([u], { type: 'application/pdf' }));
+      unduhBlob(url, r.nama);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+    } else tampilPdf(r.base64, 'F2A · ' + (it.site || '') + ' · ' + bulan(it.periode), r.nama || ('F2A_' + it.periode + '.pdf'));
   });
 }
 function terbilang(n){
@@ -661,13 +701,10 @@ function bukaKuitansi(it){
   toast('Mengambil kuitansi asli SIPP…');
   call('getPaymentTkKuitansiFile', [it.periode, it.site || ''], function(r){
     if(!r || !r.success){ toast((r && r.error) || 'Kuitansi tidak ditemukan.', 'err'); return; }
-    var bin = atob(r.base64), u = new Uint8Array(bin.length); for(var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
-    var url = URL.createObjectURL(new Blob([u], { type: 'application/pdf' }));
-    if(!window.open(url, '_blank')) toast('Pop-up diblokir browser. Izinkan pop-up lalu klik lagi.', 'err');
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+    tampilPdf(r.base64, 'Kuitansi · ' + (it.site || '') + ' · ' + bulan(it.periode), r.nama || ('Kuitansi_' + it.periode + '.pdf'));
   });
 }
-var KWKEYS = {}, SIPP_BUSY = false;
+var KWKEYS = {}, KARTUKEYS = {}, SIPP_BUSY = false;
 var GS_KEY = 'shelter_sipp_gagal';
 function gsMuat(){ try{ return JSON.parse(localStorage.getItem(GS_KEY) || '[]') || []; }catch(e){ return []; } }
 function gsSimpan(a){ try{ localStorage.setItem(GS_KEY, JSON.stringify(a.slice(0, 200))); }catch(e){} gsHitung(); }
@@ -702,12 +739,20 @@ function isiDlSipp(){
 }
 function spLog(t, cls){ var d = document.createElement('div'); d.textContent = t; if(cls) d.style.color = cls; var b = $('spLog'); b.appendChild(d); b.scrollTop = b.scrollHeight; }
 function tutupSipp(){ if(SIPP_BUSY && !confirm('Proses masih berjalan. Tutup jendela ini? (proses di ekstensi tetap lanjut)')) return; tutup('mSipp'); }
-function bukaSipp(nppPaksa, namaPaksa){
+var SP_MODE = 'f2a';
+function bukaSipp(nppPaksa, namaPaksa, mode){
   if(VIEWER) return;
+  SP_MODE = mode === 'kartu' ? 'kartu' : 'f2a';
   var per = $('upPeriode').value;
-  if(!per){ toast('Pilih periode dulu.', 'err'); return; }
+  if(SP_MODE === 'f2a' && !per){ toast('Pilih periode dulu.', 'err'); return; }
+  $('spPerBox').style.display = SP_MODE === 'kartu' ? 'none' : '';
+  $('spKartuWrap').style.display = SP_MODE === 'kartu' ? 'none' : '';
+  $('spJudul').textContent = SP_MODE === 'kartu' ? 'Ambil Kartu Peserta dari SIPP' : 'Ambil F2A & Kuitansi dari SIPP';
+  $('spInfo').textContent = SP_MODE === 'kartu'
+    ? 'Login SIPP dulu di tab Chrome lain. Ekstensi memilih perusahaan, klik Cetak Semua, Lanjut, Download Kartu, lalu kartu dipisah per orang dan disimpan di sini (tanpa Drive). Yang sudah punya kartu dilewati.'
+    : 'Login SIPP dulu di tab Chrome lain (pakai ekstensi SHELTER-SIPP). Perintahnya selalu sama: ambil F2A + kuitansi untuk site dan periode di bawah.';
   var nama = namaPaksa || ($('spNama').value || '').trim();
-  $('spPer').textContent = bulan(per);
+  $('spPer').textContent = per ? bulan(per) : '';
   isiDlSipp();
   $('spNama').value = nama;
   $('spNpp').value = nppPaksa || nppDariRiwayat(nama);
@@ -731,24 +776,106 @@ function b64File(b64, name){
   var bin = atob(b64), u = new Uint8Array(bin.length); for(var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
   return new File([u], name, { type: 'application/pdf' });
 }
-function jalankanSipp(){
+var SP_NEXT = false, SP_OK = false;
+function jalankanSipp(lanjut){
   if(SIPP_BUSY) return;
+  if(lanjut !== true){ SP_NEXT = SP_MODE === 'f2a' && $('spKartuCb').checked; SP_OK = false; }
   var ctx = { site: ($('spNama').value || '').trim().replace(/\s+/g, ' ').toUpperCase(), periode: $('upPeriode').value, npp: ($('spNpp').value || '').replace(/\D/g, '') };
   if(!ctx.site){ toast('Ketik nama site / perusahaan seperti di SIPP.', 'err'); return; }
-  SIPP_BUSY = true; $('spGo').disabled = true; $('spGo').textContent = 'Berjalan…'; $('spLog').innerHTML = '';
+  SIPP_BUSY = true; $('spGo').disabled = true; $('spGo').textContent = 'Berjalan…'; if(lanjut !== true) $('spLog').innerHTML = '';
+  var kartu = SP_MODE === 'kartu';
   sippPing(function(ada){
     if(!ada){ spLog('Ekstensi SHELTER-SIPP belum terdeteksi. Pasang dulu lalu refresh halaman ini.', '#dc2626'); sippBerhenti(); return; }
     spLog('Ekstensi terdeteksi. Memulai…');
-    var selesai = false, stop = sippKirim({ type: 'SHELTER_SIPP_REQ', npp: ctx.npp, nama: ctx.site, periode: ctx.periode, site: ctx.site }, function(d){
+    var selesai = false, stop = sippKirim({ type: 'SHELTER_SIPP_REQ', mode: kartu ? 'kartu' : '', npp: ctx.npp, nama: ctx.site, periode: ctx.periode, site: ctx.site }, function(d){
       if(d.kind === 'progress'){ spLog(d.text); return; }
       if(d.kind !== 'done' || selesai) return;
       selesai = true; stop();
       if(d.basi){ spLog(d.error, '#dc2626'); toast('Tekan Ctrl+F5 di halaman ini dulu, lalu coba lagi.', 'err'); sippBerhenti(); return; }
-      sippHasil(ctx, d);
+      if(kartu) sippKartuHasil(ctx, d); else sippHasil(ctx, d);
     });
   });
 }
-function sippBerhenti(){ SIPP_BUSY = false; $('spGo').disabled = false; $('spGo').textContent = 'Mulai Ambil'; }
+function sippBerhenti(){
+  var lanjut = SP_NEXT && SP_OK && SP_MODE === 'f2a';
+  SP_NEXT = false; SP_OK = false;
+  SIPP_BUSY = false; $('spGo').disabled = false; $('spGo').textContent = 'Mulai Ambil';
+  if(lanjut) setTimeout(function(){ spLog('— Lanjut ambil kartu peserta —'); SP_MODE = 'kartu'; jalankanSipp(true); }, 800);
+}
+/* ---------- Kartu peserta: pecah PDF gabungan per orang, simpan per NIK ---------- */
+function muatPdfLib(ok, fail){
+  if(window.PDFLib){ ok(); return; }
+  var sc = document.createElement('script');
+  sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+  sc.onload = function(){ window.PDFLib ? ok() : fail(new Error('Pemecah PDF tidak termuat.')); };
+  sc.onerror = function(){ fail(new Error('Pemecah PDF gagal dimuat. Cek koneksi internet.')); };
+  document.head.appendChild(sc);
+}
+// ambil NIK (4x4 digit) dan No KPJ dari teks satu halaman kartu
+function kartuParse(teks){
+  var t = String(teks || '').replace(/\s+/g, ' ');
+  var m = /(\d{4}) (\d{4}) (\d{4}) (\d{4})/.exec(t), nik = '', kpj = '', sisa = t;
+  if(m){ nik = m[1] + m[2] + m[3] + m[4]; sisa = t.slice(m.index + m[0].length); }
+  else { var m2 = /(?:^|\D)(\d{16})(?!\d)/.exec(t); if(m2){ nik = m2[1]; sisa = t.slice(m2.index + m2[0].length); } }
+  if(!nik) return null;
+  var k = /(?:^|\D)(\d{10,11})(?!\d)/.exec(sisa); if(k) kpj = k[1];
+  return { nik: nik, kpj: kpj };
+}
+function u8b64(u){ var s = '', n = 0x8000; for(var i = 0; i < u.length; i += n) s += String.fromCharCode.apply(null, u.subarray(i, i + n)); return btoa(s); }
+function sippKartuHasil(ctx, d){
+  function berhenti(msg){ if(msg) spLog('GAGAL: ' + msg, '#dc2626'); sippBerhenti(); }
+  if(!d.ok){ berhenti(d.error || 'Gagal mengambil kartu dari SIPP.'); toast('Ambil kartu gagal.', 'err'); return; }
+  (d.notes || []).forEach(function(n){ spLog(n, '#b45309'); });
+  var k = d.kartu; if(!k || !k.b64){ berhenti('PDF kartu kosong.'); return; }
+  spLog('PDF kartu diterima dari SIPP. Memisahkan per orang…');
+  var bin = atob(k.b64), u = new Uint8Array(bin.length); for(var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  muatPdfJs(function(){ muatPdfLib(function(){
+    pdfjsLib.getDocument({ data: u.slice() }).promise.then(function(doc){
+      var n = doc.numPages, orang = [], gagalBaca = [], seen = {}, p = 0;
+      (function baca(){
+        if(p >= n){ simpanSemua(); return; }
+        p++; var hal = p;
+        doc.getPage(hal).then(function(pg){ return pg.getTextContent(); }).then(function(tc){
+          var r = kartuParse(tc.items.map(function(x){ return x.str; }).join(' '));
+          if(!r) gagalBaca.push(hal); else if(!seen[r.nik]){ seen[r.nik] = 1; r.hal = hal; orang.push(r); }
+          baca();
+        }).catch(function(){ gagalBaca.push(hal); baca(); });
+      })();
+      function simpanSemua(){
+        spLog('PDF berisi ' + n + ' halaman, ' + orang.length + ' kartu terbaca' + (gagalBaca.length ? ', halaman ' + gagalBaca.join(', ') + ' tidak terbaca (dilewati)' : '') + '.');
+        if(!orang.length){ berhenti('Tidak ada NIK yang terbaca dari PDF kartu.'); return; }
+        PDFLib.PDFDocument.load(u).then(function(src){
+          var baru = 0, lewat = 0, gagal = 0, i = 0;
+          var prog = document.createElement('div'); prog.style.fontWeight = '600'; $('spLog').appendChild(prog);
+          (function lanjut(){
+            prog.textContent = 'Menyimpan kartu ' + Math.min(i + 1, orang.length) + '/' + orang.length + ' (baru ' + baru + ', dilewati ' + lewat + ')';
+            if(i >= orang.length){
+              spLog('SELESAI: ' + baru + ' kartu baru tersimpan, ' + lewat + ' sudah ada (dilewati)' + (gagal ? ', ' + gagal + ' gagal simpan' : '') + '.', gagal ? '#b45309' : '#16a34a');
+              toast(baru + ' kartu tersimpan.'); sippBerhenti(); return;
+            }
+            var o = orang[i++];
+            if(KARTUKEYS[o.nik]){ lewat++; lanjut(); return; }
+            PDFLib.PDFDocument.create().then(function(out){
+              return out.copyPages(src, [o.hal - 1]).then(function(pg){ out.addPage(pg[0]); return out.save(); });
+            }).then(function(bytes){
+              call('savePaymentTkKartu', [o.nik, 'Kartu_' + o.nik + (o.kpj ? '_' + o.kpj : '') + '.pdf', u8b64(bytes)], function(r){
+                if(r && r.success){ KARTUKEYS[o.nik] = 1; baru++; } else { gagal++; spLog('Kartu ' + o.nik + ' gagal disimpan: ' + ((r && r.error) || '?'), '#dc2626'); }
+                lanjut();
+              }, function(e){ gagal++; spLog('Kartu ' + o.nik + ' gagal disimpan: ' + String((e && e.message) || e), '#dc2626'); lanjut(); });
+            }).catch(function(e){ gagal++; spLog('Kartu ' + o.nik + ' gagal dipisah: ' + String((e && e.message) || e), '#dc2626'); lanjut(); });
+          })();
+        }).catch(function(e){ berhenti('PDF kartu tidak bisa dipecah: ' + String((e && e.message) || e)); });
+      }
+    }).catch(function(e){ berhenti('PDF kartu tidak bisa dibaca: ' + String((e && e.message) || e)); });
+  }, function(e){ berhenti(String((e && e.message) || e)); }); }, function(e){ berhenti(String((e && e.message) || e)); });
+}
+function bukaKartu(nik){
+  toast('Mengambil kartu…');
+  call('getPaymentTkKartu', [nik], function(r){
+    if(!r || !r.success){ toast((r && r.error) || 'Kartu tidak ditemukan.', 'err'); return; }
+    tampilPdf(r.base64, 'Kartu Peserta · ' + nik, r.nama || ('Kartu_' + nik + '.pdf'));
+  });
+}
 function gagalSipp(ctx, alasan){ gsTambah(ctx, alasan); spLog('GAGAL: ' + alasan, '#dc2626'); toast('Gagal: ' + ctx.site + ' (masuk Daftar Gagal Ambil SIPP)', 'err'); sippBerhenti(); }
 function sippHasil(ctx, d){
   if(!d.ok){ gagalSipp(ctx, d.error || 'Gagal mengambil dari SIPP.'); return; }
@@ -805,7 +932,7 @@ function sippKuitansi(ctx, d, res){
       gsTambah(ctx, 'F2A tersimpan, kuitansi belum ditemukan / belum dibayar'); akhir(false);
     }
   }
-  function akhir(adaKw){ toast(ctx.site + ': F2A tersimpan' + (adaKw ? ' + kuitansi.' : ', kuitansi belum ada.')); sippBerhenti(); muatList(); }
+  function akhir(adaKw){ toast(ctx.site + ': F2A tersimpan' + (adaKw ? ' + kuitansi.' : ', kuitansi belum ada.')); SP_OK = true; sippBerhenti(); muatList(); }
   var kand = [];
   (function next(){
     if(i >= list.length){
@@ -842,7 +969,7 @@ function detailCols(){
   var tk = CFG.jenis === 'tk', o = tk ? 2 : 0;
   function T(i, label, extra){ var c = { label: label, val: function(r){ return r[o + i]; }, cell: function(r){ return esc(r[o + i]); } }; for(var k in extra) c[k] = extra[k]; return c; }
   function N(i, label){ return { label: label, num: true, val: function(r){ return r[o + i]; }, cell: function(r){ return esc(rp(r[o + i])); } }; }
-  if(tk) return [ T(0,'NIK KTP',{filter:'Cari NIK KTP'}), T(1,'Nama Karyawan',{filter:'Cari Nama Karyawan'}), T(2,'NO KPJ',{filter:'Cari NO KPJ'}), T(3,'Site Bisnis',{filter:'Cari Site'}), T(4,'NPP Ketenagakerjaan'),
+  if(tk) return [ T(0,'NIK KTP',{filter:'Cari NIK KTP'}), T(1,'Nama Karyawan',{filter:'Cari Nama Karyawan', cell: function(r){ var nk = String(r[o] || '').replace(/\D/g, ''); return esc(r[o + 1]) + (!VIEWER && nk && KARTUKEYS[nk] ? ' <button class="hb hb-blue hb-sm" onclick="bukaKartu(\'' + nk + '\')">Kartu</button>' : ''); }}), T(2,'NO KPJ',{filter:'Cari NO KPJ'}), T(3,'Site Bisnis',{filter:'Cari Site'}), T(4,'NPP Ketenagakerjaan'),
     N(5,'Perusahaan'), N(6,'Karyawan'), N(7,'Perusahaan'), N(8,'karyawan'), N(9,'JKK'), N(10,'JKM') ];
   return [ T(0,'NIK KTP',{filter:'Cari NIK KTP'}), T(1,'Nama Karyawan',{filter:'Cari Nama Karyawan'}), T(2,'NO KIS',{filter:'Cari NO KIS'}), T(3,'Site Bisnis',{filter:'Cari Site'}), T(4,'NPP Kesehatan'),
     N(6,'Pembayaran Karyawan'), N(5,'Pembayaran Perusahaan') ];
