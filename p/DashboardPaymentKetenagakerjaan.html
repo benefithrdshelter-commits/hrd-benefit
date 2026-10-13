@@ -511,7 +511,7 @@ function muatList(){
   call(CFG.fnList, [], function(raw){
     var rows = J(raw, []); if(!Array.isArray(rows)) rows = [];
     all = rows; filterList();
-    if(CFG.jenis === 'tk'){ call('getPaymentTkPdfKeys', [], function(k){ PDFKEYS = {}; J(k, []).forEach(function(x){ PDFKEYS[x] = 1; }); filterList(); }, function(){}); call('getPaymentTkKuitansiKeys', [], function(k){ KWKEYS = {}; J(k, []).forEach(function(x){ KWKEYS[x] = 1; }); }, function(){}); }
+    if(CFG.jenis === 'tk'){ call('getPaymentTkPdfKeys', [], function(k){ PDFKEYS = {}; J(k, []).forEach(function(x){ PDFKEYS[x] = 1; }); filterList(); }, function(){}); call('getPaymentTkKuitansiKeys', [], function(k){ KWKEYS = {}; J(k, []).forEach(function(x){ KWKEYS[x] = 1; }); filterList(); }, function(){}); }
   }, function(e){ T1.fail('Gagal memuat: ' + String((e && e.message) || e)); });
 }
 function onField(){
@@ -610,7 +610,8 @@ function extraBtn(it, mode, attrs){
   var cls = mode === 'sa' ? ' hb-sm' : '', k = mode === 'sa' ? 'data-sa' : 'data-act', s = '';
   if(PDFKEYS[it.periode + '|' + String(it.site || '').trim()])
     s += '<button class="hb hb-blue' + cls + '" ' + k + '="pdf"' + attrs + '>PDF</button><button class="hb hb-blue' + cls + '" ' + k + '="pdfdl"' + attrs + ' title="Unduh PDF">&#8681;</button>';
-  return s + '<button class="hb hb-amber' + cls + '" ' + k + '="kw"' + attrs + '>Kuitansi</button>';
+  if(KWKEYS[it.periode + '|' + String(it.site || '').trim()]) s += '<button class="hb hb-amber' + cls + '" ' + k + '="kw"' + attrs + '>Kuitansi</button>';
+  return s;
 }
 function simpanPdfAsli(f, periode, site){
   var rd = new FileReader();
@@ -654,53 +655,15 @@ function terbilang(n){
 }
 function bukaKuitansi(it){
   if(!it) return;
-  if(KWKEYS[it.periode + '|' + String(it.site || '').trim()]){
-    toast('Mengambil kuitansi asli SIPP…');
-    call('getPaymentTkKuitansiFile', [it.periode, it.site || ''], function(r){
-      if(!r || !r.success){ toast((r && r.error) || 'Kuitansi tidak ditemukan.', 'err'); return; }
-      var bin = atob(r.base64), u = new Uint8Array(bin.length); for(var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
-      var url = URL.createObjectURL(new Blob([u], { type: 'application/pdf' }));
-      if(!window.open(url, '_blank')) toast('Pop-up diblokir browser. Izinkan pop-up lalu klik lagi.', 'err');
-      setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
-    });
-    return;
-  }
-  var w = window.open('', '_blank');
-  if(!w){ toast('Pop-up diblokir browser. Izinkan pop-up lalu klik lagi.', 'err'); return; }
-  w.document.write('<p style="font:14px Arial;padding:20px">Menyiapkan kuitansi…</p>');
-  call('getPaymentTkKuitansi', [it.periode, it.site || ''], function(r){
-    if(!r || !r.success){ w.close(); toast((r && r.error) || 'Gagal membuat kuitansi.', 'err'); return; }
-    var tot = r.jkk + r.jht + r.jkm + r.jpn, f = function(v){ return String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '.00'; };
-    var m = r.periode.split('-'), blth = m[1] + '/' + m[0], kode = '4' + r.npp + '000';
-    var html = '<!doctype html><html><head><meta charset="utf-8"><title>Kuitansi ' + esc(r.site) + ' ' + blth + '</title><style>' +
-      '@page{size:A4;margin:14mm}body{font-family:"Courier New",monospace;color:#111;margin:0;padding:24px;font-size:13px}' +
-      '.kop{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #1d4ed8;padding-bottom:8px;margin-bottom:6px}' +
-      '.kop b{font:800 20px Arial;color:#1d4ed8}.kop span{font:12px Arial;color:#475569}' +
-      '.cat{font:11px Arial;color:#b45309;text-align:center;margin:4px 0 10px}' +
-      '.box{background:#f1f1f1;border:1px solid #bbb;text-align:center;padding:6px;margin-bottom:6px}.box .n{color:#00008b;font-weight:700;font-size:15px}' +
-      '.kd{text-align:center;margin:10px 0}.kd b{display:block;font-size:30px;letter-spacing:3px;color:#047857}' +
-      'table{width:100%;border-collapse:collapse}td,th{border:1px solid #bbb;padding:4px 8px}th{background:#ccc}td.r{text-align:right}' +
-      '.ib{margin:8px 0;line-height:1.6;text-align:center}.tb{border:1px solid #bbb;padding:10px;text-align:center;font-weight:700;font-size:15px;margin-top:6px}' +
-      '.ttd{display:flex;justify-content:flex-end;margin-top:34px;font:13px Arial}.ttd div{text-align:center;width:220px}.ttd i{display:block;height:64px}' +
-      '.noprint{position:fixed;top:10px;right:10px}.noprint button{padding:8px 16px;font:600 13px Arial;background:#1d4ed8;color:#fff;border:0;border-radius:8px;cursor:pointer}' +
-      '@media print{.noprint{display:none}}</style></head><body>' +
-      '<div class="noprint"><button onclick="print()">Cetak / Simpan PDF</button></div>' +
-      '<div class="kop"><b>SHELTER</b><span>Portal Admin HRD</span></div>' +
-      '<div class="cat">Kuitansi internal rekap iuran BPJS Ketenagakerjaan - bukan bukti pembayaran resmi BPJS</div>' +
-      '<div class="box">REKAP PEMBAYARAN UNTUK<br><span class="n">' + esc(r.site) + '</span><br>NPP : ' + esc(r.npp) + '<br>DIVISI : 000</div>' +
-      '<div class="kd">KODE IURAN :<b>' + esc(kode) + '</b></div>' +
-      '<div class="ib">BLTH : ' + esc(blth) + '<br>JUMLAH TENAGA KERJA : ' + r.jumlahTk + (r.tglUpload ? '<br>TANGGAL DATA : ' + esc(r.tglUpload) : '') + '</div>' +
-      '<table><tr><th colspan="2">RINCIAN IURAN</th></tr>' +
-      '<tr><td class="r">JAMINAN KECELAKAAN KERJA ( JKK ) :</td><td class="r">' + f(r.jkk) + '</td></tr>' +
-      '<tr><td class="r">JAMINAN HARI TUA ( JHT ) :</td><td class="r">' + f(r.jht) + '</td></tr>' +
-      '<tr><td class="r">JAMINAN KEMATIAN ( JKM ) :</td><td class="r">' + f(r.jkm) + '</td></tr>' +
-      '<tr><td class="r">JAMINAN PENSIUN ( JPN ) :</td><td class="r">' + f(r.jpn) + '</td></tr>' +
-      '<tr><td class="r"><b>TOTAL YANG DIBAYARKAN ( PEMBULATAN ) :</b></td><td class="r"><b>' + f(tot) + '</b></td></tr></table>' +
-      '<div class="tb">' + esc(terbilang(tot)) + ' RUPIAH</div>' +
-      '<div class="ttd"><div>Dicetak dari SHELTER<br>' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + '<i></i>(............................)</div></div>' +
-      '</body></html>';
-    w.document.open(); w.document.write(html); w.document.close();
-  }, function(er){ w.close(); toast(String((er && er.message) || er), 'err'); });
+  if(!KWKEYS[it.periode + '|' + String(it.site || '').trim()]){ toast('Kuitansi asli SIPP untuk site ini belum ada. Klik "Ambil dari SIPP" dulu.', 'err'); return; }
+  toast('Mengambil kuitansi asli SIPP…');
+  call('getPaymentTkKuitansiFile', [it.periode, it.site || ''], function(r){
+    if(!r || !r.success){ toast((r && r.error) || 'Kuitansi tidak ditemukan.', 'err'); return; }
+    var bin = atob(r.base64), u = new Uint8Array(bin.length); for(var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    var url = URL.createObjectURL(new Blob([u], { type: 'application/pdf' }));
+    if(!window.open(url, '_blank')) toast('Pop-up diblokir browser. Izinkan pop-up lalu klik lagi.', 'err');
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+  });
 }
 var KWKEYS = {}, SIPP_BUSY = false;
 var GS_KEY = 'shelter_sipp_gagal';
