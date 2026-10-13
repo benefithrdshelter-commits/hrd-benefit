@@ -521,7 +521,7 @@ function muatList(){
   call(CFG.fnList, [], function(raw){
     var rows = J(raw, []); if(!Array.isArray(rows)) rows = [];
     all = rows; filterList();
-    if(CFG.jenis === 'tk'){ call('getPaymentTkPdfKeys', [], function(k){ PDFKEYS = {}; J(k, []).forEach(function(x){ PDFKEYS[x] = 1; }); filterList(); }, function(){}); call('getPaymentTkKuitansiKeys', [], function(k){ KWKEYS = {}; J(k, []).forEach(function(x){ KWKEYS[x] = 1; }); filterList(); }, function(){}); call('getPaymentTkKartuKeys', [], function(k){ KARTUKEYS = {}; J(k, []).forEach(function(x){ KARTUKEYS[x] = 1; }); }, function(){}); }
+    if(CFG.jenis === 'tk'){ call('getPaymentTkPdfKeys', [], function(k){ PDFKEYS = {}; J(k, []).forEach(function(x){ PDFKEYS[x] = 1; }); filterList(); }, function(){}); call('getPaymentTkKuitansiKeys', [], function(k){ KWKEYS = {}; J(k, []).forEach(function(x){ KWKEYS[x] = 1; }); filterList(); }, function(){}); call('getPaymentTkKartuKeys', [], function(k){ var o = J(k, {}); KARTUKEYS = {}; if(Array.isArray(o)) o.forEach(function(x){ KARTUKEYS[x] = 'x'; }); else KARTUKEYS = o || {}; }, function(){}); }
   }, function(e){ T1.fail('Gagal memuat: ' + String((e && e.message) || e)); });
 }
 function onField(){
@@ -820,7 +820,8 @@ function kartuParse(teks){
   else { var m2 = /(?:^|\D)(\d{16})(?!\d)/.exec(t); if(m2){ nik = m2[1]; sisa = t.slice(m2.index + m2[0].length); } }
   if(!nik) return null;
   var k = /(?:^|\D)(\d{10,11})(?!\d)/.exec(sisa); if(k) kpj = k[1];
-  return { nik: nik, kpj: kpj };
+  var d = /(?:^|\D)(0[1-9]|1[0-2])-(20\d{2}|19\d{2})(?!\d)/.exec(t);  // bulan-tahun kepesertaan di pojok kartu
+  return { nik: nik, kpj: kpj, tgl: d ? d[1] + d[2] : '' };
 }
 function u8b64(u){ var s = '', n = 0x8000; for(var i = 0; i < u.length; i += n) s += String.fromCharCode.apply(null, u.subarray(i, i + n)); return btoa(s); }
 function sippKartuHasil(ctx, d){
@@ -848,21 +849,24 @@ function sippKartuHasil(ctx, d){
         if(totSipp && orang.length < totSipp) spLog('Catatan: SIPP mencatat ' + totSipp + ' peserta, kartu yang keluar ' + orang.length + '. Sisanya tidak punya kartu di SIPP.', '#b45309');
         if(!orang.length){ berhenti('Tidak ada NIK yang terbaca dari PDF kartu.'); return; }
         PDFLib.PDFDocument.load(u).then(function(src){
-          var baru = 0, lewat = 0, gagal = 0, i = 0;
+          var baru = 0, lewat = 0, gagal = 0, ganti = 0, i = 0;
           var prog = document.createElement('div'); prog.style.fontWeight = '600'; $('spLog').appendChild(prog);
           (function lanjut(){
             prog.textContent = 'Menyimpan kartu ' + Math.min(i + 1, orang.length) + '/' + orang.length + ' (baru ' + baru + ', dilewati ' + lewat + ')';
             if(i >= orang.length){
-              spLog('SELESAI: ' + baru + ' kartu baru tersimpan, ' + lewat + ' sudah ada (dilewati)' + (gagal ? ', ' + gagal + ' gagal simpan' : '') + '.', gagal ? '#b45309' : '#16a34a');
+              spLog('SELESAI: ' + baru + ' kartu tersimpan' + (ganti ? ' (' + ganti + ' diperbarui karena data kepesertaan berubah)' : '') + ', ' + lewat + ' sudah ada dan sama (dilewati)' + (gagal ? ', ' + gagal + ' gagal simpan' : '') + '.', gagal ? '#b45309' : '#16a34a');
               toast(baru + ' kartu tersimpan.'); sippBerhenti(); return;
             }
             var o = orang[i++];
-            if(KARTUKEYS[o.nik]){ lewat++; lanjut(); return; }
+            o.nama = 'Kartu_' + o.nik + (o.kpj ? '_' + o.kpj : '') + (o.tgl ? '_' + o.tgl : '') + '.pdf';
+            // sudah ada dengan KPJ dan bulan kepesertaan yang sama: lewati. Beda: kartu diganti yang baru.
+            if(KARTUKEYS[o.nik] && (KARTUKEYS[o.nik] === o.nama || !o.tgl)){ lewat++; lanjut(); return; }
+            if(KARTUKEYS[o.nik]) ganti++;
             PDFLib.PDFDocument.create().then(function(out){
               return out.copyPages(src, [o.hal - 1]).then(function(pg){ out.addPage(pg[0]); return out.save(); });
             }).then(function(bytes){
-              call('savePaymentTkKartu', [o.nik, 'Kartu_' + o.nik + (o.kpj ? '_' + o.kpj : '') + '.pdf', u8b64(bytes)], function(r){
-                if(r && r.success){ KARTUKEYS[o.nik] = 1; baru++; } else { gagal++; spLog('Kartu ' + o.nik + ' gagal disimpan: ' + ((r && r.error) || '?'), '#dc2626'); }
+              call('savePaymentTkKartu', [o.nik, o.nama, u8b64(bytes)], function(r){
+                if(r && r.success){ KARTUKEYS[o.nik] = o.nama; baru++; } else { gagal++; spLog('Kartu ' + o.nik + ' gagal disimpan: ' + ((r && r.error) || '?'), '#dc2626'); }
                 lanjut();
               }, function(e){ gagal++; spLog('Kartu ' + o.nik + ' gagal disimpan: ' + String((e && e.message) || e), '#dc2626'); lanjut(); });
             }).catch(function(e){ gagal++; spLog('Kartu ' + o.nik + ' gagal dipisah: ' + String((e && e.message) || e), '#dc2626'); lanjut(); });
