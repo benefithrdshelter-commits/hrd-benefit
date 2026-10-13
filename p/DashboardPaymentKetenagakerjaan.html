@@ -829,18 +829,23 @@ function sippKuitansi(ctx, d, res){
     }
   }
   function akhir(adaKw){ toast(ctx.site + ': F2A tersimpan' + (adaKw ? ' + kuitansi.' : ', kuitansi belum ada.')); sippBerhenti(); muatList(); }
+  var kand = [];
   (function next(){
-    if(i >= list.length){ selesai(); return; }
+    if(i >= list.length){
+      var pilih = kand.filter(function(c){ return c.blthOk && c.totOk; })[0] || kand.filter(function(c){ return c.blthOk; })[0] || kand.filter(function(c){ return c.totOk && !c.blth; })[0];
+      if(pilih) terbaik = { f: pilih.f, b64: pilih.b64, tgl: pilih.tgl };
+      selesai(); return;
+    }
     var k = list[i++], f = b64File(k.b64, k.name);
     teksPdf1(f, function(t){
-      var m = t.match(/BLTH\s*:?\s*(\d{2})\s*\/\s*(\d{4})/);
-      if(m && (m[1] + '/' + m[2]) === blth){
-        var tot = Math.round(res.refTotal || res.pdfTotal || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        var skor = t.indexOf(tot) >= 0 ? 2 : 1;
-        if(!terbaik || skor > terbaik.skor) terbaik = { f: f, b64: k.b64, tgl: k.tgl, skor: skor };
-      }
+      var tn = String(t).replace(/\s+/g, ''), m = tn.match(/BLTH:?(\d{2})\/(\d{4})/i);
+      var dig = tn.replace(/[^0-9]/g, ''), ref = String(Math.round(res.refTotal || res.pdfTotal || 0));
+      var c = { f: f, b64: k.b64, tgl: k.tgl, blth: m ? m[1] + '/' + m[2] : '', blthOk: !!m && (m[1] + '/' + m[2]) === blth, totOk: !!ref && ref !== '0' && dig.indexOf(ref + '00') >= 0 };
+      kand.push(c);
+      spLog('Kuitansi bayar ' + k.tgl + ': BLTH ' + (c.blth || 'tidak terbaca') + (c.blthOk ? ' (cocok)' : '') + ', total ' + (c.totOk ? 'cocok' : 'tidak cocok'), c.blthOk ? '' : '#b45309');
+      if(!c.blth) spLog('  isi PDF: ' + String(t).replace(/\s+/g, ' ').slice(0, 140), '#64748b');
       next();
-    }, next);
+    }, function(){ spLog('Kuitansi bayar ' + k.tgl + ': PDF tidak bisa dibaca.', '#b45309'); next(); });
   })();
 }
 function xlsx(aoa, name){
