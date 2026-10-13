@@ -334,6 +334,7 @@ function ask(msg, fn){
 function $(id){ return document.getElementById(id); }
 function call(fn, args, ok, fail){
   var r = google.script.run.withSuccessHandler(function(x){ ok && ok(x); }).withFailureHandler(function(e){ (fail || function(er){ toast(String((er && er.message) || er), 'err'); })(e); });
+  if(typeof r[fn] !== 'function'){ (fail || function(er){ toast(String(er.message), 'err'); })(new Error('Fungsi server "' + fn + '" belum ada. Tempel PaymentKetenagakerjaan.gs dan ApiRun.gs ke Apps Script, lalu deploy ulang.')); return; }
   r[fn].apply(r, args);
 }
 function J(raw, d){ if(typeof raw === 'string'){ try{ return JSON.parse(raw); }catch(e){ return d; } } return raw == null ? d : raw; }
@@ -826,7 +827,8 @@ function sippKartuHasil(ctx, d){
   function berhenti(msg){ if(msg) spLog('GAGAL: ' + msg, '#dc2626'); sippBerhenti(); }
   if(!d.ok){ berhenti(d.error || 'Gagal mengambil kartu dari SIPP.'); toast('Ambil kartu gagal.', 'err'); return; }
   (d.notes || []).forEach(function(n){ spLog(n, '#b45309'); });
-  var k = d.kartu; if(!k || !k.b64){ berhenti('PDF kartu kosong.'); return; }
+  var k = d.kartu;
+  var totSipp = parseInt(String((k && k.total) || '0').replace(/[.,]/g, ''), 10) || 0; if(!k || !k.b64){ berhenti('PDF kartu kosong.'); return; }
   spLog('PDF kartu diterima dari SIPP. Memisahkan per orang…');
   var bin = atob(k.b64), u = new Uint8Array(bin.length); for(var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
   muatPdfJs(function(){ muatPdfLib(function(){
@@ -843,6 +845,7 @@ function sippKartuHasil(ctx, d){
       })();
       function simpanSemua(){
         spLog('PDF berisi ' + n + ' halaman, ' + orang.length + ' kartu terbaca' + (gagalBaca.length ? ', halaman ' + gagalBaca.join(', ') + ' tidak terbaca (dilewati)' : '') + '.');
+        if(totSipp && orang.length < totSipp) spLog('Catatan: SIPP mencatat ' + totSipp + ' peserta, kartu yang keluar ' + orang.length + '. Sisanya tidak punya kartu di SIPP.', '#b45309');
         if(!orang.length){ berhenti('Tidak ada NIK yang terbaca dari PDF kartu.'); return; }
         PDFLib.PDFDocument.load(u).then(function(src){
           var baru = 0, lewat = 0, gagal = 0, i = 0;
