@@ -743,6 +743,7 @@ function jalankanSipp(){
       if(d.kind === 'progress'){ spLog(d.text); return; }
       if(d.kind !== 'done' || selesai) return;
       selesai = true; stop();
+      if(d.basi){ spLog(d.error, '#dc2626'); toast('Tekan Ctrl+F5 di halaman ini dulu, lalu coba lagi.', 'err'); sippBerhenti(); return; }
       sippHasil(ctx, d);
     });
   });
