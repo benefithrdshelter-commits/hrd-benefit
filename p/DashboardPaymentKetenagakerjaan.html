@@ -816,7 +816,8 @@ function sippKuitansi(ctx, d, res){
     teksPdf1(f, function(t){
       var tn = String(t).replace(/\s+/g, ''), m = tn.match(/BLTH:?(\d{2})\/(\d{4})/i);
       // urutan teks PDF bisa memisahkan label "BLTH" dari nilainya, jadi cari semua pola bulan/tahun (pakai garis miring; tanggal bayar pakai strip)
-      var semua = tn.match(/(?:^|[^0-9\/])(0[1-9]|1[0-2])\/(20\d{2})/g) || [];
+      var tx = String(t).replace(/\s+/g, ' ');  // spasi dipertahankan: nilai BLTH bisa menempel di kode iuran kalau spasi dibuang
+      var semua = tx.match(/(?:^|[^0-9\/])(0[1-9]|1[0-2])\/(20\d{2})(?![0-9\/])/g) || [];
       var per = semua.map(function(x){ var q = /(\d{2})\/(\d{4})/.exec(x); return q[1] + '/' + q[2]; });
       var bl = m ? m[1] + '/' + m[2] : (per.length ? per[0] : '');
       var dig = tn.replace(/[^0-9]/g, ''), ref = String(Math.round(res.refTotal || res.pdfTotal || 0));
