@@ -851,25 +851,40 @@ function sippKartuHasil(ctx, d){
         PDFLib.PDFDocument.load(u).then(function(src){
           var baru = 0, lewat = 0, gagal = 0, ganti = 0, i = 0;
           var prog = document.createElement('div'); prog.style.fontWeight = '600'; $('spLog').appendChild(prog);
-          (function lanjut(){
-            prog.textContent = 'Menyimpan kartu ' + Math.min(i + 1, orang.length) + '/' + orang.length + ' (baru ' + baru + ', dilewati ' + lewat + ')';
-            if(i >= orang.length){
-              spLog('SELESAI: ' + baru + ' kartu tersimpan' + (ganti ? ' (' + ganti + ' diperbarui karena data kepesertaan berubah)' : '') + ', ' + lewat + ' sudah ada dan sama (dilewati)' + (gagal ? ', ' + gagal + ' gagal simpan' : '') + '.', gagal ? '#b45309' : '#16a34a');
-              toast(baru + ' kartu tersimpan.'); sippBerhenti(); return;
-            }
-            var o = orang[i++];
+          // pilih dulu mana yang perlu disimpan; yang sudah sama dilewati
+          var todo = [];
+          orang.forEach(function(o){
             o.nama = 'Kartu_' + o.nik + (o.kpj ? '_' + o.kpj : '') + (o.tgl ? '_' + o.tgl : '') + '.pdf';
-            // sudah ada dengan KPJ dan bulan kepesertaan yang sama: lewati. Beda: kartu diganti yang baru.
-            if(KARTUKEYS[o.nik] && (KARTUKEYS[o.nik] === o.nama || !o.tgl)){ lewat++; lanjut(); return; }
+            if(KARTUKEYS[o.nik] && (KARTUKEYS[o.nik] === o.nama || !o.tgl)){ lewat++; return; }
             if(KARTUKEYS[o.nik]) ganti++;
-            PDFLib.PDFDocument.create().then(function(out){
-              return out.copyPages(src, [o.hal - 1]).then(function(pg){ out.addPage(pg[0]); return out.save(); });
-            }).then(function(bytes){
-              call('savePaymentTkKartu', [o.nik, o.nama, u8b64(bytes)], function(r){
-                if(r && r.success){ KARTUKEYS[o.nik] = o.nama; baru++; } else { gagal++; spLog('Kartu ' + o.nik + ' gagal disimpan: ' + ((r && r.error) || '?'), '#dc2626'); }
-                lanjut();
-              }, function(e){ gagal++; spLog('Kartu ' + o.nik + ' gagal disimpan: ' + String((e && e.message) || e), '#dc2626'); lanjut(); });
-            }).catch(function(e){ gagal++; spLog('Kartu ' + o.nik + ' gagal dipisah: ' + String((e && e.message) || e), '#dc2626'); lanjut(); });
+            todo.push(o);
+          });
+          var UKURAN = 6, mulai = 0;
+          function selesai(){
+            spLog('SELESAI: ' + baru + ' kartu tersimpan' + (ganti ? ' (' + ganti + ' diperbarui karena data kepesertaan berubah)' : '') + ', ' + lewat + ' sudah ada dan sama (dilewati)' + (gagal ? ', ' + gagal + ' gagal simpan' : '') + '.', gagal ? '#b45309' : '#16a34a');
+            toast(baru + ' kartu tersimpan.'); sippBerhenti();
+          }
+          (function gelombang(){
+            prog.textContent = 'Menyimpan kartu ' + Math.min(mulai, todo.length) + '/' + todo.length + ' (baru ' + baru + ', dilewati ' + lewat + ')';
+            if(mulai >= todo.length){ selesai(); return; }
+            var grup = todo.slice(mulai, mulai + UKURAN); mulai += UKURAN;
+            var items = [], k = 0;
+            (function pecah(){
+              if(k >= grup.length){
+                if(!items.length){ gelombang(); return; }
+                call('savePaymentTkKartuBatch', [items], function(r){
+                  if(r && r.success){ items.forEach(function(it){ KARTUKEYS[it.nik] = it.nama; baru++; }); }
+                  else { gagal += items.length; spLog('Satu gelombang gagal disimpan: ' + ((r && r.error) || '?'), '#dc2626'); }
+                  gelombang();
+                }, function(e){ gagal += items.length; spLog('Satu gelombang gagal disimpan: ' + String((e && e.message) || e), '#dc2626'); gelombang(); });
+                return;
+              }
+              var o = grup[k++];
+              PDFLib.PDFDocument.create().then(function(out){
+                return out.copyPages(src, [o.hal - 1]).then(function(pg){ out.addPage(pg[0]); return out.save(); });
+              }).then(function(bytes){ items.push({ nik: o.nik, nama: o.nama, b64: u8b64(bytes) }); pecah(); })
+              .catch(function(e){ gagal++; spLog('Kartu ' + o.nik + ' gagal dipisah: ' + String((e && e.message) || e), '#dc2626'); pecah(); });
+            })();
           })();
         }).catch(function(e){ berhenti('PDF kartu tidak bisa dipecah: ' + String((e && e.message) || e)); });
       }
@@ -972,11 +987,17 @@ function xlsx(aoa, name){
 
 /* ---------- Detail ---------- */
 var T2, curR = null, hdr = [];
+// Site Bisnis = nama perusahaan binaan lengkap dari SIPP (mis. GLOBAL SECURINDO UTAMA UNIT LIKU TELAGA), yaitu kolom Site saat ambil/upload.
+// Kalau kosong, baru pakai site penempatan dari data karyawan.
+function siteLengkap(sipp, tempat){
+  sipp = String(sipp || '').trim();
+  return sipp || String(tempat || '').trim();
+}
 function detailCols(){
   var tk = CFG.jenis === 'tk', o = tk ? 2 : 0;
   function T(i, label, extra){ var c = { label: label, val: function(r){ return r[o + i]; }, cell: function(r){ return esc(r[o + i]); } }; for(var k in extra) c[k] = extra[k]; return c; }
   function N(i, label){ return { label: label, num: true, val: function(r){ return r[o + i]; }, cell: function(r){ return esc(rp(r[o + i])); } }; }
-  if(tk) return [ T(0,'NIK KTP',{filter:'Cari NIK KTP'}), T(1,'Nama Karyawan',{filter:'Cari Nama Karyawan', cell: function(r){ var nk = String(r[o] || '').replace(/\D/g, ''); return esc(r[o + 1]) + (!VIEWER && nk && KARTUKEYS[nk] ? ' <button class="hb hb-blue hb-sm" onclick="bukaKartu(\'' + nk + '\')">Kartu</button>' : ''); }}), T(2,'NO KPJ',{filter:'Cari NO KPJ'}), T(3,'Site Bisnis',{filter:'Cari Site'}), T(4,'NPP Ketenagakerjaan'),
+  if(tk) return [ T(0,'NIK KTP',{filter:'Cari NIK KTP'}), T(1,'Nama Karyawan',{filter:'Cari Nama Karyawan', cell: function(r){ var nk = String(r[o] || '').replace(/\D/g, ''); return esc(r[o + 1]) + (!VIEWER && nk && KARTUKEYS[nk] ? ' <button class="hb hb-blue hb-sm" onclick="bukaKartu(\'' + nk + '\')">Kartu</button>' : ''); }}), T(2,'NO KPJ',{filter:'Cari NO KPJ'}), T(3,'Site Bisnis',{filter:'Cari Site', val: function(r){ return siteLengkap(r[1], r[o + 3]); }, cell: function(r){ return esc(siteLengkap(r[1], r[o + 3])); }}), T(4,'NPP Ketenagakerjaan'),
     N(5,'Perusahaan'), N(6,'Karyawan'), N(7,'Perusahaan'), N(8,'karyawan'), N(9,'JKK'), N(10,'JKM') ];
   return [ T(0,'NIK KTP',{filter:'Cari NIK KTP'}), T(1,'Nama Karyawan',{filter:'Cari Nama Karyawan'}), T(2,'NO KIS',{filter:'Cari NO KIS'}), T(3,'Site Bisnis',{filter:'Cari Site'}), T(4,'NPP Kesehatan'),
     N(6,'Pembayaran Karyawan'), N(5,'Pembayaran Perusahaan') ];
