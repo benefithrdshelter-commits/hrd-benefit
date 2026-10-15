@@ -276,10 +276,10 @@ tr.sub>td{padding:0!important;background:#f8fafc}
   <h3 id="spJudul">Ambil F2A &amp; Kuitansi dari SIPP</h3>
   <p id="spInfo">Login SIPP dulu di tab Chrome lain (pakai ekstensi SHELTER-SIPP). Perintahnya selalu sama: ambil F2A + kuitansi untuk site dan periode di bawah.</p>
   <div class="pv-info" id="spPerBox"><div class="pv-k"><span>Periode</span><b id="spPer"></b></div></div>
-  <label style="font-size:12.5px;font-weight:600;display:block;margin:10px 0 4px">Nama site / perusahaan (ketik persis seperti di SIPP)</label>
-  <input class="hi" id="spNama" list="dlSipp" placeholder="mis. GLOBAL SECURINDO UTAMA UNIT MULTI DUTA UTARI" autocomplete="off" oninput="spNamaIsiNpp()" style="width:100%"><datalist id="dlSipp"></datalist>
-  <label style="font-size:12.5px;font-weight:600;display:block;margin:10px 0 4px">NPP <span style="font-weight:400;color:var(--muted)">(boleh kosong, diisi otomatis dari SIPP)</span></label>
-  <input class="hi" id="spNpp" placeholder="otomatis, atau ketik NPP saja" inputmode="numeric" autocomplete="off" oninput="spNppIsiNama()" style="width:100%">
+  <label style="font-size:12.5px;font-weight:600;display:block;margin:10px 0 4px">NPP <span style="font-weight:400;color:var(--muted)">(kunci utama, ketik NPP-nya saja)</span></label>
+  <input class="hi" id="spNpp" placeholder="mis. 24175371" inputmode="numeric" autocomplete="off" oninput="spNppIsiNama()" style="width:100%">
+  <label style="font-size:12.5px;font-weight:600;display:block;margin:10px 0 4px">Nama site / perusahaan <span style="font-weight:400;color:var(--muted)">(otomatis mengikuti NPP)</span></label>
+  <input class="hi" id="spNama" readonly placeholder="terisi otomatis dari NPP" autocomplete="off" style="width:100%;background:#f1f5f9"><datalist id="dlSipp"></datalist>
   <label id="spKartuWrap" style="display:flex;gap:8px;align-items:center;font-size:12.5px;margin-top:12px"><input type="checkbox" id="spKartuCb" checked> Sekalian ambil kartu peserta (yang sudah punya kartu dilewati)</label>
   <div id="spLog" style="margin-top:12px;font-size:12.5px;line-height:1.7;max-height:200px;overflow:auto"></div>
   <div style="display:flex;gap:10px;margin-top:16px"><button class="hb hb-gray" style="flex:1;justify-content:center" onclick="tutupSipp()">Tutup</button><button class="hb hb-green" id="spGo" style="flex:2;justify-content:center" onclick="jalankanSipp()">Mulai Ambil</button></div>
@@ -738,7 +738,7 @@ function siteDariNpp(npp){
   var r = (all || []).filter(function(x){ return String(x.npp || '').replace(/\D/g, '') === npp && String(x.site || '').trim(); });
   return r.length ? String(r[0].site).trim().replace(/\s+/g, ' ').toUpperCase() : '';
 }
-function spNppIsiNama(){ var n = siteDariNpp($('spNpp').value); if(n) $('spNama').value = n; }
+function spNppIsiNama(){ $('spNama').value = siteDariNpp($('spNpp').value) || ''; }
 function spNamaIsiNpp(){ var n = nppDariRiwayat($('spNama').value); if(n) $('spNpp').value = n; }
 function isiDlSipp(){
   var seen = {}, a = [];
@@ -762,11 +762,12 @@ function bukaSipp(nppPaksa, namaPaksa, mode){
   var nama = namaPaksa || ($('spNama').value || '').trim();
   $('spPer').textContent = per ? bulan(per) : '';
   isiDlSipp();
-  $('spNama').value = nama;
-  $('spNpp').value = nppPaksa || nppDariRiwayat(nama);
+  var nppAwal = String(nppPaksa || nppDariRiwayat(nama) || '').replace(/\D/g, '');
+  $('spNpp').value = nppAwal;
+  $('spNama').value = nppAwal ? (siteDariNpp(nppAwal) || nama || '') : '';
   $('spLog').innerHTML = ''; $('spGo').disabled = false; $('spGo').textContent = 'Mulai Ambil';
   $('mSipp').classList.add('on');
-  setTimeout(function(){ try{ $('spNama').focus(); }catch(e){} }, 50);
+  setTimeout(function(){ try{ $('spNpp').focus(); }catch(e){} }, 50);
 }
 function sippKirim(req, onMsg){
   var id = 's' + Date.now() + Math.random().toString(36).slice(2, 6); req.id = id;
@@ -784,23 +785,26 @@ function b64File(b64, name){
   var bin = atob(b64), u = new Uint8Array(bin.length); for(var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
   return new File([u], name, { type: 'application/pdf' });
 }
-var SP_NEXT = false, SP_OK = false;
+var SP_NEXT = false, SP_OK = false, SP_KB = { h: 1, seen: {}, baru: 0, lewat: 0, gagal: 0, ganti: 0 }, SP_KB_LAGI = false;
 function jalankanSipp(lanjut){
   if(SIPP_BUSY) return;
   if(lanjut !== true){ SP_NEXT = SP_MODE === 'f2a' && $('spKartuCb').checked; SP_OK = false; }
-  var ctx = { site: ($('spNama').value || '').trim().replace(/\s+/g, ' ').toUpperCase(), periode: $('upPeriode').value, npp: ($('spNpp').value || '').replace(/\D/g, '') };
-  if(!ctx.site && ctx.npp.length >= 6) ctx.site = siteDariNpp(ctx.npp);  // cukup ketik NPP: nama site dicari dari riwayat, atau diisi dari SIPP setelah perusahaan terpilih
-  if(!ctx.site && !ctx.npp){ toast('Ketik nama site atau NPP.', 'err'); return; }
+  var ctx = { site: '', periode: $('upPeriode').value, npp: ($('spNpp').value || '').replace(/\D/g, '') };
+  if(!/^\d{6,10}$/.test(ctx.npp)){ toast('Isi NPP dulu (6 sampai 10 angka).', 'err'); return; }
+  ctx.site = siteDariNpp(ctx.npp);  // nama site mengikuti NPP: dari riwayat dulu, lalu dikoreksi dengan nama resmi dari SIPP
   SIPP_BUSY = true; $('spGo').disabled = true; $('spGo').textContent = 'Berjalan…'; if(lanjut !== true) $('spLog').innerHTML = '';
   var kartu = SP_MODE === 'kartu';
+  if(kartu){ if(!SP_KB_LAGI) SP_KB = { h: 1, seen: {}, baru: 0, lewat: 0, gagal: 0, ganti: 0 }; SP_KB_LAGI = false; ctx.halaman = SP_KB.h; }
   sippPing(function(ada){
     if(!ada){ spLog('Ekstensi SHELTER-SIPP belum terdeteksi. Pasang dulu lalu refresh halaman ini.', '#dc2626'); sippBerhenti(); return; }
     spLog('Ekstensi terdeteksi. Memulai…');
-    var selesai = false, stop = sippKirim({ type: 'SHELTER_SIPP_REQ', mode: kartu ? 'kartu' : '', npp: ctx.npp, nama: ctx.site, periode: ctx.periode, site: ctx.site }, function(d){
+    window.SP_CH = [];
+    var selesai = false, stop = sippKirim({ type: 'SHELTER_SIPP_REQ', mode: kartu ? 'kartu' : '', halaman: ctx.halaman || 1, npp: ctx.npp, nama: '', periode: ctx.periode, site: ctx.site }, function(d){
       if(d.kind === 'progress'){ spLog(d.text); return; }
+      if(d.kind === 'chunk'){ (window.SP_CH = window.SP_CH || [])[d.part] = d.data; if(d.part === d.total - 1 || d.part % 10 === 0) spLog('Menerima PDF kartu: bagian ' + (d.part + 1) + '/' + d.total + '…'); return; }
       if(d.kind !== 'done' || selesai) return;
       selesai = true; stop();
-      if(!ctx.site && d.ok && d.nama){ ctx.site = String(d.nama).trim().replace(/\s+/g, ' ').toUpperCase(); $('spNama').value = ctx.site; spLog('Nama site dari SIPP: ' + ctx.site); }
+      if(d.ok && d.nama && (d.namaPasti || !ctx.site)){ ctx.site = String(d.nama).trim().replace(/\s+/g, ' ').toUpperCase(); $('spNama').value = ctx.site; spLog('Nama site dari SIPP: ' + ctx.site); }
       if(d.ok && !ctx.site){ spLog('Nama perusahaan tidak terbaca dari SIPP. Isi kolom nama site lalu ulangi.', '#dc2626'); toast('Isi nama site, lalu ulangi.', 'err'); sippBerhenti(); return; }
       if(d.basi){ spLog(d.error, '#dc2626'); toast('Tekan Ctrl+F5 di halaman ini dulu, lalu coba lagi.', 'err'); sippBerhenti(); return; }
       if(kartu) sippKartuHasil(ctx, d); else sippHasil(ctx, d);
@@ -839,6 +843,7 @@ function sippKartuHasil(ctx, d){
   if(!d.ok){ berhenti(d.error || 'Gagal mengambil kartu dari SIPP.'); toast('Ambil kartu gagal.', 'err'); return; }
   (d.notes || []).forEach(function(n){ spLog(n, '#b45309'); });
   var k = d.kartu;
+  if(k && k.chunks){ var CH = window.SP_CH || []; window.SP_CH = []; var lengkap = CH.length === k.chunks; for(var ci = 0; ci < k.chunks && lengkap; ci++) if(typeof CH[ci] !== 'string') lengkap = false; if(!lengkap){ berhenti('PDF kartu yang diterima tidak lengkap. Coba ambil lagi.'); return; } k.b64 = CH.join(''); }
   var totSipp = parseInt(String((k && k.total) || '0').replace(/[.,]/g, ''), 10) || 0; if(!k || !k.b64){ berhenti('PDF kartu kosong.'); return; }
   spLog('PDF kartu diterima dari SIPP. Memisahkan per orang…');
   var bin = atob(k.b64), u = new Uint8Array(bin.length); for(var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
@@ -856,7 +861,14 @@ function sippKartuHasil(ctx, d){
       })();
       function simpanSemua(){
         spLog('PDF berisi ' + n + ' halaman, ' + orang.length + ' kartu terbaca' + (gagalBaca.length ? ', halaman ' + gagalBaca.join(', ') + ' tidak terbaca (dilewati)' : '') + '.');
-        if(totSipp && orang.length < totSipp) spLog('Catatan: SIPP mencatat ' + totSipp + ' peserta, kartu yang keluar ' + orang.length + '. Sisanya tidak punya kartu di SIPP.', '#b45309');
+        var HT = d.halamanTotal || 1;
+        if(HT > 1){
+          var baruNik = orang.filter(function(o){ return !SP_KB.seen[o.nik]; }).length;
+          spLog('Bagian ' + SP_KB.h + '/' + HT + ': ' + orang.length + ' kartu, ' + baruNik + ' belum pernah diterima.');
+          if(SP_KB.h > 1 && baruNik === 0){ berhenti('SIPP mengeluarkan kartu yang sama untuk bagian ' + SP_KB.h + ' (pilihan halaman tabel tidak mempengaruhi Cetak Semua). Kirim screenshot halaman Cetak Kartu ke Claude supaya pembagiannya disesuaikan.'); return; }
+          orang.forEach(function(o){ SP_KB.seen[o.nik] = 1; });
+        }
+        if(HT <= 1 && totSipp && orang.length < totSipp) spLog('Catatan: SIPP mencatat ' + totSipp + ' peserta, kartu yang keluar ' + orang.length + '. Sisanya tidak punya kartu di SIPP.', '#b45309');
         if(!orang.length){ berhenti('Tidak ada NIK yang terbaca dari PDF kartu.'); return; }
         PDFLib.PDFDocument.load(u).then(function(src){
           var baru = 0, lewat = 0, gagal = 0, ganti = 0, i = 0;
@@ -871,6 +883,14 @@ function sippKartuHasil(ctx, d){
           });
           var UKURAN = 6, mulai = 0;
           function selesai(){
+            SP_KB.baru += baru; SP_KB.lewat += lewat; SP_KB.gagal += gagal; SP_KB.ganti += ganti;
+            if(HT > 1 && SP_KB.h < HT){
+              spLog('Bagian ' + SP_KB.h + '/' + HT + ' tersimpan (' + baru + ' baru, ' + lewat + ' dilewati' + (gagal ? ', ' + gagal + ' gagal' : '') + '). Lanjut bagian berikutnya…', '#16a34a');
+              SP_KB.h++; SP_KB_LAGI = true; SIPP_BUSY = false;
+              setTimeout(function(){ jalankanSipp(true); }, 800);
+              return;
+            }
+            if(HT > 1){ baru = SP_KB.baru; lewat = SP_KB.lewat; gagal = SP_KB.gagal; ganti = SP_KB.ganti; spLog('SEMUA BAGIAN SELESAI (' + HT + ' bagian, ' + Object.keys(SP_KB.seen).length + ' peserta berkartu).', '#16a34a'); }
             spLog('SELESAI: ' + baru + ' kartu tersimpan' + (ganti ? ' (' + ganti + ' diperbarui karena data kepesertaan berubah)' : '') + ', ' + lewat + ' sudah ada dan sama (dilewati)' + (gagal ? ', ' + gagal + ' gagal simpan' : '') + '.', gagal ? '#b45309' : '#16a34a');
             toast(baru + ' kartu tersimpan.'); sippBerhenti();
           }
@@ -908,7 +928,7 @@ function bukaKartu(nik){
     tampilPdf(r.base64, 'Kartu Peserta · ' + nik, r.nama || ('Kartu_' + nik + '.pdf'));
   });
 }
-function gagalSipp(ctx, alasan){ gsTambah(ctx, alasan); spLog('GAGAL: ' + alasan, '#dc2626'); toast('Gagal: ' + ctx.site + ' (masuk Daftar Gagal Ambil SIPP)', 'err'); sippBerhenti(); }
+function gagalSipp(ctx, alasan){ if(!ctx.site) ctx.site = 'NPP ' + ctx.npp; gsTambah(ctx, alasan); spLog('GAGAL: ' + alasan, '#dc2626'); toast('Gagal: ' + ctx.site + ' (masuk Daftar Gagal Ambil SIPP)', 'err'); sippBerhenti(); }
 function sippHasil(ctx, d){
   if(!d.ok){ gagalSipp(ctx, d.error || 'Gagal mengambil dari SIPP.'); return; }
   if(d.npp) ctx.npp = String(d.npp);
