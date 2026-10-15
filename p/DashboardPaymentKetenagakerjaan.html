@@ -778,7 +778,7 @@ function sippKirim(req, onMsg){
       port = chrome.runtime.connect(EXT_ID, { name: 'job' });
       port.onMessage.addListener(function(m){ if(m && m.kind === 'done') selesaiExt = true; onMsg(m); });
       port.onDisconnect.addListener(function(){ void (chrome.runtime && chrome.runtime.lastError); if(!selesaiExt){ selesaiExt = true; onMsg({ kind: 'done', ok: false, error: 'Koneksi ke ekstensi terputus. Pastikan ekstensi SHELTER-SIPP terpasang dan aktif.' }); } });
-      port.postMessage({ id: req.id || ('x' + Date.now()), npp: String(req.npp || ''), nama: String(req.nama || ''), periode: String(req.periode || ''), mode: req.mode === 'kartu' ? 'kartu' : '', halaman: parseInt(req.halaman, 10) || 1, site: String(req.site || '') });
+      port.postMessage({ id: req.id || ('x' + Date.now()), npp: String(req.npp || ''), nama: String(req.nama || ''), periode: String(req.periode || ''), mode: req.mode === 'kartu' ? 'kartu' : '', halaman: parseInt(req.halaman, 10) || 1, k: parseInt(req.k, 10) || 2, site: String(req.site || '') });
     }catch(e){ setTimeout(function(){ onMsg({ kind: 'done', ok: false, error: 'Tidak bisa menyambung ke ekstensi: ' + String((e && e.message) || e) }); }, 0); }
     return function(){ try{ if(port) port.disconnect(); }catch(e){} };
   }
@@ -817,7 +817,7 @@ function b64File(b64, name){
   var bin = atob(b64), u = new Uint8Array(bin.length); for(var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
   return new File([u], name, { type: 'application/pdf' });
 }
-var SP_NEXT = false, SP_OK = false, SP_KB = { h: 1, seen: {}, baru: 0, lewat: 0, gagal: 0, ganti: 0 }, SP_KB_LAGI = false;
+var SP_NEXT = false, SP_OK = false, SP_KB = { h: 1, k: 2, seen: {}, baru: 0, lewat: 0, gagal: 0, ganti: 0 }, SP_KB_LAGI = false;
 function jalankanSipp(lanjut){
   if(SIPP_BUSY) return;
   if(lanjut !== true){ SP_NEXT = SP_MODE === 'f2a' && $('spKartuCb').checked; SP_OK = false; }
@@ -826,19 +826,20 @@ function jalankanSipp(lanjut){
   ctx.site = siteDariNpp(ctx.npp) || String($('spNama').value || '').trim().replace(/\s+/g, ' ').toUpperCase();  // kolom nama ikut NPP, jadi aman dipakai kalau riwayat kosong; nama site mengikuti NPP: dari riwayat dulu, lalu dikoreksi dengan nama resmi dari SIPP
   SIPP_BUSY = true; $('spGo').disabled = true; $('spGo').textContent = 'Berjalan…'; if(lanjut !== true) $('spLog').innerHTML = '';
   var kartu = SP_MODE === 'kartu';
-  if(kartu){ if(!SP_KB_LAGI) SP_KB = { h: 1, seen: {}, baru: 0, lewat: 0, gagal: 0, ganti: 0 }; SP_KB_LAGI = false; ctx.halaman = SP_KB.h; }
+  if(kartu){ if(!SP_KB_LAGI) SP_KB = { h: 1, k: 2, seen: {}, baru: 0, lewat: 0, gagal: 0, ganti: 0 }; SP_KB_LAGI = false; ctx.halaman = SP_KB.h; }
   sippPing(function(ada, basi){
     if(ada && basi){ spLog('Ekstensi terdeteksi tapi sambungannya basi (ekstensi baru di-refresh atau jendela aplikasi ini belum memuat ulang ekstensi). Tutup jendela aplikasi ini sepenuhnya lalu buka lagi. Kalau masih sama, buka web ini di tab Chrome biasa.', '#dc2626'); sippBerhenti(); return; }
     if(!ada){ spLog('Ekstensi SHELTER-SIPP belum terdeteksi. Pasang dulu lalu refresh halaman ini.', '#dc2626'); sippBerhenti(); return; }
     spLog('Ekstensi terdeteksi. Memulai…');
     window.SP_CH = [];
-    var selesai = false, stop = sippKirim({ type: 'SHELTER_SIPP_REQ', mode: kartu ? 'kartu' : '', halaman: ctx.halaman || 1, npp: ctx.npp, nama: '', periode: ctx.periode, site: ctx.site }, function(d){
+    var selesai = false, stop = sippKirim({ type: 'SHELTER_SIPP_REQ', mode: kartu ? 'kartu' : '', halaman: ctx.halaman || 1, k: SP_KB.k, npp: ctx.npp, nama: '', periode: ctx.periode, site: ctx.site }, function(d){
       if(d.kind === 'progress'){ spLog(d.text); return; }
       if(d.kind === 'chunk'){ (window.SP_CH = window.SP_CH || [])[d.part] = d.data; if(d.part === d.total - 1 || d.part % 10 === 0) spLog('Menerima PDF kartu: bagian ' + (d.part + 1) + '/' + d.total + '…'); return; }
       if(d.kind !== 'done' || selesai) return;
       selesai = true; stop();
       if(d.ok && d.nama && (d.namaPasti || !ctx.site)){ ctx.site = String(d.nama).trim().replace(/\s+/g, ' ').toUpperCase(); $('spNama').value = ctx.site; spLog('Nama site dari SIPP: ' + ctx.site); }
       if(d.ok && !ctx.site && !kartu){ spLog('Nama perusahaan tidak terbaca dari SIPP. Isi kolom nama site lalu ulangi.', '#dc2626'); toast('Isi nama site, lalu ulangi.', 'err'); sippBerhenti(); return; }
+      if(kartu && !d.ok && d.kMismatch && SP_KB.k > 1){ SP_KB.k = 1; SP_KB.h = 1; SP_KB_LAGI = true; SIPP_BUSY = false; spLog('Pilihan tidak bertahan antar halaman tabel. Diulang dengan 1 halaman tabel (sampai 100 orang) per bagian.', '#b45309'); setTimeout(function(){ jalankanSipp(true); }, 800); return; }
       if(d.basi){ spLog(d.error, '#dc2626'); toast('Tekan Ctrl+F5 di halaman ini dulu, lalu coba lagi.', 'err'); sippBerhenti(); return; }
       if(kartu) sippKartuHasil(ctx, d); else sippHasil(ctx, d);
     });
