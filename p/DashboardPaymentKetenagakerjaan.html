@@ -769,7 +769,22 @@ function bukaSipp(nppPaksa, namaPaksa, mode){
   $('mSipp').classList.add('on');
   setTimeout(function(){ try{ $('spNpp').focus(); }catch(e){} }, 50);
 }
+var EXT_ID = 'jajnnbplabbamplgncckppkcmflahmph', SP_VIA_EXT = false;
+function extAda(){ try{ return !!(window.chrome && chrome.runtime && chrome.runtime.sendMessage && chrome.runtime.connect); }catch(e){ return false; } }
 function sippKirim(req, onMsg){
+  if(SP_VIA_EXT && extAda()){
+    var port = null, selesaiExt = false;
+    try{
+      port = chrome.runtime.connect(EXT_ID, { name: 'job' });
+      port.onMessage.addListener(function(m){ if(m && m.kind === 'done') selesaiExt = true; onMsg(m); });
+      port.onDisconnect.addListener(function(){ void (chrome.runtime && chrome.runtime.lastError); if(!selesaiExt){ selesaiExt = true; onMsg({ kind: 'done', ok: false, error: 'Koneksi ke ekstensi terputus. Pastikan ekstensi SHELTER-SIPP terpasang dan aktif.' }); } });
+      port.postMessage({ id: req.id || ('x' + Date.now()), npp: String(req.npp || ''), nama: String(req.nama || ''), periode: String(req.periode || ''), mode: req.mode === 'kartu' ? 'kartu' : '', halaman: parseInt(req.halaman, 10) || 1, site: String(req.site || '') });
+    }catch(e){ setTimeout(function(){ onMsg({ kind: 'done', ok: false, error: 'Tidak bisa menyambung ke ekstensi: ' + String((e && e.message) || e) }); }, 0); }
+    return function(){ try{ if(port) port.disconnect(); }catch(e){} };
+  }
+  return sippKirimLama(req, onMsg);
+}
+function sippKirimLama(req, onMsg){
   var id = 's' + Date.now() + Math.random().toString(36).slice(2, 6); req.id = id;
   function h(e){ var d = e.data; if(!d || d.type !== 'SHELTER_SIPP_RES' || d.id !== id || d.kind === 'dup') return; onMsg(d); }
   window.addEventListener('message', h);
@@ -778,8 +793,25 @@ function sippKirim(req, onMsg){
   return function(){ window.removeEventListener('message', h); };
 }
 function sippPing(cb){
-  var sudah = false, stop = sippKirim({ type: 'SHELTER_SIPP_PING' }, function(d){ if(sudah) return; sudah = true; stop(); cb(true); });
-  setTimeout(function(){ if(sudah) return; sudah = true; stop(); cb(false); }, 2000);
+  var selesai = false;
+  function lama(){
+    SP_VIA_EXT = false;
+    var sudah = false, stop = sippKirimLama({ type: 'SHELTER_SIPP_PING' }, function(d){ if(sudah) return; sudah = true; stop(); cb(true, !!(d && d.basi)); });
+    setTimeout(function(){ if(sudah) return; sudah = true; stop(); cb(false); }, 2000);
+  }
+  // cara utama: panggil ekstensi langsung (jalan di tab biasa dan jendela aplikasi); cadangan: jembatan lama
+  if(extAda()){
+    try{
+      chrome.runtime.sendMessage(EXT_ID, { type: 'SHELTER_SIPP_PING' }, function(r){
+        void (chrome.runtime && chrome.runtime.lastError);
+        if(selesai) return; selesai = true;
+        if(r && r.kind === 'pong'){ SP_VIA_EXT = true; cb(true, false); } else lama();
+      });
+      setTimeout(function(){ if(selesai) return; selesai = true; lama(); }, 1500);
+      return;
+    }catch(e){}
+  }
+  lama();
 }
 function b64File(b64, name){
   var bin = atob(b64), u = new Uint8Array(bin.length); for(var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
@@ -795,7 +827,8 @@ function jalankanSipp(lanjut){
   SIPP_BUSY = true; $('spGo').disabled = true; $('spGo').textContent = 'Berjalan…'; if(lanjut !== true) $('spLog').innerHTML = '';
   var kartu = SP_MODE === 'kartu';
   if(kartu){ if(!SP_KB_LAGI) SP_KB = { h: 1, seen: {}, baru: 0, lewat: 0, gagal: 0, ganti: 0 }; SP_KB_LAGI = false; ctx.halaman = SP_KB.h; }
-  sippPing(function(ada){
+  sippPing(function(ada, basi){
+    if(ada && basi){ spLog('Ekstensi terdeteksi tapi sambungannya basi (ekstensi baru di-refresh atau jendela aplikasi ini belum memuat ulang ekstensi). Tutup jendela aplikasi ini sepenuhnya lalu buka lagi. Kalau masih sama, buka web ini di tab Chrome biasa.', '#dc2626'); sippBerhenti(); return; }
     if(!ada){ spLog('Ekstensi SHELTER-SIPP belum terdeteksi. Pasang dulu lalu refresh halaman ini.', '#dc2626'); sippBerhenti(); return; }
     spLog('Ekstensi terdeteksi. Memulai…');
     window.SP_CH = [];
