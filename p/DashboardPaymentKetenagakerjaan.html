@@ -791,7 +791,7 @@ function jalankanSipp(lanjut){
   if(lanjut !== true){ SP_NEXT = SP_MODE === 'f2a' && $('spKartuCb').checked; SP_OK = false; }
   var ctx = { site: '', periode: $('upPeriode').value, npp: ($('spNpp').value || '').replace(/\D/g, '') };
   if(!/^\d{6,10}$/.test(ctx.npp)){ toast('Isi NPP dulu (6 sampai 10 angka).', 'err'); return; }
-  ctx.site = siteDariNpp(ctx.npp);  // nama site mengikuti NPP: dari riwayat dulu, lalu dikoreksi dengan nama resmi dari SIPP
+  ctx.site = siteDariNpp(ctx.npp) || String($('spNama').value || '').trim().replace(/\s+/g, ' ').toUpperCase();  // kolom nama ikut NPP, jadi aman dipakai kalau riwayat kosong; nama site mengikuti NPP: dari riwayat dulu, lalu dikoreksi dengan nama resmi dari SIPP
   SIPP_BUSY = true; $('spGo').disabled = true; $('spGo').textContent = 'Berjalan…'; if(lanjut !== true) $('spLog').innerHTML = '';
   var kartu = SP_MODE === 'kartu';
   if(kartu){ if(!SP_KB_LAGI) SP_KB = { h: 1, seen: {}, baru: 0, lewat: 0, gagal: 0, ganti: 0 }; SP_KB_LAGI = false; ctx.halaman = SP_KB.h; }
@@ -805,7 +805,7 @@ function jalankanSipp(lanjut){
       if(d.kind !== 'done' || selesai) return;
       selesai = true; stop();
       if(d.ok && d.nama && (d.namaPasti || !ctx.site)){ ctx.site = String(d.nama).trim().replace(/\s+/g, ' ').toUpperCase(); $('spNama').value = ctx.site; spLog('Nama site dari SIPP: ' + ctx.site); }
-      if(d.ok && !ctx.site){ spLog('Nama perusahaan tidak terbaca dari SIPP. Isi kolom nama site lalu ulangi.', '#dc2626'); toast('Isi nama site, lalu ulangi.', 'err'); sippBerhenti(); return; }
+      if(d.ok && !ctx.site && !kartu){ spLog('Nama perusahaan tidak terbaca dari SIPP. Isi kolom nama site lalu ulangi.', '#dc2626'); toast('Isi nama site, lalu ulangi.', 'err'); sippBerhenti(); return; }
       if(d.basi){ spLog(d.error, '#dc2626'); toast('Tekan Ctrl+F5 di halaman ini dulu, lalu coba lagi.', 'err'); sippBerhenti(); return; }
       if(kartu) sippKartuHasil(ctx, d); else sippHasil(ctx, d);
     });
