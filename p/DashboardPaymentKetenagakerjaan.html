@@ -279,7 +279,7 @@ tr.sub>td{padding:0!important;background:#f8fafc}
   <label style="font-size:12.5px;font-weight:600;display:block;margin:10px 0 4px">Nama site / perusahaan (ketik persis seperti di SIPP)</label>
   <input class="hi" id="spNama" list="dlSipp" placeholder="mis. GLOBAL SECURINDO UTAMA UNIT MULTI DUTA UTARI" autocomplete="off" oninput="spNamaIsiNpp()" style="width:100%"><datalist id="dlSipp"></datalist>
   <label style="font-size:12.5px;font-weight:600;display:block;margin:10px 0 4px">NPP <span style="font-weight:400;color:var(--muted)">(boleh kosong, diisi otomatis dari SIPP)</span></label>
-  <input class="hi" id="spNpp" placeholder="otomatis" inputmode="numeric" style="width:100%">
+  <input class="hi" id="spNpp" placeholder="otomatis, atau ketik NPP saja" inputmode="numeric" autocomplete="off" oninput="spNppIsiNama()" style="width:100%">
   <label id="spKartuWrap" style="display:flex;gap:8px;align-items:center;font-size:12.5px;margin-top:12px"><input type="checkbox" id="spKartuCb" checked> Sekalian ambil kartu peserta (yang sudah punya kartu dilewati)</label>
   <div id="spLog" style="margin-top:12px;font-size:12.5px;line-height:1.7;max-height:200px;overflow:auto"></div>
   <div style="display:flex;gap:10px;margin-top:16px"><button class="hb hb-gray" style="flex:1;justify-content:center" onclick="tutupSipp()">Tutup</button><button class="hb hb-green" id="spGo" style="flex:2;justify-content:center" onclick="jalankanSipp()">Mulai Ambil</button></div>
@@ -732,6 +732,13 @@ function nppDariRiwayat(site){
   var r = (all || []).filter(function(x){ return String(x.site || '').trim().toUpperCase().replace(/\s+/g, ' ') === k && x.npp; });
   return r.length ? String(r[0].npp) : '';
 }
+function siteDariNpp(npp){
+  npp = String(npp || '').replace(/\D/g, '');
+  if(npp.length < 6) return '';
+  var r = (all || []).filter(function(x){ return String(x.npp || '').replace(/\D/g, '') === npp && String(x.site || '').trim(); });
+  return r.length ? String(r[0].site).trim().replace(/\s+/g, ' ').toUpperCase() : '';
+}
+function spNppIsiNama(){ var n = siteDariNpp($('spNpp').value); if(n) $('spNama').value = n; }
 function spNamaIsiNpp(){ var n = nppDariRiwayat($('spNama').value); if(n) $('spNpp').value = n; }
 function isiDlSipp(){
   var seen = {}, a = [];
@@ -782,7 +789,8 @@ function jalankanSipp(lanjut){
   if(SIPP_BUSY) return;
   if(lanjut !== true){ SP_NEXT = SP_MODE === 'f2a' && $('spKartuCb').checked; SP_OK = false; }
   var ctx = { site: ($('spNama').value || '').trim().replace(/\s+/g, ' ').toUpperCase(), periode: $('upPeriode').value, npp: ($('spNpp').value || '').replace(/\D/g, '') };
-  if(!ctx.site){ toast('Ketik nama site / perusahaan seperti di SIPP.', 'err'); return; }
+  if(!ctx.site && ctx.npp.length >= 6) ctx.site = siteDariNpp(ctx.npp);  // cukup ketik NPP: nama site dicari dari riwayat, atau diisi dari SIPP setelah perusahaan terpilih
+  if(!ctx.site && !ctx.npp){ toast('Ketik nama site atau NPP.', 'err'); return; }
   SIPP_BUSY = true; $('spGo').disabled = true; $('spGo').textContent = 'Berjalan…'; if(lanjut !== true) $('spLog').innerHTML = '';
   var kartu = SP_MODE === 'kartu';
   sippPing(function(ada){
@@ -792,6 +800,8 @@ function jalankanSipp(lanjut){
       if(d.kind === 'progress'){ spLog(d.text); return; }
       if(d.kind !== 'done' || selesai) return;
       selesai = true; stop();
+      if(!ctx.site && d.ok && d.nama){ ctx.site = String(d.nama).trim().replace(/\s+/g, ' ').toUpperCase(); $('spNama').value = ctx.site; spLog('Nama site dari SIPP: ' + ctx.site); }
+      if(d.ok && !ctx.site){ spLog('Nama perusahaan tidak terbaca dari SIPP. Isi kolom nama site lalu ulangi.', '#dc2626'); toast('Isi nama site, lalu ulangi.', 'err'); sippBerhenti(); return; }
       if(d.basi){ spLog(d.error, '#dc2626'); toast('Tekan Ctrl+F5 di halaman ini dulu, lalu coba lagi.', 'err'); sippBerhenti(); return; }
       if(kartu) sippKartuHasil(ctx, d); else sippHasil(ctx, d);
     });
@@ -989,15 +999,19 @@ function xlsx(aoa, name){
 var T2, curR = null, hdr = [];
 // Site Bisnis = nama perusahaan binaan lengkap dari SIPP (mis. GLOBAL SECURINDO UTAMA UNIT LIKU TELAGA), yaitu kolom Site saat ambil/upload.
 // Kalau kosong, baru pakai site penempatan dari data karyawan.
+// Awalan entitas ditambahkan otomatis di depan nama SIPP: BINA KARYA -> PT SHELTER INDONESIA GEMILANG UNIT BINA KARYA
+var ENTITAS_SITE = 'PT SHELTER INDONESIA GEMILANG UNIT';
 function siteLengkap(sipp, tempat){
-  sipp = String(sipp || '').trim();
-  return sipp || String(tempat || '').trim();
+  var s = String(sipp || '').trim() || String(tempat || '').trim();
+  if(!s) return '';
+  if(/SHELTER\s+INDONESIA\s+GEMILANG/i.test(s)) return s;   // sudah lengkap
+  return ENTITAS_SITE + ' ' + s;
 }
 function detailCols(){
   var tk = CFG.jenis === 'tk', o = tk ? 2 : 0;
   function T(i, label, extra){ var c = { label: label, val: function(r){ return r[o + i]; }, cell: function(r){ return esc(r[o + i]); } }; for(var k in extra) c[k] = extra[k]; return c; }
   function N(i, label){ return { label: label, num: true, val: function(r){ return r[o + i]; }, cell: function(r){ return esc(rp(r[o + i])); } }; }
-  if(tk) return [ T(0,'NIK KTP',{filter:'Cari NIK KTP'}), T(1,'Nama Karyawan',{filter:'Cari Nama Karyawan', cell: function(r){ var nk = String(r[o] || '').replace(/\D/g, ''); return esc(r[o + 1]) + (!VIEWER && nk && KARTUKEYS[nk] ? ' <button class="hb hb-blue hb-sm" onclick="bukaKartu(\'' + nk + '\')">Kartu</button>' : ''); }}), T(2,'NO KPJ',{filter:'Cari NO KPJ'}), T(3,'Site Bisnis',{filter:'Cari Site', val: function(r){ return siteLengkap(r[1], r[o + 3]); }, cell: function(r){ return esc(siteLengkap(r[1], r[o + 3])); }}), T(4,'NPP Ketenagakerjaan'),
+  if(tk) return [ T(0,'NIK KTP',{filter:'Cari NIK KTP'}), T(1,'Nama Karyawan',{filter:'Cari Nama Karyawan'}), { label: 'Kartu', sort: false, val: function(r){ var nk = String(r[o] || '').replace(/\D/g, ''); return nk && KARTUKEYS[nk] ? 'ada' : ''; }, cell: function(r){ var nk = String(r[o] || '').replace(/\D/g, ''); return (!VIEWER && nk && KARTUKEYS[nk]) ? '<button class="hb hb-blue hb-sm" onclick="bukaKartu(\'' + nk + '\')">Kartu</button>' : '<span style="color:#94a3b8">-</span>'; } }, T(2,'NO KPJ',{filter:'Cari NO KPJ'}), T(3,'Site Bisnis',{filter:'Cari Site', val: function(r){ return siteLengkap(r[1], r[o + 3]); }, cell: function(r){ return esc(siteLengkap(r[1], r[o + 3])); }}), T(4,'NPP Ketenagakerjaan'),
     N(5,'Perusahaan'), N(6,'Karyawan'), N(7,'Perusahaan'), N(8,'karyawan'), N(9,'JKK'), N(10,'JKM') ];
   return [ T(0,'NIK KTP',{filter:'Cari NIK KTP'}), T(1,'Nama Karyawan',{filter:'Cari Nama Karyawan'}), T(2,'NO KIS',{filter:'Cari NO KIS'}), T(3,'Site Bisnis',{filter:'Cari Site'}), T(4,'NPP Kesehatan'),
     N(6,'Pembayaran Karyawan'), N(5,'Pembayaran Perusahaan') ];
@@ -1005,8 +1019,8 @@ function detailCols(){
 function detailHead(){
   if(CFG.jenis !== 'tk') return null;
   return [
-    [ {t:'NIK KTP',c:0,rs:2}, {t:'Nama Karyawan',c:1,rs:2}, {t:'NO KPJ',c:2,rs:2}, {t:'Site Bisnis',c:3,rs:2}, {t:'NPP Ketenagakerjaan',c:4,rs:2}, {t:'JHT',cs:2,cls:'ctr'}, {t:'JP',cs:2,cls:'ctr'}, {t:'JKK',c:9,rs:2}, {t:'JKM',c:10,rs:2} ],
-    [ {t:'Perusahaan',c:5}, {t:'Karyawan',c:6}, {t:'Perusahaan',c:7}, {t:'karyawan',c:8} ]
+    [ {t:'NIK KTP',c:0,rs:2}, {t:'Nama Karyawan',c:1,rs:2}, {t:'Kartu',rs:2}, {t:'NO KPJ',c:3,rs:2}, {t:'Site Bisnis',c:4,rs:2}, {t:'NPP Ketenagakerjaan',c:5,rs:2}, {t:'JHT',cs:2,cls:'ctr'}, {t:'JP',cs:2,cls:'ctr'}, {t:'JKK',c:10,rs:2}, {t:'JKM',c:11,rs:2} ],
+    [ {t:'Perusahaan',c:6}, {t:'Karyawan',c:7}, {t:'Perusahaan',c:8}, {t:'karyawan',c:9} ]
   ];
 }
 function bukaDetail(r){
