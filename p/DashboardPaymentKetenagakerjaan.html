@@ -1067,12 +1067,12 @@ function sippHasil(ctx, d){
     if(ref == null && d.f2a.nominal){ ref = d.f2a.nominal; sumber = 'tabel Mutasi Data SIPP'; spLog('Total tidak ada di PDF, dicocokkan dengan total di tabel SIPP (' + rp(ref) + ').', '#b45309'); }
     res.refTotal = ref;
     if(ref == null) al.push('total di PDF tidak terbaca' + ((res.dbg && res.dbg.length) ? ' (baris terkait: ' + res.dbg.join(' | ') + ')' : ''));
-    else if(Math.abs(ref - res.sumTotal) >= (sumber === 'PDF' ? 0.01 : 1)) al.push('total hitungan ' + rp(res.sumTotal) + ' beda dengan total ' + sumber + ' ' + rp(ref));
+    else if(Math.abs(ref - res.sumTotal) >= 1) al.push('total hitungan ' + rp(res.sumTotal) + ' beda dengan total ' + sumber + ' ' + rp(ref));
     if(d.f2a.tk && res.rows.length !== d.f2a.tk) al.push('jumlah karyawan terbaca ' + res.rows.length + ' beda dengan SIPP (' + d.f2a.tk + ')');
     if(salah) al.push(salah + ' baris komponen tidak sama dengan total');
     if(res.bad.length) al.push(res.bad.length + ' baris tidak terbaca');
     if(al.length){ gagalSipp(ctx, al.join('; ')); return; }
-    spLog('Total cocok (' + rp(res.sumTotal) + ', ' + res.rows.length + ' karyawan' + (sumber !== 'PDF' && Math.abs(ref - res.sumTotal) >= 0.005 ? '; tabel SIPP menampilkan tanpa sen' : '') + '). Menyimpan…');
+    spLog('Total cocok (' + rp(ref) + ', ' + res.rows.length + ' karyawan' + (Math.abs(ref - res.sumTotal) >= 0.005 ? '; disimpan sesuai total F2A ' + rp(ref) : '') + '). Menyimpan…');
     call('payUpload', [CFG.jenis, ctx.periode, ctx.site, '', pdfRowsServer({ res: res })], function(r){
       if(!r || r.success === false){ gagalSipp(ctx, (r && r.error) || 'Gagal menyimpan ke sheet.'); return; }
       gsHapusKey(ctx.site, ctx.periode);
@@ -1263,7 +1263,14 @@ function parseF2a(items){
   });
   lines.forEach(function(l){ l.it.sort(function(a, b){ return a.x - b.x; }); l.t = l.it.map(function(i){ return String(i.s).trim(); }).join(' ').replace(/\s+/g, ' ').trim(); });
 
-  var out = { npp: '', periode: '', unit: '', rows: [], pdfTotal: null, sumTotal: 0, bad: [], dbg: [] };
+  var out = { npp: '', periode: '', unit: '', rows: [], pdfTotal: null, pdfTot: null, sumTotal: 0, bad: [], dbg: [] };
+  // petakan angka baris (atau baris total) F2A ke kolom: upah, rapel, jkk, jkm, jht P/K, jp P/K, jkp P/G, total
+  function petakan(amts){
+    if(amts.length >= 11){ var a = amts.slice(-11).map(num); return { upah: a[0], rapel: a[1], jkk: a[2], jkm: a[3], jhtP: a[4], jhtK: a[5], jpP: a[6], jpK: a[7], jkpP: a[8], jkpG: a[9], total: a[10] }; }
+    if(amts.length >= 9){ var b = amts.slice(-9).map(num); return { upah: b[0], rapel: b[1], jkk: b[2], jkm: b[3], jhtP: b[4], jhtK: b[5], jpP: b[6], jpK: b[7], jkpP: 0, jkpG: 0, total: b[8] }; }
+    return null;
+  }
+  var calonTot = null;
   // ---- header
   for(var i = 0; i < lines.length; i++){
     if(/Nama\s+Perusahaan/i.test(lines[i].t) && /Periode/i.test(lines[i].t)){
@@ -1286,7 +1293,7 @@ function parseF2a(items){
     if(/Jumlah\s+Seluruhnya/i.test(t)){
       var am = t.match(AMT);
       for(var q2 = 1; (!am || !am.length) && q2 <= 2 && lines[k + q2]; q2++) am = lines[k + q2].t.match(AMT);
-      if(am && am.length){ out.pdfTotal = (out.pdfTotal || 0) + num(am[am.length - 1]); }
+      if(am && am.length){ out.pdfTotal = (out.pdfTotal || 0) + num(am[am.length - 1]); var pt = petakan(am); if(pt) out.pdfTot = pt; }
       prev = null; continue;
     }
     var nm = t.match(/\b(\d{16})\b/);
@@ -1313,10 +1320,15 @@ function parseF2a(items){
       r.ok = Math.abs(jum - r.total) < 0.06;
       out.rows.push(r); out.sumTotal += r.total; prev = r; continue;
     }
+    // baris tanpa NIK tapi angkanya lengkap: calon baris TOTAL F2A (baris tebal paling bawah)
+    var amL = t.match(AMT); if(amL && amL.length >= 9){ var ct = petakan(amL); if(ct) calonTot = ct; }
     // lanjutan nama (baris tanpa angka & NIK)
     if(prev && /^[A-Z][A-Z .'\-]*$/.test(t) && t.length < 40){ prev.nama = (prev.nama + ' ' + t).trim(); }
   }
   out.sumTotal = Math.round(out.sumTotal * 100) / 100;
+  // total resmi F2A (baris total tebal). Dipakai kalau tidak ada label "Jumlah Seluruhnya" dan nilainya sesuai jumlah baris (selisih sen saja).
+  if(out.pdfTotal == null && calonTot && Math.abs(calonTot.total - out.sumTotal) < 1){ out.pdfTotal = calonTot.total; out.pdfTot = calonTot; }
+  if(out.pdfTot && Math.abs(out.pdfTot.total - (out.pdfTotal || 0)) >= 0.01) out.pdfTot = null;
   return out;
 }
 
@@ -1384,7 +1396,9 @@ function pdfFlow(f, site){
 }
 function pdfRowsServer(d){
   d = d || PDFD; if(!d) return [];
-  return d.res.rows.map(function(r, i){ return { __baris: i + 1, __pdf: 1, nikKtp: r.nik, namaKaryawan: r.nama, nppKetenagakerjaan: d.res.npp || '', noKpj: r.kpj,
+  var tot = d.res.pdfTot ? { jkk: d.res.pdfTot.jkk, jkm: d.res.pdfTot.jkm, jhtP: d.res.pdfTot.jhtP, jhtK: d.res.pdfTot.jhtK, jpP: d.res.pdfTot.jpP, jpK: d.res.pdfTot.jpK, jkpP: d.res.pdfTot.jkpP, jkpG: d.res.pdfTot.jkpG, total: d.res.pdfTot.total }
+    : (d.res.refTotal != null ? { total: Number(d.res.refTotal) } : (d.res.pdfTotal != null ? { total: Number(d.res.pdfTotal) } : null));
+  return d.res.rows.map(function(r, i){ return { __baris: i + 1, __pdf: 1, __f2aTot: i === 0 ? tot : null, nikKtp: r.nik, namaKaryawan: r.nama, nppKetenagakerjaan: d.res.npp || '', noKpj: r.kpj,
     jhtPerusahaan: r.jhtP, jhtKaryawan: r.jhtK, jpPerusahaan: r.jpP, jpKaryawan: r.jpK, jkk: r.jkk, jkm: r.jkm, jkp: (r.jkpP || 0) + (r.jkpG || 0) }; });
 }
 function pdfSimpan(){
