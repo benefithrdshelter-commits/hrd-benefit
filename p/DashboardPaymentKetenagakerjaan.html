@@ -1552,153 +1552,300 @@ mulai();
 
 if(!VIEWER){ var _c = document.getElementById('upCard'); if(_c) _c.style.display = ''; }
 /* ===================== LAPORAN / DASHBOARD PER SITE ===================== */
-var LAP = { data: null, periode: '', html: '' };
+var LAP = { data: null, periode: '', site: '', html: '' };
 function lapRp(n){ n = Math.round((Number(n) || 0) * 100) / 100; var neg = n < 0; if(neg) n = -n; var b = Math.floor(n), sen = Math.round((n - b) * 100);
   return 'Rp ' + (neg ? '-' : '') + b.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (sen ? ',' + (sen < 10 ? '0' : '') + sen : ''); }
-function lapNum(n){ return lapRp(n).replace(/^Rp\u00a0/, ''); }
+function lapNum(n){ return lapRp(n).replace(/^Rp /, ''); }
 function lapAngka(n){ return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
 function lapPct(a, b){ return b ? (a / b * 100).toFixed(1).replace('.', ',') + '%' : '0%'; }
-function lapPendek(s){ s = String(s || '').replace(/^\s*(PT\.?\s+)?SHELTER\s+INDONESIA\s+GEMILANG\s*(UNIT\s+)?/i, '').trim(); return s || String(s); }
+function lapPendek(s){ var t = String(s || '').replace(/^\s*(PT\.?\s+)?SHELTER\s+INDONESIA\s+GEMILANG\s*(UNIT\s+)?/i, '').trim(); return t || String(s || ''); }
 function lapJt(n){ var v = n / 1e6; return (v >= 100 ? Math.round(v) : Math.round(v * 10) / 10).toString().replace('.', ',') + ' jt'; }
+var LAP_BLN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+function lapBlnPendek(p){ return LAP_BLN[parseInt(String(p).slice(5, 7), 10) - 1].slice(0, 3) + ' ' + String(p).slice(2, 4); }
 
 function bukaLaporan(){
   var m = $('mLap');
   if(!m){
     m = document.createElement('div'); m.id = 'mLap'; m.className = 'lap-o';
-    m.innerHTML = '<div class="lap-bar"><b class="lap-t">Dashboard Laporan Pembayaran</b>' +
+    m.innerHTML = '<div class="lap-bar"><b class="lap-t">Dashboard Laporan</b>' +
       '<label class="lap-l">Periode <select class="hs" id="lapPer" onchange="lapRender()"></select></label>' +
       '<label class="lap-l">Site <select class="hs" id="lapSite" onchange="lapRender()" style="max-width:260px"><option value="">Semua site</option></select></label>' +
-      '<div style="flex:1"></div>' +
+      '<span id="lapSt" style="font-size:12px;flex:1;min-width:120px"></span>' +
       '<button class="hb hb-green hb-sm" onclick="lapUnduhHtml()">Unduh HTML</button>' +
       '<button class="hb hb-blue hb-sm" id="lapPdfB" onclick="lapUnduhPdf()">Unduh PDF</button>' +
       '<button class="hb hb-gray hb-sm" onclick="lapPrint()">Print</button>' +
       '<button class="hb hb-red hb-sm" onclick="$(\'mLap\').classList.remove(\'on\')">Tutup</button></div>' +
-      '<div class="lap-body"><div class="lap-load" id="lapLoad">Memuat data…</div><iframe id="lapFrame" title="Laporan"></iframe></div>';
+      '<div class="lap-body"><div class="lap-load" id="lapLoad">Memuat data…</div><iframe id="lapFrame" title="Dashboard laporan"></iframe></div>';
     document.body.appendChild(m);
     var st = document.createElement('style');
-    st.textContent = '.lap-o{position:fixed;inset:0;z-index:9000;background:#eef1f6;display:none;flex-direction:column}.lap-o.on{display:flex}' +
-      '.lap-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 16px;background:#fff;border-bottom:1px solid #dfe4ec;box-shadow:0 2px 8px rgba(15,31,51,.06)}' +
-      '.lap-t{font-size:14.5px;color:#0f1f33;margin-right:6px}.lap-l{font-size:12.5px;color:#52606d;display:flex;align-items:center;gap:6px}.lap-l .hs{min-width:0;padding:6px 10px;font-size:13px}' +
+    st.textContent = '.lap-o{position:fixed;inset:0;z-index:9000;background:#eef2f8;display:none;flex-direction:column}.lap-o.on{display:flex}' +
+      '.lap-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 16px;background:#fff;border-bottom:1px solid #dfe4ec}' +
+      '.lap-t{font-size:14.5px;color:#14213d;margin-right:6px}.lap-l{font-size:12.5px;color:#52606d;display:flex;align-items:center;gap:6px}.lap-l .hs{min-width:0;padding:6px 10px;font-size:13px}' +
       '.lap-body{flex:1;position:relative;overflow:hidden}.lap-body iframe{width:100%;height:100%;border:0;display:block}' +
-      '.lap-load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:#52606d;background:#eef1f6}';
+      '.lap-load{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:14px;color:#52606d;background:#eef2f8}';
     document.head.appendChild(st);
   }
   m.classList.add('on');
-  $('lapLoad').style.display = 'flex'; $('lapLoad').textContent = 'Memuat data…';
+  // 1) langsung tampil dari daftar yang sudah ada di halaman, 2) lalu lengkapi rincian program dari server
+  var dasar = (all || []).map(function(r){ return { periode: r.periode, site: String(r.site || '').trim(), npp: String(r.npp || ''), tk: Number(r.jumlahKaryawan) || 0, total: Number(r.totalDibayarkan) || 0, jht: 0, jp: 0, jkk: 0, jkm: 0, jkp: 0, tanpaProgram: true }; });
+  if(dasar.length){ lapIsi(dasar); lapStatus('Memuat rincian per program…'); }
+  else { $('lapLoad').style.display = 'flex'; $('lapLoad').textContent = 'Memuat data…'; }
+  var selesai = false;
+  setTimeout(function(){ if(!selesai) lapStatus('Rincian program belum terbaca dari server. Pastikan PaymentKetenagakerjaan.gs dan ApiRun.gs sudah di-Deploy New version.', true); }, 30000);
   call('getPaymentTkLaporan', [], function(raw){
-    var d = J(raw, []);
-    if(!Array.isArray(d)){ $('lapLoad').textContent = 'Gagal memuat: ' + ((d && d.error) || 'data tidak terbaca'); return; }
-    LAP.data = d;
-    var per = {}, sites = {}; d.forEach(function(r){ per[r.periode] = 1; sites[r.site] = 1; });
-    var ps = Object.keys(per).sort().reverse();
-    if(!ps.length){ $('lapLoad').textContent = 'Belum ada data pembayaran.'; return; }
-    var sp = $('lapPer'), cur = sp.value;
-    sp.innerHTML = ps.map(function(p){ return '<option value="' + p + '">' + esc(bulan(p)) + '</option>'; }).join('');
-    sp.value = ps.indexOf(cur) >= 0 ? cur : ps[0];
-    var ss = $('lapSite'), cs = ss.value;
-    ss.innerHTML = '<option value="">Semua site</option>' + Object.keys(sites).sort().map(function(s){ return '<option value="' + esc(s) + '">' + esc(lapPendek(s)) + '</option>'; }).join('');
-    ss.value = sites[cs] ? cs : '';
-    lapRender();
-  }, function(e){ $('lapLoad').textContent = 'Gagal memuat: ' + String((e && e.message) || e); });
+    selesai = true;
+    try{
+      var d = J(raw, []);
+      if(!Array.isArray(d)) throw new Error((d && d.error) || 'data tidak terbaca');
+      if(!d.length && dasar.length) throw new Error('data rincian kosong');
+      lapIsi(d); lapStatus('');
+    }catch(e){ lapStatus('Rincian program gagal dimuat: ' + e.message, true); if(!dasar.length){ $('lapLoad').style.display = 'flex'; $('lapLoad').textContent = 'Gagal memuat: ' + e.message; } }
+  }, function(e){
+    selesai = true; var msg = String((e && e.message) || e);
+    lapStatus('Rincian program gagal dimuat: ' + msg + (/izin|not found|tidak ditemukan/i.test(msg) ? ' (Deploy New version untuk PaymentKetenagakerjaan.gs + ApiRun.gs)' : ''), true);
+    if(!dasar.length){ $('lapLoad').style.display = 'flex'; $('lapLoad').textContent = 'Gagal memuat: ' + msg; }
+  });
 }
-
+function lapStatus(t, err){ var el = $('lapSt'); if(!el) return; el.textContent = t || ''; el.style.color = err ? '#b42318' : '#52606d'; }
+function lapIsi(d){
+  LAP.data = d;
+  var per = {}, sites = {}; d.forEach(function(r){ per[r.periode] = 1; sites[r.site] = 1; });
+  var ps = Object.keys(per).sort().reverse();
+  if(!ps.length){ $('lapLoad').style.display = 'flex'; $('lapLoad').textContent = 'Belum ada data pembayaran.'; return; }
+  var sp = $('lapPer'), cur = sp.value;
+  sp.innerHTML = '<option value="ALL">Semua bulan</option>' + ps.map(function(p){ return '<option value="' + p + '">' + esc(bulan(p)) + '</option>'; }).join('');
+  sp.value = (cur === 'ALL' || ps.indexOf(cur) >= 0) ? cur : ps[0];
+  var ss = $('lapSite'), cs = ss.value;
+  ss.innerHTML = '<option value="">Semua site</option>' + Object.keys(sites).sort().map(function(s){ return '<option value="' + esc(s) + '">' + esc(lapPendek(s)) + '</option>'; }).join('');
+  ss.value = sites[cs] ? cs : '';
+  lapRender();
+}
 function lapRender(){
   if(!LAP.data) return;
   var p = $('lapPer').value, site = $('lapSite').value;
   LAP.periode = p; LAP.site = site;
-  LAP.html = lapDokumen(LAP.data, p, site);
-  var f = $('lapFrame'); f.srcdoc = LAP.html;
+  try{ LAP.html = lapDokumen(LAP.data, p, site); }catch(e){ $('lapLoad').style.display = 'flex'; $('lapLoad').textContent = 'Gagal menyusun laporan: ' + e.message; return; }
+  $('lapFrame').srcdoc = LAP.html;
   $('lapLoad').style.display = 'none';
 }
 
+/* ---------- isi dashboard (dokumen HTML mandiri: dipakai untuk tampilan, unduh HTML, print & PDF) ---------- */
 function lapDokumen(all, p, site){
-  var semuaPer = {}; all.forEach(function(r){ semuaPer[r.periode] = 1; });
-  var urut = Object.keys(semuaPer).sort(), iP = urut.indexOf(p), pPrev = iP > 0 ? urut[iP - 1] : '';
-  function pilih(per){ return all.filter(function(r){ return r.periode === per && (!site || r.site === site); }); }
-  var rows = pilih(p).sort(function(a, b){ return b.total - a.total; }), prev = pPrev ? pilih(pPrev) : [];
+  var SEMUA = p === 'ALL';
+  var bulanAda = {}; all.forEach(function(r){ bulanAda[r.periode] = 1; });
+  var urut = Object.keys(bulanAda).sort();
+  var iP = SEMUA ? urut.length - 1 : urut.indexOf(p), pAkhir = urut[iP], pPrev = (!SEMUA && iP > 0) ? urut[iP - 1] : '';
+  var data = all.filter(function(r){ return !site || r.site === site; });
   function jml(arr, k){ return Math.round(arr.reduce(function(s, r){ return s + (Number(r[k]) || 0); }, 0) * 100) / 100; }
+  function bulanIni(per){ return data.filter(function(r){ return r.periode === per; }); }
+  // baris per site: satu bulan, atau gabungan semua bulan
+  function perSite(list){
+    var m = {}, ord = [];
+    list.forEach(function(r){
+      var o = m[r.site]; if(!o){ o = m[r.site] = { site: r.site, npp: r.npp, tk: 0, tkPer: '', total: 0, jht: 0, jp: 0, jkk: 0, jkm: 0, jkp: 0, tanpaProgram: false, bulan: 0 }; ord.push(o); }
+      ['total', 'jht', 'jp', 'jkk', 'jkm', 'jkp'].forEach(function(k){ o[k] = Math.round((o[k] + (Number(r[k]) || 0)) * 100) / 100; });
+      if(r.periode >= o.tkPer){ o.tkPer = r.periode; o.tk = Number(r.tk) || 0; o.npp = r.npp || o.npp; }
+      if(r.tanpaProgram) o.tanpaProgram = true; o.bulan++;
+    });
+    return ord.sort(function(a, b){ return b.total - a.total; });
+  }
+  var rows = perSite(SEMUA ? data : bulanIni(p)), prev = pPrev ? perSite(bulanIni(pPrev)) : [];
   var T = { total: jml(rows, 'total'), tk: jml(rows, 'tk'), jht: jml(rows, 'jht'), jp: jml(rows, 'jp'), jkk: jml(rows, 'jkk'), jkm: jml(rows, 'jkm'), jkp: jml(rows, 'jkp') };
   var TP = { total: jml(prev, 'total'), tk: jml(prev, 'tk') };
-  var now = new Date(), bln = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-  var tglCetak = now.getDate() + ' ' + bln[now.getMonth()] + ' ' + now.getFullYear() + ', ' + ('0' + now.getHours()).slice(-2) + ':' + ('0' + now.getMinutes()).slice(-2) + ' WIB';
-  function delta(a, b){
-    if(!pPrev || !b) return '<span class="dl">Belum ada data bulan sebelumnya</span>';
-    var d = a - b, pc = (d / b * 100).toFixed(1).replace('.', ',');
-    var naik = d > 0, sama = Math.abs(d) < 0.005;
-    return '<span class="dl ' + (sama ? '' : naik ? 'up' : 'down') + '">' + (sama ? 'Sama dengan' : (naik ? '▲ ' : '▼ ') + pc.replace('-', '') + '% dari') + ' ' + esc(bulan(pPrev)) + '</span>';
+  var tanpaP = rows.some(function(r){ return r.tanpaProgram; });
+  // tren bulanan
+  var trenBln = SEMUA ? urut : urut.slice(Math.max(0, iP - 11), iP + 1);
+  var tren = trenBln.map(function(per){ var a = bulanIni(per); return { p: per, t: jml(a, 'total'), tk: jml(a, 'tk'), n: a.length }; });
+  var now = new Date();
+  var tglCetak = now.getDate() + ' ' + LAP_BLN[now.getMonth()] + ' ' + now.getFullYear() + ', ' + ('0' + now.getHours()).slice(-2) + '.' + ('0' + now.getMinutes()).slice(-2) + ' WIB';
+  var labelPer = SEMUA ? (urut.length > 1 ? 'Semua bulan (' + bulan(urut[0]) + ' – ' + bulan(urut[urut.length - 1]) + ')' : 'Semua bulan (' + bulan(urut[0]) + ')') : bulan(p);
+  var cakupan = site ? lapPendek(site) : 'Semua site';
+
+  // ---------- ikon ----------
+  var IK = {
+    uang: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg>',
+    orang: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.2 3-5 6-5s5.4 1.8 6 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16.5 14.2c2.3.2 3.9 1.7 4.5 4.3"/></svg>',
+    gedung: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V5.5L12 3v17M12 8.5l8 2.5V20M2.5 20h19"/><path d="M7 8h2M7 11.5h2M7 15h2M15 13.5h2M15 16.5h2"/></svg>',
+    hitung: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M8 6.5h8M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h3.5"/></svg>',
+    piala: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0V4zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20.5h7M9.5 17h5"/></svg>',
+    kalender: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6h.01"/></svg>'
+  };
+  function naikTurun(a, b, label){
+    if(!b) return '<span class="kd">' + (label || 'Belum ada bulan pembanding') + '</span>';
+    var d = (a - b) / b * 100;
+    if(Math.abs(a - b) < 0.005) return '<span class="kd">Sama dengan ' + esc(bulan(pPrev)) + '</span>';
+    return '<span class="kd"><b class="pill ' + (d > 0 ? 'naik' : 'turun') + '">' + (d > 0 ? '▲' : '▼') + ' ' + Math.abs(d).toFixed(1).replace('.', ',') + '%</b> vs ' + esc(bulan(pPrev)) + '</span>';
   }
-  var judulSite = site ? lapPendek(site) : 'Semua Site';
-  // --- KPI
-  var kpi = '<div class="kpi">' +
-    '<div class="k k1"><div class="kl">Total Pembayaran</div><div class="kv">' + lapRp(T.total) + '</div>' + delta(T.total, TP.total) + '</div>' +
-    '<div class="k"><div class="kl">Jumlah Site</div><div class="kv">' + rows.length + '</div><span class="dl">' + (pPrev ? 'Bulan lalu: ' + prev.length + ' site' : '&nbsp;') + '</span></div>' +
-    '<div class="k"><div class="kl">Tenaga Kerja</div><div class="kv">' + lapAngka(T.tk) + ' <small>orang</small></div>' + delta(T.tk, TP.tk) + '</div>' +
-    '<div class="k"><div class="kl">Rata-rata per Tenaga Kerja</div><div class="kv">' + lapRp(T.tk ? T.total / T.tk : 0) + '</div><span class="dl">Total ÷ jumlah tenaga kerja</span></div></div>';
-  // --- chart 1: total per site (bar horizontal)
-  var maxS = rows.reduce(function(m, r){ return Math.max(m, r.total); }, 0) || 1;
-  var c1 = '<div class="sec"><h2>Total Pembayaran per Site</h2><p class="sub">' + esc(bulan(p)) + ' · diurutkan dari yang terbesar</p><div class="hbars">' +
-    rows.map(function(r){
-      var w = Math.max(0.5, r.total / maxS * 100);
-      return '<div class="hr" title="' + esc(r.site) + '\n' + lapRp(r.total) + ' · ' + lapAngka(r.tk) + ' TK"><div class="hn">' + esc(lapPendek(r.site)) + '<span>NPP ' + esc(r.npp) + ' · ' + lapAngka(r.tk) + ' TK</span></div>' +
-        '<div class="ht"><div class="hf" style="width:' + w.toFixed(2) + '%"></div></div><div class="hv">' + lapRp(r.total) + '<span>' + lapPct(r.total, T.total) + '</span></div></div>';
-    }).join('') + '</div></div>';
-  // --- chart 2: komposisi program (stacked 100%)
-  var prog = [['JHT', 'Jaminan Hari Tua', T.jht, '#2a78d6'], ['JP', 'Jaminan Pensiun', T.jp, '#eb6834'], ['JKK', 'Jaminan Kecelakaan Kerja', T.jkk, '#1baf7a'], ['JKM', 'Jaminan Kematian', T.jkm, '#eda100'], ['JKP', 'Jaminan Kehilangan Pekerjaan', T.jkp, '#e87ba4']];
-  var sumP = prog.reduce(function(s, x){ return s + x[2]; }, 0) || 1;
-  var c2 = '<div class="sec"><h2>Komposisi Iuran per Program</h2><p class="sub">Porsi masing-masing program dari total iuran ' + esc(bulan(p)) + '</p>' +
-    '<div class="stack">' + prog.filter(function(x){ return x[2] > 0; }).map(function(x){ return '<div style="flex:' + x[2] + ';background:' + x[3] + '" title="' + x[0] + ' · ' + lapRp(x[2]) + ' (' + lapPct(x[2], sumP) + ')"></div>'; }).join('') + '</div>' +
-    '<table class="lg"><tbody>' + prog.map(function(x){ return '<tr><td><i style="background:' + x[3] + '"></i><b>' + x[0] + '</b> <span>' + x[1] + '</span></td><td class="n">' + lapRp(x[2]) + '</td><td class="n m">' + lapPct(x[2], sumP) + '</td></tr>'; }).join('') + '</tbody></table></div>';
-  // --- chart 3: tren per periode (kolom SVG, maks 12 periode sampai periode terpilih)
-  var tren = urut.slice(Math.max(0, iP - 11), iP + 1).map(function(per){ var a = pilih(per); return { p: per, t: jml(a, 'total'), tk: jml(a, 'tk') }; });
-  var W = 900, Hh = 230, padL = 64, padB = 30, padT = 14, maxT = tren.reduce(function(m, x){ return Math.max(m, x.t); }, 0) || 1;
-  var step = Math.pow(10, Math.floor(Math.log10(maxT))), nice = [1, 2, 2.5, 5, 10].map(function(f){ return f * step; }).filter(function(v){ return maxT / v <= 5; })[0] || step * 10;
-  var top = Math.ceil(maxT / nice) * nice, plotW = W - padL - 10, plotH = Hh - padT - padB, bw = Math.min(46, plotW / tren.length * 0.56);
-  var svg = '<svg viewBox="0 0 ' + W + ' ' + Hh + '" width="100%" role="img" aria-label="Tren total pembayaran per bulan">';
-  for(var g = 0; g <= top + 1e-6; g += nice){ var y = padT + plotH - g / top * plotH; svg += '<line x1="' + padL + '" x2="' + (W - 10) + '" y1="' + y + '" y2="' + y + '" stroke="#e8ebf0"/><text x="' + (padL - 8) + '" y="' + (y + 4) + '" text-anchor="end" class="ax">' + (g ? lapJt(g) : '0') + '</text>'; }
+  function kartu(warna, ikon, judul, nilai, bawah){ return '<div class="kp ' + warna + '"><div class="kh"><div class="kic">' + ikon + '</div><div class="kl">' + judul + '</div></div><div class="kv">' + nilai + '</div>' + bawah + '</div>'; }
+
+  // ---------- KPI ----------
+  var top1 = rows[0], kpi;
+  if(SEMUA){
+    var avgBln = tren.length ? T.total / tren.length : 0;
+    var tert = tren.slice().sort(function(a, b){ return b.t - a.t; })[0] || { p: '', t: 0 };
+    var tAkhir = tren.length ? tren[tren.length - 1] : { tk: 0 };
+    kpi = kartu('k-biru', IK.uang, 'Total pembayaran', lapRp(T.total), '<span class="kd">' + tren.length + ' bulan tercatat</span>') +
+      kartu('k-hijau', IK.kalender, 'Rata-rata per bulan', lapRp(avgBln), '<span class="kd">Total ÷ ' + tren.length + ' bulan</span>') +
+      kartu('k-ungu', IK.orang, 'Tenaga kerja', lapAngka(tAkhir.tk) + ' <small>orang</small>', '<span class="kd">Bulan terakhir (' + esc(bulan(pAkhir)) + ')</span>') +
+      kartu('k-oranye', IK.gedung, 'Jumlah site', String(rows.length), '<span class="kd">Pernah dibayarkan</span>') +
+      kartu('k-tosca', IK.piala, 'Bulan tertinggi', esc(tert.p ? bulan(tert.p) : '-'), '<span class="kd">' + lapRp(tert.t) + '</span>');
+  } else {
+    kpi = kartu('k-biru', IK.uang, 'Total pembayaran', lapRp(T.total), naikTurun(T.total, TP.total)) +
+      kartu('k-hijau', IK.orang, 'Tenaga kerja', lapAngka(T.tk) + ' <small>orang</small>', naikTurun(T.tk, TP.tk)) +
+      kartu('k-ungu', IK.gedung, 'Jumlah site', String(rows.length), '<span class="kd">' + (pPrev ? 'Bulan lalu ' + prev.length + ' site' : 'Site yang dibayarkan') + '</span>') +
+      kartu('k-oranye', IK.hitung, 'Rata-rata per tenaga kerja', lapRp(T.tk ? T.total / T.tk : 0), '<span class="kd">Total ÷ jumlah tenaga kerja</span>') +
+      kartu('k-tosca', IK.piala, 'Site terbesar', esc(top1 ? lapPendek(top1.site) : '-'), '<span class="kd">' + (top1 ? lapRp(top1.total) + ' · ' + lapPct(top1.total, T.total) : '') + '</span>');
+  }
+
+  // ---------- ringkasan kalimat ----------
+  var ring = SEMUA
+    ? 'Selama <b>' + esc(labelPer.replace(/^Semua bulan \(|\)$/g, '')) + '</b>, total iuran BPJS Ketenagakerjaan yang dibayarkan untuk <b>' + esc(cakupan.toLowerCase() === 'semua site' ? rows.length + ' site' : cakupan) + '</b> adalah <b>' + lapRp(T.total) + '</b>, rata-rata <b>' + lapRp(tren.length ? T.total / tren.length : 0) + '</b> per bulan.' +
+      (top1 && rows.length > 1 ? ' Kontributor terbesar adalah <b>' + esc(lapPendek(top1.site)) + '</b> (' + lapPct(top1.total, T.total) + ' dari total).' : '')
+    : 'Pada <b>' + esc(bulan(p)) + '</b>, total iuran BPJS Ketenagakerjaan yang dibayarkan adalah <b>' + lapRp(T.total) + '</b> untuk <b>' + lapAngka(T.tk) + ' tenaga kerja</b> di <b>' + rows.length + ' site</b>.' +
+      (top1 && rows.length > 1 ? ' Pembayaran terbesar dari <b>' + esc(lapPendek(top1.site)) + '</b> sebesar ' + lapRp(top1.total) + ' (' + lapPct(top1.total, T.total) + ').' : '') +
+      (pPrev && TP.total ? ' Dibanding ' + esc(bulan(pPrev)) + ' (' + lapRp(TP.total) + '), total ' + (Math.abs(T.total - TP.total) < 0.005 ? 'tidak berubah.' : (T.total > TP.total ? '<b class="tx-naik">naik ' : '<b class="tx-turun">turun ') + lapRp(Math.abs(T.total - TP.total)) + ' (' + Math.abs((T.total - TP.total) / TP.total * 100).toFixed(1).replace('.', ',') + '%)</b>.') : '');
+
+  // ---------- donat generik ----------
+  function donat(items, tengah1, tengah2){
+    var sum = items.reduce(function(s, x){ return s + x.v; }, 0) || 1, R = 88, r0 = 58, c = 100, ang = -Math.PI / 2;
+    var s = '<svg viewBox="0 0 200 200" class="dn" role="img">';
+    items.forEach(function(x){
+      if(x.v <= 0) return;
+      var fr = x.v / sum, a1 = ang, a2 = ang + fr * Math.PI * 2; ang = a2;
+      if(fr >= 0.9999){ s += '<circle cx="100" cy="100" r="' + ((R + r0) / 2) + '" fill="none" stroke="' + x.w + '" stroke-width="' + (R - r0) + '"><title>' + esc(x.n) + ': ' + lapRp(x.v) + '</title></circle>'; return; }
+      var big = a2 - a1 > Math.PI ? 1 : 0, P = function(r, a){ return (c + r * Math.cos(a)).toFixed(2) + ' ' + (c + r * Math.sin(a)).toFixed(2); };
+      s += '<path d="M' + P(R, a1) + 'A' + R + ' ' + R + ' 0 ' + big + ' 1 ' + P(R, a2) + 'L' + P(r0, a2) + 'A' + r0 + ' ' + r0 + ' 0 ' + big + ' 0 ' + P(r0, a1) + 'Z" fill="' + x.w + '" stroke="#fff" stroke-width="2.5"><title>' + esc(x.n) + ': ' + lapRp(x.v) + ' (' + lapPct(x.v, sum) + ')</title></path>';
+      if(fr >= 0.06){ var am = (a1 + a2) / 2, lr = (R + r0) / 2; s += '<text x="' + (c + lr * Math.cos(am)).toFixed(1) + '" y="' + (c + lr * Math.sin(am) + 3.5).toFixed(1) + '" text-anchor="middle" class="dpct">' + Math.round(fr * 100) + '%</text>'; }
+    });
+    return s + '<text x="100" y="94" text-anchor="middle" class="dc1">' + tengah1 + '</text><text x="100" y="114" text-anchor="middle" class="dc2">' + tengah2 + '</text></svg>';
+  }
+  function legenda(items){
+    var sum = items.reduce(function(s, x){ return s + x.v; }, 0) || 1;
+    return '<ul class="lgd">' + items.map(function(x){ return '<li><i style="background:' + x.w + '"></i><div class="lgn"><b>' + esc(x.n) + '</b>' + (x.k ? '<span>' + esc(x.k) + '</span>' : '') + '</div><div class="lgv">' + lapRp(x.v) + '<span>' + lapPct(x.v, sum) + '</span></div></li>'; }).join('') + '</ul>';
+  }
+
+  // ---------- A. komposisi program ----------
+  var prog = [{ n: 'JHT', k: 'Jaminan Hari Tua', v: T.jht, w: '#2a78d6' }, { n: 'JP', k: 'Jaminan Pensiun', v: T.jp, w: '#eb6834' }, { n: 'JKK', k: 'Jaminan Kecelakaan Kerja', v: T.jkk, w: '#1baf7a' }, { n: 'JKM', k: 'Jaminan Kematian', v: T.jkm, w: '#eda100' }, { n: 'JKP', k: 'Jaminan Kehilangan Pekerjaan', v: T.jkp, w: '#e87ba4' }];
+  var sumP = prog.reduce(function(s, x){ return s + x.v; }, 0);
+  var cA = '<section class="cd s4"><header><h2>Komposisi iuran per program</h2><p>Iuran perusahaan + tenaga kerja</p></header>' +
+    (tanpaP || !sumP ? '<div class="kosong">Rincian per program sedang dimuat atau belum tersedia.</div>' :
+      '<div class="dnw">' + donat(prog, 'Total iuran', lapRp(sumP)) + '</div>' + legenda(prog)) + '</section>';
+
+  // ---------- B. tren per bulan (kolom) ----------
+  var W = 560, Hh = 250, padL = 52, padB = 34, padT = 30, maxT = tren.reduce(function(m, x){ return Math.max(m, x.t); }, 0) || 1;
+  var step = Math.pow(10, Math.floor(Math.log10(maxT))), nice = [1, 2, 2.5, 5, 10].map(function(f){ return f * step; }).filter(function(v){ return maxT / v <= 4; })[0] || step * 10;
+  var top = Math.ceil(maxT * 1.08 / nice) * nice, plotW = W - padL - 8, plotH = Hh - padT - padB, slot = plotW / Math.max(1, tren.length), bw = Math.min(44, slot * 0.58);
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + Hh + '" class="tr" role="img"><defs><linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient><linearGradient id="gS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfd7fb"/><stop offset="1" stop-color="#93bbf3"/></linearGradient></defs>';
+  for(var g = 0; g <= top + 1e-6; g += nice){ var y = padT + plotH - g / top * plotH; svg += '<line x1="' + padL + '" x2="' + (W - 8) + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) + '" class="gl"/><text x="' + (padL - 8) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" class="ax">' + (g ? lapJt(g) : '0') + '</text>'; }
   tren.forEach(function(x, i){
-    var cx = padL + plotW / tren.length * (i + 0.5), h = x.t / top * plotH, y = padT + plotH - h, sel = x.p === p;
-    svg += '<g><title>' + esc(bulan(x.p)) + ': ' + lapRp(x.t) + ' (' + lapAngka(x.tk) + ' TK)</title>' +
-      '<path d="M' + (cx - bw / 2) + ' ' + (padT + plotH) + 'V' + (y + Math.min(4, h)) + 'q0 -4 4 -4h' + (bw - 8) + 'q4 0 4 4V' + (padT + plotH) + 'Z" fill="' + (sel ? '#1c5cab' : '#9ec5f4') + '"/>' +
-      '<text x="' + cx + '" y="' + (Hh - 10) + '" text-anchor="middle" class="ax' + (sel ? ' sel' : '') + '">' + bln[parseInt(x.p.slice(5), 10) - 1].slice(0, 3) + ' ' + x.p.slice(2, 4) + '</text></g>';
+    var cx = padL + slot * (i + 0.5), h = Math.max(0, x.t / top * plotH), y = padT + plotH - h, sel = SEMUA ? i === tren.length - 1 : x.p === p, rr = Math.min(6, h / 2);
+    svg += '<g><title>' + esc(bulan(x.p)) + ': ' + lapRp(x.t) + ' · ' + lapAngka(x.tk) + ' TK</title>' +
+      '<path d="M' + (cx - bw / 2).toFixed(1) + ' ' + (padT + plotH) + 'V' + (y + rr).toFixed(1) + 'q0 -' + rr + ' ' + rr + ' -' + rr + 'h' + (bw - 2 * rr).toFixed(1) + 'q' + rr + ' 0 ' + rr + ' ' + rr + 'V' + (padT + plotH) + 'Z" fill="url(#' + (sel || SEMUA ? 'gB' : 'gS') + ')"/>' +
+      (tren.length <= 6 ? '<text x="' + cx.toFixed(1) + '" y="' + (y - 7).toFixed(1) + '" text-anchor="middle" class="vl">' + lapNum(x.t) + '</text>' : '') +
+      '<text x="' + cx.toFixed(1) + '" y="' + (Hh - 12) + '" text-anchor="middle" class="ax' + (sel ? ' sel' : '') + '">' + lapBlnPendek(x.p) + '</text></g>';
   });
   svg += '</svg>';
-  var c3 = '<div class="sec"><h2>Tren Total Pembayaran</h2><p class="sub">' + (tren.length > 1 ? tren.length + ' bulan terakhir sampai ' + esc(bulan(p)) + ' · bulan terpilih berwarna gelap' : 'Baru ada data 1 bulan') + '</p>' + svg +
-    '<table class="tt"><thead><tr><th>Periode</th><th class="n">Tenaga Kerja</th><th class="n">Total Pembayaran</th></tr></thead><tbody>' +
-    tren.slice().reverse().map(function(x){ return '<tr' + (x.p === p ? ' class="sel"' : '') + '><td>' + esc(bulan(x.p)) + '</td><td class="n">' + lapAngka(x.tk) + '</td><td class="n">' + lapRp(x.t) + '</td></tr>'; }).join('') + '</tbody></table></div>';
-  // --- tabel rincian
-  var c4 = '<div class="sec brk"><h2>Rincian Pembayaran per Site</h2><p class="sub">' + esc(bulan(p)) + ' · angka sesuai F2A SIPP BPJS Ketenagakerjaan (tanpa pembulatan)</p><table class="rt"><thead><tr><th>No</th><th>Site</th><th>NPP</th><th class="n">TK</th><th class="n">JHT (Rp)</th><th class="n">JP (Rp)</th><th class="n">JKK (Rp)</th><th class="n">JKM (Rp)</th><th class="n">JKP (Rp)</th><th class="n">Total (Rp)</th><th class="n">%</th></tr></thead><tbody>' +
-    rows.map(function(r, i){ return '<tr><td>' + (i + 1) + '</td><td class="st">' + esc(lapPendek(r.site)) + '</td><td>' + esc(r.npp) + '</td><td class="n">' + lapAngka(r.tk) + '</td><td class="n">' + lapNum(r.jht) + '</td><td class="n">' + lapNum(r.jp) + '</td><td class="n">' + lapNum(r.jkk) + '</td><td class="n">' + lapNum(r.jkm) + '</td><td class="n">' + lapNum(r.jkp) + '</td><td class="n b">' + lapNum(r.total) + '</td><td class="n m">' + lapPct(r.total, T.total) + '</td></tr>'; }).join('') +
-    '</tbody><tfoot><tr><td></td><td>TOTAL</td><td></td><td class="n">' + lapAngka(T.tk) + '</td><td class="n">' + lapNum(T.jht) + '</td><td class="n">' + lapNum(T.jp) + '</td><td class="n">' + lapNum(T.jkk) + '</td><td class="n">' + lapNum(T.jkm) + '</td><td class="n">' + lapNum(T.jkp) + '</td><td class="n">' + lapNum(T.total) + '</td><td class="n">100%</td></tr></tfoot></table>' +
-    (Math.abs(sumP - T.total) >= 1 ? '<p class="note">Catatan: jumlah per program (' + lapRp(sumP) + ') berbeda dari total pembayaran. Ambil ulang F2A site yang datanya lama supaya rincian program ikut baris total F2A.</p>' : '') + '</div>';
+  var cB = '<section class="cd s5"><header><h2>Tren total pembayaran</h2><p>' + (tren.length > 1 ? tren.length + ' bulan · dalam rupiah' + (tren.length > 6 ? ' · arahkan kursor ke batang atau lihat tabel untuk angka lengkap' : '') : 'Baru ada data 1 bulan') + '</p></header>' + svg +
+    '<table class="mini"><tbody>' + tren.slice().reverse().slice(0, SEMUA ? 99 : 4).map(function(x, i, arr){
+      var sb = tren[tren.indexOf(x) - 1], d = sb && sb.t ? (x.t - sb.t) / sb.t * 100 : null;
+      return '<tr' + ((!SEMUA && x.p === p) ? ' class="on"' : '') + '><td>' + esc(bulan(x.p)) + '</td><td class="n">' + lapRp(x.t) + '</td><td class="n">' + (d == null ? '<span class="mu">–</span>' : '<b class="pill ' + (d > 0 ? 'naik' : d < 0 ? 'turun' : '') + '">' + (d > 0 ? '▲ ' : d < 0 ? '▼ ' : '') + Math.abs(d).toFixed(1).replace('.', ',') + '%</b>') + '</td></tr>';
+    }).join('') + '</tbody></table></section>';
 
-  var css = '*{box-sizing:border-box}body{margin:0;background:#eef1f6;font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;color:#1d2733;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
-    '.doc{max-width:960px;margin:24px auto;background:#fff;border-radius:10px;box-shadow:0 4px 24px rgba(15,31,51,.08);overflow:hidden}' +
-    '.hd{background:#0f2f57;color:#fff;padding:26px 34px 22px}.hd .co{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.75}.hd h1{margin:6px 0 4px;font-size:23px;font-weight:700}.hd .meta{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:13px;opacity:.9}' +
-    '.in{padding:24px 34px 30px}.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:8px}.k{border:1px solid #e3e8ef;border-radius:8px;padding:13px 15px}.k1{background:#f2f7fd;border-color:#cfe0f5}' +
-    '.kl{font-size:11.5px;color:#5b6876;text-transform:uppercase;letter-spacing:.05em}.kv{font-size:19px;font-weight:700;margin:5px 0 4px;color:#0f1f33;white-space:nowrap}.kv small{font-size:12px;font-weight:500;color:#5b6876}.dl{font-size:11.5px;color:#5b6876}.dl.up{color:#0b6b3a}.dl.down{color:#b42318}' +
-    '.sec{margin-top:26px;page-break-inside:avoid;break-inside:avoid}.sec.brk{page-break-inside:auto;break-inside:auto}h2{font-size:15.5px;margin:0;color:#0f1f33}.sub{font-size:12px;color:#5b6876;margin:3px 0 12px}' +
-    '.hbars{display:flex;flex-direction:column;gap:9px}.hr{display:grid;grid-template-columns:230px 1fr 150px;align-items:center;gap:12px}.hn{font-size:12.5px;font-weight:600;line-height:1.25}.hn span{display:block;font-weight:400;font-size:11px;color:#5b6876}' +
-    '.ht{height:16px;background:#f1f3f6;border-radius:4px}.hf{height:100%;background:#2a78d6;border-radius:0 4px 4px 0}.hv{font-size:12.5px;font-weight:600;text-align:right;white-space:nowrap}.hv span{display:block;font-weight:400;font-size:11px;color:#5b6876}' +
-    '.stack{display:flex;gap:2px;height:22px;border-radius:4px;overflow:hidden;margin-bottom:10px}' +
-    'table{border-collapse:collapse;width:100%;font-size:12px}.lg td{padding:6px 4px;border-bottom:1px solid #eef1f4}.lg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:8px;vertical-align:-1px}.lg span{color:#5b6876}' +
-    '.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}.m{color:#5b6876}.b{font-weight:700}' +
-    '.ax{font-size:11px;fill:#5b6876}.ax.sel{fill:#0f1f33;font-weight:700}' +
-    '.tt{margin-top:8px}.tt th,.tt td{padding:6px 8px;border-bottom:1px solid #eef1f4}.tt th{text-align:left;font-size:11px;color:#5b6876;text-transform:uppercase;letter-spacing:.04em}.tt th.n{text-align:right}.tt tr.sel td{font-weight:700;background:#f2f7fd}' +
-    '.rt{font-size:10.5px}.rt th{background:#0f2f57;color:#fff;padding:7px 6px;text-align:left;font-weight:600}.rt th.n{text-align:right}.rt td{padding:6px;border-bottom:1px solid #e9edf2;vertical-align:top}.rt tbody tr:nth-child(even) td{background:#f8fafc}.rt .st{min-width:120px}.rt td.n,.rt th.n{padding-left:4px}' +
-    '.rt tfoot td{font-weight:700;background:#e8eff9;border-top:2px solid #0f2f57;padding:8px 6px}thead{display:table-header-group}tr{page-break-inside:avoid}' +
-    '.note{font-size:11.5px;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:8px 10px;margin-top:10px}' +
-    '.ft{border-top:1px solid #e3e8ef;margin-top:28px;padding-top:12px;font-size:11px;color:#5b6876;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}' +
-    '@media (max-width:720px){.kpi{grid-template-columns:repeat(2,1fr)}.hr{grid-template-columns:1fr;gap:4px}.hv{text-align:left}.in{padding:18px 16px}.hd{padding:20px 16px}.rt{display:block;overflow-x:auto}}' +
-    '@page{size:A4;margin:12mm}@media print{body{background:#fff}.doc{margin:0;box-shadow:none;border-radius:0;max-width:none}.hd{padding:18px 22px}.in{padding:16px 4px}.kpi{grid-template-columns:repeat(4,1fr)}.hr{grid-template-columns:200px 1fr 140px}.rt{font-size:8.4px}.rt th,.rt td,.rt tfoot td{padding:5px 3px}.rt .st{min-width:0;width:95px}.rt td:nth-child(3){font-size:8px}}' +
-    '.pdf .doc{margin:0;box-shadow:none;border-radius:0;max-width:none;width:1000px}';
+  // ---------- C. top site ----------
+  var cC = '<section class="cd s3"><header><h2>Site terbesar</h2><p>Berdasarkan total pembayaran</p></header><ol class="top">' +
+    rows.slice(0, 5).map(function(r, i){ return '<li><span class="md m' + (i + 1) + '">' + (i + 1) + '</span><div class="tn"><b>' + esc(lapPendek(r.site)) + '</b><span>' + lapAngka(r.tk) + ' TK · NPP ' + esc(r.npp) + '</span><div class="tb"><i style="width:' + (top1 && top1.total ? (r.total / top1.total * 100).toFixed(1) : 0) + '%"></i></div></div><div class="tv">' + lapPct(r.total, T.total) + '</div></li>'; }).join('') +
+    (rows.length ? '' : '<li class="mu">Belum ada data</li>') + '</ol></section>';
+
+  // ---------- D. total per site (batang horizontal) ----------
+  var mx = top1 ? top1.total : 1;
+  var cD = '<section class="cd s7"><header><h2>Total pembayaran per site</h2><p>' + esc(labelPer) + ' · urut dari yang terbesar</p></header><div class="hb2">' +
+    rows.map(function(r){ var w = Math.max(0.8, r.total / (mx || 1) * 100); return '<div class="hrw" title="' + esc(r.site) + '"><div class="hnm">' + esc(lapPendek(r.site)) + '</div><div class="htr"><div class="hfl" style="width:' + (w * 0.66).toFixed(2) + '%"></div><div class="hvl">' + lapRp(r.total) + ' <em>' + lapPct(r.total, T.total) + '</em></div></div></div>'; }).join('') + '</div></section>';
+
+  // ---------- E. porsi per site (donat) ----------
+  var WS = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4'], porsi = rows.slice(0, 5).map(function(r, i){ return { n: lapPendek(r.site), v: r.total, w: WS[i] }; });
+  if(rows.length > 5) porsi.push({ n: 'Lainnya (' + (rows.length - 5) + ' site)', v: jml(rows.slice(5), 'total'), w: '#98a2b3' });
+  var cE = '<section class="cd s5"><header><h2>Porsi pembayaran per site</h2><p>Persentase dari total ' + esc(SEMUA ? 'semua bulan' : bulan(p)) + '</p></header>' +
+    '<div class="dnw">' + donat(porsi, 'Total ' + rows.length + ' site', lapRp(T.total)) + '</div>' + legenda(porsi) + '</section>';
+
+  // ---------- F. tabel rincian + tren mini ----------
+  function spark(site){
+    var v = trenBln.map(function(per){ var a = data.filter(function(r){ return r.periode === per && r.site === site; }); return a.length ? jml(a, 'total') : null; });
+    var ada = v.filter(function(x){ return x != null; }); if(ada.length < 2) return '<span class="mu">–</span>';
+    var mn = Math.min.apply(null, ada), mxv = Math.max.apply(null, ada), w = 84, h = 24, pts = [];
+    v.forEach(function(x, i){ if(x == null) return; pts.push((i / Math.max(1, v.length - 1) * (w - 4) + 2).toFixed(1) + ',' + (h - 3 - (mxv === mn ? 0.5 : (x - mn) / (mxv - mn)) * (h - 6)).toFixed(1)); });
+    var naik = ada[ada.length - 1] >= ada[ada.length - 2];
+    return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '"><polyline points="' + pts.join(' ') + '" fill="none" stroke="' + (naik ? '#12a150' : '#d92d20') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+  var mp = {}; prev.forEach(function(r){ mp[r.site] = r; });
+  function sel(r){
+    if(SEMUA) return '<td class="n">' + r.bulan + '</td>';
+    var a = mp[r.site]; if(!pPrev) return '<td class="n mu">–</td>'; if(!a) return '<td class="n"><span class="tag">Baru</span></td>';
+    var d = r.total - a.total; if(Math.abs(d) < 0.005) return '<td class="n mu">Tetap</td>';
+    return '<td class="n"><b class="pill ' + (d > 0 ? 'naik' : 'turun') + '">' + (d > 0 ? '▲ ' : '▼ ') + Math.abs(d / a.total * 100).toFixed(1).replace('.', ',') + '%</b></td>';
+  }
+  function pv(r, k){ return r.tanpaProgram ? '<span class="mu">–</span>' : lapNum(r[k]); }
+  var cF = '<section class="cd s12 brk"><header><h2>Rincian pembayaran per site</h2><p>' + esc(labelPer) + ' · dalam rupiah · angka sesuai F2A SIPP, tanpa pembulatan</p></header><div class="tw"><table class="rt"><thead><tr><th>No</th><th>Site</th><th>NPP</th><th class="n">TK' + (SEMUA ? '*' : '') + '</th><th class="n">JHT</th><th class="n">JP</th><th class="n">JKK</th><th class="n">JKM</th><th class="n">JKP</th><th class="n">Total</th><th class="n">Porsi</th><th class="n">' + (SEMUA ? 'Bulan' : 'vs bln lalu') + '</th><th>Tren</th></tr></thead><tbody>' +
+    rows.map(function(r, i){ return '<tr><td class="mu">' + (i + 1) + '</td><td class="st">' + esc(lapPendek(r.site)) + '</td><td class="mu">' + esc(r.npp) + '</td><td class="n">' + lapAngka(r.tk) + '</td><td class="n">' + pv(r, 'jht') + '</td><td class="n">' + pv(r, 'jp') + '</td><td class="n">' + pv(r, 'jkk') + '</td><td class="n">' + pv(r, 'jkm') + '</td><td class="n">' + pv(r, 'jkp') + '</td><td class="n b">' + lapNum(r.total) + '</td><td class="n">' + lapPct(r.total, T.total) + '</td>' + sel(r) + '<td>' + spark(r.site) + '</td></tr>'; }).join('') +
+    '</tbody><tfoot><tr><td></td><td>Total</td><td></td><td class="n">' + lapAngka(T.tk) + '</td><td class="n">' + (tanpaP ? '–' : lapNum(T.jht)) + '</td><td class="n">' + (tanpaP ? '–' : lapNum(T.jp)) + '</td><td class="n">' + (tanpaP ? '–' : lapNum(T.jkk)) + '</td><td class="n">' + (tanpaP ? '–' : lapNum(T.jkm)) + '</td><td class="n">' + (tanpaP ? '–' : lapNum(T.jkp)) + '</td><td class="n">' + lapNum(T.total) + '</td><td class="n">100%</td><td></td><td></td></tr></tfoot></table></div>' +
+    (SEMUA ? '<p class="fn">* TK = jumlah tenaga kerja pada bulan terakhir site tersebut dibayarkan.</p>' : '') +
+    (!tanpaP && Math.abs(sumP - T.total) >= 1 ? '<p class="warn">Jumlah per program (' + lapRp(sumP) + ') berbeda dari total pembayaran. Ambil ulang F2A site yang datanya lama supaya rincian program ikut baris total F2A.</p>' : '') + '</section>';
+
+  var css = '*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}' +
+    'body{margin:0;background:#eef2f8;font-family:"Plus Jakarta Sans","Segoe UI",Roboto,Arial,sans-serif;color:#14213d;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
+    '.wrap{max-width:1280px;margin:0 auto;padding:22px 22px 28px}' +
+    '.top0{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}' +
+    '.brand{display:flex;align-items:center;gap:14px}.logo{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#0B7FC7,#14213d);display:grid;place-items:center;color:#fff;font-weight:800;font-size:19px;letter-spacing:-.02em}' +
+    'h1{margin:0;font-size:25px;font-weight:800;letter-spacing:-.02em;color:#14213d}.co{font-size:13px;color:#5b6b82;margin-top:2px}' +
+    '.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{background:#fff;border:1px solid #dbe3ef;border-radius:999px;padding:7px 13px;font-size:12.5px;color:#3d4b63}.chip b{color:#14213d}' +
+    '.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}' +
+    '.kp{border-radius:16px;padding:15px 16px 14px;color:#fff;min-width:0;box-shadow:0 8px 20px -10px rgba(20,33,61,.45)}.kh{display:flex;align-items:center;gap:10px;margin-bottom:10px}' +
+    '.kic{width:36px;height:36px;flex:none;border-radius:50%;background:rgba(255,255,255,.95);display:grid;place-items:center}.kic svg{width:20px;height:20px}' +
+    '.kl{font-size:12.5px;font-weight:600;opacity:.95;line-height:1.3}.kv{font-size:20px;font-weight:800;letter-spacing:-.015em;margin:0 0 6px;line-height:1.2;overflow-wrap:anywhere}.kv small{font-size:12px;font-weight:600;opacity:.9}.kd{font-size:11.5px;opacity:.95;line-height:1.4}' +
+    '.kp .pill{background:rgba(255,255,255,.22);color:#fff}' +
+    '.k-biru{background:linear-gradient(135deg,#1d4ed8,#3b82f6)}.k-biru .kic{color:#1d4ed8}.k-hijau{background:linear-gradient(135deg,#047857,#10b981)}.k-hijau .kic{color:#047857}' +
+    '.k-ungu{background:linear-gradient(135deg,#6d28d9,#8b5cf6)}.k-ungu .kic{color:#6d28d9}.k-oranye{background:linear-gradient(135deg,#c2410c,#f59e0b)}.k-oranye .kic{color:#c2410c}.k-tosca{background:linear-gradient(135deg,#0e7490,#06b6d4)}.k-tosca .kic{color:#0e7490}' +
+    '.ring{display:flex;gap:12px;align-items:flex-start;background:#fff;border-radius:16px;padding:14px 18px;margin:14px 0;font-size:13.5px;line-height:1.65;border:1px solid #e3e9f2}.ring .ri{width:30px;height:30px;flex:none;border-radius:9px;background:#e8f1fd;color:#1d4ed8;display:grid;place-items:center}.ring .ri svg{width:18px;height:18px}.tx-naik{color:#067647}.tx-turun{color:#b42318}' +
+    '.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}' +
+    '.cd{background:#fff;border-radius:16px;padding:18px 18px 16px;border:1px solid #e3e9f2;min-width:0;break-inside:avoid;page-break-inside:avoid}.cd.brk{break-inside:auto;page-break-inside:auto}' +
+    '.s3{grid-column:span 3}.s4{grid-column:span 4}.s5{grid-column:span 5}.s7{grid-column:span 7}.s12{grid-column:span 12}' +
+    '.cd header{margin-bottom:12px}.cd h2{margin:0;font-size:15.5px;font-weight:700;color:#14213d}.cd header p{margin:3px 0 0;font-size:12px;color:#6b7a90}' +
+    '.dnw{display:flex;justify-content:center;margin:2px 0 10px}.dn{width:190px;height:190px}.dpct{font-size:10px;font-weight:700;fill:#fff}.dc1{font-size:11px;fill:#6b7a90}.dc2{font-size:10.5px;font-weight:800;fill:#14213d}' +
+    '.lgd{list-style:none;margin:0;padding:0}.lgd li{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid #eef2f7}.lgd li:first-child{border-top:0}.lgd i{width:11px;height:11px;border-radius:50%;flex:none}' +
+    '.lgn{flex:1;min-width:0;font-size:12.5px}.lgn b{display:block;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lgn span{font-size:11px;color:#6b7a90}.lgv{text-align:right;font-size:12.5px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}.lgv span{display:block;font-size:11px;font-weight:600;color:#6b7a90}' +
+    '.tr{width:100%;height:auto;display:block}.gl{stroke:#edf1f6}.ax{font-size:11px;fill:#6b7a90}.ax.sel{fill:#14213d;font-weight:700}.vl{font-size:10.5px;font-weight:700;fill:#1d4ed8}' +
+    '.mini{width:100%;border-collapse:collapse;margin-top:8px;font-size:12.5px}.mini td{padding:6px 4px;border-top:1px solid #eef2f7}.mini tr.on td{font-weight:700;background:#f2f7ff}' +
+    '.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}.b{font-weight:800}.mu{color:#8a97ab}' +
+    '.pill{display:inline-block;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;background:#eef2f7;color:#3d4b63}.pill.naik{background:#e3f6ea;color:#067647}.pill.turun{background:#fdeceb;color:#b42318}' +
+    '.top{list-style:none;margin:0;padding:0}.top li{display:flex;align-items:center;gap:11px;padding:9px 0;border-top:1px solid #eef2f7}.top li:first-child{border-top:0}' +
+    '.md{width:28px;height:28px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;background:#eef2f7;color:#3d4b63}.md.m1{background:#fde68a;color:#854d0e}.md.m2{background:#e2e8f0;color:#334155}.md.m3{background:#fed7aa;color:#9a3412}' +
+    '.tn{flex:1;min-width:0}.tn b{display:block;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tn span{font-size:11px;color:#6b7a90}.tb{height:5px;background:#eef2f7;border-radius:3px;margin-top:5px}.tb i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#3b82f6,#06b6d4)}.tv{font-size:13px;font-weight:800;color:#1d4ed8}' +
+    '.hb2{display:flex;flex-direction:column;gap:11px}.hrw{display:grid;grid-template-columns:minmax(120px,30%) 1fr;gap:12px;align-items:center}.hnm{font-size:12.5px;font-weight:600;line-height:1.3}' +
+    '.htr{display:flex;align-items:center;gap:9px}.hfl{height:20px;border-radius:0 6px 6px 0;background:linear-gradient(90deg,#1d4ed8,#3b82f6);flex:none}.hvl{font-size:12.5px;font-weight:700;white-space:nowrap}.hvl em{font-style:normal;font-size:11px;font-weight:700;color:#3d4b63;background:#eef2f7;border-radius:999px;padding:1px 7px;margin-left:3px}' +
+    '.tw{overflow-x:auto}.rt{width:100%;border-collapse:separate;border-spacing:0;font-size:12px}.rt th{background:#14213d;color:#fff;font-weight:600;padding:9px 8px;text-align:left;white-space:nowrap}.rt th:first-child{border-radius:10px 0 0 0}.rt th:last-child{border-radius:0 10px 0 0}.rt th.n{text-align:right}' +
+    '.rt td{padding:8px;border-bottom:1px solid #eef2f7;vertical-align:middle}.rt tbody tr:nth-child(even) td{background:#f8fafd}.rt .st{font-weight:600;min-width:150px}.rt tfoot td{font-weight:800;background:#e8f0fc;padding:10px 8px;border-top:2px solid #14213d}' +
+    '.tag{font-size:10.5px;font-weight:700;background:#e8f1fd;color:#1d4ed8;border-radius:999px;padding:2px 8px}.kosong{background:#f6f8fb;border-radius:12px;padding:30px 14px;text-align:center;font-size:12.5px;color:#6b7a90}' +
+    '.fn{font-size:11px;color:#6b7a90;margin:8px 0 0}.warn{font-size:12px;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:9px 12px;margin:10px 0 0}' +
+    '.ft{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:16px;font-size:11.5px;color:#6b7a90}' +
+    'thead{display:table-header-group}tr{break-inside:avoid;page-break-inside:avoid}' +
+    '@media (max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.s3,.s4,.s5,.s7{grid-column:span 6}}' +
+    '@media (max-width:720px){.wrap{padding:14px 12px}.kpis{grid-template-columns:1fr}.s3,.s4,.s5,.s7{grid-column:span 12}h1{font-size:20px}}' +
+    '@page{size:A4 landscape;margin:8mm}@media print{body{background:#fff;zoom:.78}.wrap{max-width:none;padding:0}.cd,.ring{border-color:#dfe5ee}.kp{box-shadow:none}}' +
+    '.pdf body,body.pdf{background:#fff}.pdf .wrap{width:1280px;max-width:none}';
   return '<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
-    '<title>Laporan Pembayaran BPJS Ketenagakerjaan - ' + esc(bulan(p)) + '</title><style>' + css + '</style></head><body><div class="doc">' +
-    '<div class="hd"><div class="co">PT Shelter Indonesia Gemilang</div><h1>Laporan Pembayaran BPJS Ketenagakerjaan</h1><div class="meta"><span>Periode: <b>' + esc(bulan(p)) + '</b></span><span>Cakupan: <b>' + esc(judulSite) + '</b></span><span>Dicetak: ' + tglCetak + '</span></div></div>' +
-    '<div class="in">' + kpi + c1 + c2 + c3 + c4 +
-    '<div class="ft"><span>Sumber: F2A SIPP BPJS Ketenagakerjaan, Portal HRD SHELTER.</span><span>Arahkan kursor ke grafik untuk melihat angka lengkap.</span></div></div></div></body></html>';
+    '<title>Dashboard Pembayaran BPJS Ketenagakerjaan - ' + esc(labelPer) + '</title>' +
+    '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">' +
+    '<style>' + css + '</style></head><body><div class="wrap">' +
+    '<div class="top0"><div class="brand"><div class="logo">S</div><div><h1>Pembayaran BPJS Ketenagakerjaan</h1><div class="co">PT Shelter Indonesia Gemilang · Laporan per site</div></div></div>' +
+    '<div class="chips"><span class="chip">Periode <b>' + esc(labelPer) + '</b></span><span class="chip">Cakupan <b>' + esc(cakupan) + '</b></span><span class="chip">Dicetak ' + tglCetak + '</span></div></div>' +
+    '<div class="kpis">' + kpi + '</div>' +
+    '<div class="ring"><div class="ri">' + IK.info + '</div><div>' + ring + '</div></div>' +
+    '<div class="grid">' + cA + cB + cC + cD + cE + cF + '</div>' +
+    '<div class="ft"><span>Sumber: F2A SIPP BPJS Ketenagakerjaan · Portal HRD SHELTER</span><span>Semua angka rupiah sesuai F2A, tanpa pembulatan. Angka "jt" hanya di garis skala grafik.</span></div>' +
+    '</div></body></html>';
 }
 
-function lapNamaFile(ext){ return 'Laporan_BPJS_TK_' + LAP.periode + (LAP.site ? '_' + lapPendek(LAP.site).replace(/[^A-Za-z0-9]+/g, '_').slice(0, 40) : '') + '.' + ext; }
+function lapNamaFile(ext){ return 'Dashboard_BPJS_TK_' + (LAP.periode === 'ALL' ? 'Semua_Bulan' : LAP.periode) + (LAP.site ? '_' + lapPendek(LAP.site).replace(/[^A-Za-z0-9]+/g, '_').slice(0, 40) : '') + '.' + ext; }
 function lapUnduhHtml(){
   if(!LAP.html) return;
   var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([LAP.html], { type: 'text/html;charset=utf-8' })); a.download = lapNamaFile('html');
@@ -1711,15 +1858,18 @@ function lapUnduhPdf(){
   function selesai(){ b.disabled = false; b.textContent = 'Unduh PDF'; }
   function jalan(){
     var doc = w.document; doc.body.classList.add('pdf');
-    w.html2pdf().set({ margin: [8, 8, 10, 8], filename: lapNamaFile('pdf'), image: { type: 'jpeg', quality: 0.96 },
-      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 1000 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, pagebreak: { mode: ['css', 'legacy'], avoid: ['.sec:not(.brk)', '.k', '.hr', 'tr'] } })
-      .from(doc.querySelector('.doc')).save().then(function(){ doc.body.classList.remove('pdf'); selesai(); }, function(e){ doc.body.classList.remove('pdf'); selesai(); toast('PDF gagal: ' + (e && e.message || e), 'err'); });
+    var siap = (doc.fonts && doc.fonts.ready) ? doc.fonts.ready : Promise.resolve();
+    siap.then(function(){
+      return w.html2pdf().set({ margin: [6, 6, 6, 6], filename: lapNamaFile('pdf'), image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 1320 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, pagebreak: { mode: ['css', 'legacy'], avoid: ['.cd:not(.brk)', '.kp', '.ring', 'tr'] } })
+        .from(doc.querySelector('.wrap')).save();
+    }).then(function(){ doc.body.classList.remove('pdf'); selesai(); }, function(e){ doc.body.classList.remove('pdf'); selesai(); toast('PDF gagal: ' + ((e && e.message) || e) + '. Pakai Print lalu Save as PDF.', 'err'); });
   }
   if(w.html2pdf) return jalan();
   var sc = w.document.createElement('script');
   sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-  sc.onload = jalan; sc.onerror = function(){ selesai(); toast('Pembuat PDF gagal dimuat. Cek internet, atau pakai Print → Save as PDF.', 'err'); };
+  sc.onload = jalan; sc.onerror = function(){ selesai(); toast('Pembuat PDF gagal dimuat. Cek internet, atau pakai Print lalu Save as PDF.', 'err'); };
   w.document.head.appendChild(sc);
 }
 </script>
