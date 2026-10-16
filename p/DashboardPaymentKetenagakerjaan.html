@@ -826,7 +826,18 @@ function jalankanSipp(lanjut){
   ctx.site = siteDariNpp(ctx.npp) || String($('spNama').value || '').trim().replace(/\s+/g, ' ').toUpperCase();  // kolom nama ikut NPP, jadi aman dipakai kalau riwayat kosong; nama site mengikuti NPP: dari riwayat dulu, lalu dikoreksi dengan nama resmi dari SIPP
   SIPP_BUSY = true; $('spGo').disabled = true; $('spGo').textContent = 'Berjalan…'; if(lanjut !== true) $('spLog').innerHTML = '';
   var kartu = SP_MODE === 'kartu';
+  var segar = kartu && !SP_KB_LAGI;  // mulai baru (bukan bagian lanjutan)
   if(kartu){ if(!SP_KB_LAGI) SP_KB = { h: 1, k: 2, par: 6, seen: {}, coba: {}, baru: 0, lewat: 0, gagal: 0, ganti: 0, simpan: 0, akhir: false }; SP_KB_LAGI = false; ctx.halaman = SP_KB.h; }
+  // kartu: baca dulu daftar kartu yang sudah tersimpan supaya tidak mengambil ulang yang sudah ada
+  if(segar && !jalankanSipp._kunci){
+    spLog('Membaca daftar kartu yang sudah tersimpan…');
+    call('getPaymentTkKartuKeys', [], function(k){
+      var o = J(k, {}); KARTUKEYS = {}; if(Array.isArray(o)) o.forEach(function(x){ KARTUKEYS[x] = 'x'; }); else KARTUKEYS = o || {};
+      spLog(Object.keys(KARTUKEYS).length + ' kartu sudah tersimpan, akan dilewati.');
+      SIPP_BUSY = false; jalankanSipp._kunci = true; try { jalankanSipp(true); } finally { jalankanSipp._kunci = false; }
+    }, function(){ spLog('Daftar kartu tersimpan gagal dibaca. Coba klik Mulai Ambil lagi.', '#dc2626'); sippBerhenti(); });
+    return;
+  }
   sippPing(function(ada, basi){
     if(ada && basi){ spLog('Ekstensi terdeteksi tapi sambungannya basi (ekstensi baru di-refresh atau jendela aplikasi ini belum memuat ulang ekstensi). Tutup jendela aplikasi ini sepenuhnya lalu buka lagi. Kalau masih sama, buka web ini di tab Chrome biasa.', '#dc2626'); sippBerhenti(); return; }
     if(!ada){ spLog('Ekstensi SHELTER-SIPP belum terdeteksi. Pasang dulu lalu refresh halaman ini.', '#dc2626'); sippBerhenti(); return; }
