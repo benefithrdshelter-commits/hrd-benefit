@@ -849,7 +849,7 @@ function jalankanSipp(lanjut){
       if(d.kind !== 'done' || selesai) return;
       selesai = true; stop();
       if(d.ok && d.nama && (d.namaPasti || !ctx.site)){ ctx.site = String(d.nama).trim().replace(/\s+/g, ' ').toUpperCase(); $('spNama').value = ctx.site; spLog('Nama site dari SIPP: ' + ctx.site); }
-      if(d.ok && !ctx.site && !kartu){ spLog('Nama perusahaan tidak terbaca dari SIPP. Isi kolom nama site lalu ulangi.', '#dc2626'); toast('Isi nama site, lalu ulangi.', 'err'); sippBerhenti(); return; }
+      // nama site belum ada (riwayat kosong & header SIPP tidak terbaca): diambil dari nama perusahaan di PDF F2A (lihat sippHasil)
       if(kartu && !d.ok && d.kMismatch && (SP_KB.par > 1 || SP_KB.k > 1)){ if(SP_KB.par > 1){ SP_KB.par = 1; spLog('Memilih serentak ada yang hilang. Diulang memilih satu per satu.', '#b45309'); } else { SP_KB.k = 1; spLog('Pilihan tidak bertahan antar halaman tabel. Diulang dengan 1 halaman tabel (sampai 100 orang) per bagian.', '#b45309'); } SP_KB.h = 1; SP_KB_LAGI = true; SIPP_BUSY = false; setTimeout(function(){ jalankanSipp(true); }, 800); return; }
       if(d.basi){ spLog(d.error, '#dc2626'); toast('Tekan Ctrl+F5 di halaman ini dulu, lalu coba lagi.', 'err'); sippBerhenti(); return; }
       if(kartu) sippKartuHasil(ctx, d); else sippHasil(ctx, d);
@@ -1045,6 +1045,8 @@ function sippHasil(ctx, d){
   spLog('PDF diterima (NPP ' + ctx.npp + '). Membaca F2A…');
   var f = b64File(d.f2a.b64, d.f2a.name);
   bacaPdf(f, function(res){
+    if(!ctx.site && res.unit){ ctx.site = String(res.unit).trim().replace(/\s+/g, ' ').toUpperCase(); $('spNama').value = ctx.site; spLog('Nama site dari PDF F2A: ' + ctx.site); }
+    if(!ctx.site){ spLog('Nama perusahaan tidak terbaca dari SIPP maupun dari PDF F2A. Coba klik Mulai Ambil lagi.', '#dc2626'); toast('Nama site tidak terbaca.', 'err'); sippBerhenti(); return; }
     var al = [], salah = res.rows.filter(function(r){ return !r.ok; }).length;
     if(!res.rows.length) al.push('tidak ada baris F2A yang terbaca');
     if(res.npp && res.npp !== ctx.npp) al.push('NPP di PDF (' + res.npp + ') beda dengan ' + ctx.npp);
