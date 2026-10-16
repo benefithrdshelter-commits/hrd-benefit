@@ -316,7 +316,9 @@ var TOKEN = '<?!= token ?>';
 var HH = null; try{ HH = (window.parent && window.parent !== window && window.parent.__host) || null; }catch(e){ HH = null; }
 
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function rp(n){ n = Math.round(Number(n) || 0); return 'Rp ' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+// TIDAK dibulatkan: tampil persis seperti F2A (sen ditampilkan kalau ada, mis. Rp 978 tetap 978; Rp 978,50 tetap 978,50)
+function rp(n){ n = Math.round((Number(n) || 0) * 100) / 100; var neg = n < 0; if(neg) n = -n; var b = Math.floor(n), sen = Math.round((n - b) * 100);
+  return 'Rp ' + (neg ? '-' : '') + b.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (sen ? ',' + (sen < 10 ? '0' : '') + sen : ''); }
 function toast(m, t){ if(HH && HH.toast) return HH.toast(m, t); var d=document.createElement('div'); d.textContent=m; d.style.cssText='position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:99999;padding:11px 18px;border-radius:10px;color:#fff;font:600 13px Inter,Arial,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25);background:'+(t==='error'||t==='err'?'#dc2626':'#16a34a'); document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 3200); }
 function ask(msg, fn){
   var o=document.createElement('div'); o.className='pcf-o';
@@ -594,8 +596,10 @@ function hapusGrup(g){
   if(its.length === 1 && g.items) return hapus(its[0].periode, its[0].namaAsuransi || '', its[0].site || '');
   ask('Hapus SEMUA data pembayaran periode ' + bulan(g.periode) + (g.namaAsuransi ? ' (' + g.namaAsuransi + ')' : '') + '?\n' + its.length + ' site dan ' + g.jumlahKaryawan + ' karyawan akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.', function(){
     var i = 0;
+    its.forEach(function(it){ buangDariList(it.periode, it.namaAsuransi || '', it.site || ''); });
+    toast('Data pembayaran periode ' + bulan(g.periode) + ' dihapus.');
     (function next(){
-      if(i >= its.length){ toast('Data pembayaran periode ' + bulan(g.periode) + ' dihapus.'); muatList(); return; }
+      if(i >= its.length){ return; }
       var it = its[i++], a = CFG.jenis === 'ks' ? [it.periode, it.namaAsuransi || '', it.site || ''] : [it.periode, it.site || ''];
       call(CFG.fnDelete, a, function(res){
         if(res && res.success === false){ toast('Gagal menghapus ' + (it.site || '') + ': ' + (res.error || 'terjadi kesalahan'), 'err'); muatList(); return; }
@@ -604,14 +608,22 @@ function hapusGrup(g){
     })();
   });
 }
+function buangDariList(periode, asuransi, site){
+  var st = String(site || '').trim(), as = String(asuransi || '').trim();
+  all = all.filter(function(r){ return !(r.periode === periode && String(r.site || '').trim() === st && (CFG.jenis !== 'ks' || String(r.namaAsuransi || '').trim() === as)); });
+  var k = periode + '|' + st; delete PDFKEYS[k]; if(typeof KWKEYS !== 'undefined') delete KWKEYS[k];
+  filterList();
+}
 function hapus(periode, asuransi, site){
   if(VIEWER) return;
   ask('Hapus data pembayaran ini?\nSemua data karyawan periode ' + bulan(periode) + (site ? ' (' + site + ')' : '') + ' akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.', function(){
     var a = CFG.jenis === 'ks' ? [periode, asuransi, site] : [periode, site];
+    // langsung hilang dari daftar; server menghapus di belakang. Kalau gagal, daftar dimuat ulang.
+    buangDariList(periode, asuransi, site);
+    toast('Data pembayaran dihapus.');
     call(CFG.fnDelete, a, function(res){
-      if(res && res.success === false){ toast('Gagal menghapus: ' + (res.error || 'terjadi kesalahan'), 'err'); return; }
-      toast('Data pembayaran dihapus.'); muatList();
-    });
+      if(res && res.success === false){ toast('Gagal menghapus: ' + (res.error || 'terjadi kesalahan'), 'err'); muatList(); }
+    }, function(e){ toast('Gagal menghapus: ' + String((e && e.message) || e), 'err'); muatList(); });
   });
 }
 var PDFKEYS = {};
@@ -1055,12 +1067,12 @@ function sippHasil(ctx, d){
     if(ref == null && d.f2a.nominal){ ref = d.f2a.nominal; sumber = 'tabel Mutasi Data SIPP'; spLog('Total tidak ada di PDF, dicocokkan dengan total di tabel SIPP (' + rp(ref) + ').', '#b45309'); }
     res.refTotal = ref;
     if(ref == null) al.push('total di PDF tidak terbaca' + ((res.dbg && res.dbg.length) ? ' (baris terkait: ' + res.dbg.join(' | ') + ')' : ''));
-    else if(Math.abs(ref - res.sumTotal) >= 1) al.push('total hitungan ' + rp(res.sumTotal) + ' beda dengan total ' + sumber + ' ' + rp(ref));
+    else if(Math.abs(ref - res.sumTotal) >= (sumber === 'PDF' ? 0.01 : 1)) al.push('total hitungan ' + rp(res.sumTotal) + ' beda dengan total ' + sumber + ' ' + rp(ref));
     if(d.f2a.tk && res.rows.length !== d.f2a.tk) al.push('jumlah karyawan terbaca ' + res.rows.length + ' beda dengan SIPP (' + d.f2a.tk + ')');
     if(salah) al.push(salah + ' baris komponen tidak sama dengan total');
     if(res.bad.length) al.push(res.bad.length + ' baris tidak terbaca');
     if(al.length){ gagalSipp(ctx, al.join('; ')); return; }
-    spLog('Total cocok (' + rp(res.sumTotal) + ', ' + res.rows.length + ' karyawan). Menyimpan…');
+    spLog('Total cocok (' + rp(res.sumTotal) + ', ' + res.rows.length + ' karyawan' + (sumber !== 'PDF' && Math.abs(ref - res.sumTotal) >= 0.005 ? '; tabel SIPP menampilkan tanpa sen' : '') + '). Menyimpan…');
     call('payUpload', [CFG.jenis, ctx.periode, ctx.site, '', pdfRowsServer({ res: res })], function(r){
       if(!r || r.success === false){ gagalSipp(ctx, (r && r.error) || 'Gagal menyimpan ke sheet.'); return; }
       gsHapusKey(ctx.site, ctx.periode);
@@ -1373,7 +1385,7 @@ function pdfFlow(f, site){
 function pdfRowsServer(d){
   d = d || PDFD; if(!d) return [];
   return d.res.rows.map(function(r, i){ return { __baris: i + 1, __pdf: 1, nikKtp: r.nik, namaKaryawan: r.nama, nppKetenagakerjaan: d.res.npp || '', noKpj: r.kpj,
-    jhtPerusahaan: r.jhtP, jhtKaryawan: r.jhtK, jpPerusahaan: r.jpP, jpKaryawan: r.jpK, jkk: r.jkk, jkm: r.jkm }; });
+    jhtPerusahaan: r.jhtP, jhtKaryawan: r.jhtK, jpPerusahaan: r.jpP, jpKaryawan: r.jpK, jkk: r.jkk, jkm: r.jkm, jkp: (r.jkpP || 0) + (r.jkpG || 0) }; });
 }
 function pdfSimpan(){
   var d = PDFD; if(!d || VIEWER) return;
