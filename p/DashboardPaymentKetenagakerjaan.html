@@ -962,7 +962,7 @@ function sippKartuHasil(ctx, d){
             if(KARTUKEYS[o.nik]) ganti++;
             todo.push(o);
           });
-          var UKURAN = 6, mulai = 0;
+          var UKURAN = 10, mulai = 0;
           function selesai(){
             SP_KB.baru += baru; SP_KB.lewat += lewat; SP_KB.gagal += gagal; SP_KB.ganti += ganti;
             if(d.net){
@@ -980,7 +980,7 @@ function sippKartuHasil(ctx, d){
             toast(baru + ' kartu tersimpan.'); sippBerhenti();
           }
           // simpan paralel: beberapa gelombang sekaligus (satu panggilan Apps Script ~beberapa detik, jadi serial terlalu lambat)
-          var PARALEL = 4, aktif = 0, tamat = false;
+          var PARALEL = 2, aktif = 0, tamat = false;  // server menyimpan kartu satu antrean, 2 cukup
           function perbarui(){ prog.textContent = 'Menyimpan kartu ' + Math.min(mulai, todo.length) + '/' + todo.length + ' (baru ' + baru + ', dilewati ' + lewat + ')'; }
           function cek(){ if(tamat) return; if(mulai >= todo.length && aktif === 0){ tamat = true; selesai(); } }
           function kerja(){
@@ -991,11 +991,19 @@ function sippKartuHasil(ctx, d){
             (function pecah(){
               if(k >= grup.length){
                 if(!items.length){ akhir(); return; }
-                call('savePaymentTkKartuBatch', [items], function(r){
-                  if(r && r.success){ items.forEach(function(it){ KARTUKEYS[it.nik] = it.nama; baru++; }); }
-                  else { gagal += items.length; spLog('Satu gelombang gagal disimpan: ' + ((r && r.error) || '?'), '#dc2626'); }
-                  akhir();
-                }, function(e){ gagal += items.length; spLog('Satu gelombang gagal disimpan: ' + String((e && e.message) || e), '#dc2626'); akhir(); });
+                var coba = 0;
+                (function kirimSimpan(){
+                  call('savePaymentTkKartuBatch', [items], function(r){
+                    if(r && r.success){ items.forEach(function(it){ KARTUKEYS[it.nik] = it.nama; baru++; }); akhir(); return; }
+                    var er = (r && r.error) || '?';
+                    if(coba++ < 3 && /lock|antrean|timeout|too many|busy/i.test(er)){ setTimeout(kirimSimpan, 4000 * coba); return; }
+                    gagal += items.length; spLog('Satu gelombang gagal disimpan (akan dicoba lagi saat Mulai Ambil berikutnya): ' + er, '#dc2626'); akhir();
+                  }, function(e){
+                    var er = String((e && e.message) || e);
+                    if(coba++ < 3){ setTimeout(kirimSimpan, 4000 * coba); return; }
+                    gagal += items.length; spLog('Satu gelombang gagal disimpan (akan dicoba lagi saat Mulai Ambil berikutnya): ' + er, '#dc2626'); akhir();
+                  });
+                })();
                 return;
               }
               var o = grup[k++];
