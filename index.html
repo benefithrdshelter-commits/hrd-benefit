@@ -802,6 +802,10 @@
   .au-ba small{display:block; font-size:10px; font-weight:800; letter-spacing:.06em; color:#8A97B1; margin-bottom:2px;}
   .au-ba>div:last-child{background:#EDF8F1;} .au-e{font-size:12px; color:#C0392B; margin-top:7px;}
   @media (max-width:520px){ .au-ba{grid-template-columns:1fr;} }
+  .au-bar input[type=date]{flex:1; min-width:0;} .au-nv{font:inherit; font-size:16px; font-weight:800; padding:0 14px; border-radius:12px; border:1.5px solid #E1E9F5; background:#fff; color:#31415F; cursor:pointer;} .au-nv.t{font-size:13px;}
+  .au-bar select{flex:1; min-width:0;} .au-cn{font-size:12.5px; color:#6B7A90; margin:2px 2px 10px;}
+  .au-x{margin-top:10px; font:inherit; font-size:12px; font-weight:700; padding:7px 12px; border-radius:10px; border:1px solid #F5B8BF; background:#FFF6F7; color:#D8344B; cursor:pointer;}
+  .au-del{display:block; width:100%; margin:6px 0 18px; padding:13px; font:inherit; font-size:14px; font-weight:800; border-radius:14px; border:1.5px solid #F5B8BF; background:#FFF6F7; color:#D8344B; cursor:pointer;}
 </style>
 </head>
 <body>
@@ -2584,35 +2588,68 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   }
 
 
-  // ----- Riwayat Perubahan (khusus Super Admin) -----
+  // ----- Riwayat Perubahan (khusus Super Admin): per tanggal, bisa dihapus -----
+  function auHariIni(){ var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function auGeser(n){ var p = AP.auTgl.split('-'), d = new Date(+p[0], +p[1] - 1, +p[2] + n); AP.auTgl = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); apMuatAudit(); }
+  function auTglIndo(t){ var p = t.split('-'), b = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']; return +p[2] + ' ' + b[+p[1] - 1] + ' ' + p[0]; }
   function apMuatAudit(){
+    if(!AP.auTgl) AP.auTgl = auHariIni();
     var ref = $('apRef'); if(ref) ref.classList.add('putar');
-    apPanggil('run', { fn:'getAuditLog', args:[{ limit:400 }] }).then(function(r){
+    apPanggil('run', { fn:'getAuditLog', args:[{ tanggal: AP.auTgl }] }).then(function(r){
       if(AP.k !== 'riwayat-ubah') return;
       if(ref) ref.classList.remove('putar');
       var d = r && r.success ? r.result : null;
       if(!d || !d.success){ $('apIsi').innerHTML = '<div class="rw-empty"><b>Belum bisa dimuat</b>' + esc((d && d.error) || (r && r.error) || 'Coba lagi.') + '</div>'; return; }
       AP.cache.audit = d.rows || [];
-      $('apSub').textContent = d.total + ' perubahan tercatat';
-      $('apIsi').innerHTML = '<div class="au-bar"><input id="auQ" type="search" placeholder="Cari nama admin, menu, atau data…"><select id="auF"><option value="">Semua hasil</option><option>Berhasil</option><option>Gagal</option><option>Ditolak</option></select></div><div id="auList"></div>';
+      $('apSub').textContent = auTglIndo(AP.auTgl);
+      var q0 = ($('auQ') || {}).value || '', f0 = ($('auF') || {}).value || '';
+      $('apIsi').innerHTML =
+        '<div class="au-bar"><button class="au-nv" id="auPrev" type="button" aria-label="Hari sebelumnya">‹</button><input id="auTgl" type="date" value="' + esc(AP.auTgl) + '"><button class="au-nv" id="auNext" type="button" aria-label="Hari berikutnya">›</button><button class="au-nv t" id="auHari" type="button">Hari ini</button></div>' +
+        '<div class="au-bar"><select id="auAda"><option value="">Tanggal yang ada catatan…</option>' + (d.hari || []).map(function(h){ return '<option' + (h === AP.auTgl ? ' selected' : '') + '>' + h + '</option>'; }).join('') + '</select></div>' +
+        '<div class="au-bar"><input id="auQ" type="search" placeholder="Cari nama admin, menu, atau data…" value="' + esc(q0) + '"><select id="auF"><option value="">Semua hasil</option><option>Berhasil</option><option>Gagal</option><option>Ditolak</option></select></div>' +
+        '<div class="au-cn" id="auCn"></div><div id="auList"></div>' +
+        '<button class="au-del" id="auHapusHari" type="button"' + (AP.cache.audit.length ? '' : ' hidden') + '>Hapus semua catatan tanggal ini</button>';
+      $('auF').value = f0;
       apRenderAudit();
       $('auQ').addEventListener('input', apRenderAudit); $('auF').addEventListener('change', apRenderAudit);
+      $('auTgl').addEventListener('change', function(){ if(this.value){ AP.auTgl = this.value; apMuatAudit(); } });
+      $('auAda').addEventListener('change', function(){ if(this.value){ AP.auTgl = this.value; apMuatAudit(); } });
+      $('auPrev').addEventListener('click', function(){ auGeser(-1); }); $('auNext').addEventListener('click', function(){ auGeser(1); });
+      $('auHari').addEventListener('click', function(){ AP.auTgl = auHariIni(); apMuatAudit(); });
+      $('auList').addEventListener('click', function(e){
+        var b = e.target.closest('[data-auhapus]'); if(!b) return;
+        if(!confirm('Hapus catatan ini? Penghapusan akan tercatat.')) return;
+        apPanggil('run', { fn:'hapusAuditLog', args:[{ tanggal: AP.auTgl, id: b.getAttribute('data-auhapus') }] }).then(function(r2){
+          var x = r2 && r2.success ? r2.result : null;
+          if(x && x.success) apMuatAudit(); else toast((x && x.error) || (r2 && r2.error) || 'Gagal menghapus.');
+        });
+      });
+      $('auHapusHari').addEventListener('click', function(){
+        if(!confirm('Hapus SEMUA ' + AP.cache.audit.length + ' catatan tanggal ' + auTglIndo(AP.auTgl) + '? Penghapusan akan tercatat.')) return;
+        apPanggil('run', { fn:'hapusAuditLog', args:[{ tanggal: AP.auTgl, semua: true }] }).then(function(r2){
+          var x = r2 && r2.success ? r2.result : null;
+          if(x && x.success) apMuatAudit(); else toast((x && x.error) || (r2 && r2.error) || 'Gagal menghapus.');
+        });
+      });
     }).catch(function(){ if(ref) ref.classList.remove('putar'); if(AP.k === 'riwayat-ubah') $('apIsi').innerHTML = '<div class="rw-empty"><b>Koneksi bermasalah</b>Ketuk tombol perbarui di kanan atas.</div>'; });
   }
   function apRenderAudit(){
     var q = String(($('auQ') || {}).value || '').toLowerCase(), f = ($('auF') || {}).value || '';
-    var rows = (AP.cache.audit || []).filter(function(x){
+    var all = AP.cache.audit || [];
+    var rows = all.filter(function(x){
       return (!f || x.hasil === f) && (!q || JSON.stringify([x.email, x.menu, x.aksi, x.ringkas, x.sebelum, x.sesudah]).toLowerCase().indexOf(q) >= 0);
     });
+    $('auCn').textContent = rows.length + ' dari ' + all.length + ' catatan';
     $('auList').innerHTML = rows.length ? rows.map(function(x){
       var w = String(x.waktu || '').split(' ');
       var sb = x.sebelum || x.sesudah ? '<div class="au-ba"><div><small>SEBELUM</small>' + (esc(x.sebelum) || '—') + '</div><div><small>SESUDAH</small>' + (esc(x.sesudah) || '—') + '</div></div>' : '';
       return '<div class="au-it"><div class="au-h"><b>' + esc(x.aksi) + '</b><span class="au-b ' + esc(x.hasil) + '">' + esc(x.hasil) + '</span></div>' +
         '<div class="au-m">' + esc(x.menu) + '</div>' +
-        '<div class="au-w">' + esc(x.email) + ' · ' + esc(x.role) + '<br>' + esc(w[0] || '') + ' ' + esc(w[1] || '') + '</div>' +
+        '<div class="au-w">' + esc(x.email) + ' · ' + esc(x.role) + '<br>pukul ' + esc(w[1] || '') + '</div>' +
         (x.ringkas ? '<div class="au-r">' + esc(x.ringkas) + '</div>' : '') + sb +
-        (x.ket ? '<div class="au-e">' + esc(x.ket) + '</div>' : '') + '</div>';
-    }).join('') : '<div class="rw-empty"><b>Belum ada catatan</b>Setiap perubahan yang dilakukan admin akan muncul di sini.</div>';
+        (x.ket ? '<div class="au-e">' + esc(x.ket) + '</div>' : '') +
+        '<button class="au-x" data-auhapus="' + esc(x.id) + '" type="button">Hapus catatan ini</button></div>';
+    }).join('') : '<div class="rw-empty"><b>Tidak ada catatan</b>Tidak ada perubahan yang tercatat pada tanggal ini.</div>';
   }
 
   // ================= Koreksi, NPP, Payment, Hapus =================
