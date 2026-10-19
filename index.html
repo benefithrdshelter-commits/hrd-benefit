@@ -788,6 +788,20 @@
   /* foto gedung SHELTER untuk semua hero di aplikasi */
   .ilus{background-image:url(hero-app.jpg) !important; background-size:cover;}
   .hero-k .ilus{background-position:55% 50%;}
+
+  /* ---------- Riwayat Perubahan ---------- */
+  .au-bar{display:flex; gap:8px; margin-bottom:12px;} .au-bar input{flex:1; min-width:0; font:inherit; font-size:14px; padding:11px 14px; border-radius:12px; border:1.5px solid #E1E9F5; background:#fff;}
+  .au-bar select{font:inherit; font-size:13.5px; padding:0 10px; border-radius:12px; border:1.5px solid #E1E9F5; background:#fff;}
+  .au-it{background:#fff; border:1px solid var(--line); border-radius:16px; padding:13px 14px; margin-bottom:10px; box-shadow:0 4px 14px rgba(20,60,140,.05);}
+  .au-h{display:flex; align-items:center; justify-content:space-between; gap:10px;} .au-h b{font-size:14.5px;}
+  .au-b{font-size:11.5px; font-weight:800; padding:3px 10px; border-radius:99px; background:#E7F7EE; color:#157A48; flex:none;}
+  .au-b.Gagal{background:#FDECEC; color:#C0392B;} .au-b.Ditolak{background:#FFF3E0; color:#B96A00;}
+  .au-m{font-size:12.5px; color:#2F6FE0; font-weight:700; margin-top:2px;} .au-w{font-size:12px; color:#6B7A90; margin-top:6px; line-height:1.5;}
+  .au-r{font-size:12.5px; color:#31415F; margin-top:8px; word-break:break-word;}
+  .au-ba{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:9px;} .au-ba>div{background:#F4F7FC; border-radius:10px; padding:8px 10px; font-size:12.3px; color:#31415F; word-break:break-word;}
+  .au-ba small{display:block; font-size:10px; font-weight:800; letter-spacing:.06em; color:#8A97B1; margin-bottom:2px;}
+  .au-ba>div:last-child{background:#EDF8F1;} .au-e{font-size:12px; color:#C0392B; margin-top:7px;}
+  @media (max-width:520px){ .au-ba{grid-template-columns:1fr;} }
 </style>
 </head>
 <body>
@@ -2089,7 +2103,8 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
     { k:'payment-ketenagakerjaan', t:'Payment Ketenagakerjaan', p:'BPJS TK', ic:'kartu', c:'c-violet', g:'Payment' },
     { k:'payment-kesehatan', t:'Payment Kesehatan', p:'BPJS Kes', ic:'jantung', c:'c-pink', g:'Payment' },
     { k:'pesan', t:'Pesan Masuk', p:'Pesan', ic:'chat', c:'c-pink', g:'Lainnya', s:true, n:function(r){ return r.pesan; } },
-    { k:'anonim', t:'Kritik & Saran', p:'Kritik & Saran', ic:'lock', c:'c-grey', g:'Lainnya', s:true, n:function(r){ return r.anonim; } }
+    { k:'anonim', t:'Kritik & Saran', p:'Kritik & Saran', ic:'lock', c:'c-grey', g:'Lainnya', s:true, n:function(r){ return r.anonim; } },
+    { k:'riwayat-ubah', t:'Riwayat Perubahan', p:'Riwayat', ic:'doc', c:'c-violet', g:'Lainnya', s:true }
   ];
   function admSesi(){ var x = S.get('sesi') || {}; return x.peran === 'admin' ? x : null; }
   function admViewer(){ var x = admSesi(); return !!(x && x.role === 'ADMIN'); }
@@ -2229,7 +2244,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
 
   // ---------- Halaman admin native ----------
   var AP = { k:null, cache:{}, q:'', f:'semua', sheet:null, chat:null };
-  var AP_NATIVE = ['saldo', 'koreksi', 'keluarga', 'kecelakaan', 'perbaikan-npp', 'payment-ketenagakerjaan', 'payment-kesehatan', 'pesan', 'anonim'];
+  var AP_NATIVE = ['saldo', 'koreksi', 'keluarga', 'kecelakaan', 'perbaikan-npp', 'payment-ketenagakerjaan', 'payment-kesehatan', 'pesan', 'anonim', 'riwayat-ubah'];
   var KOP_PIL = [['SIG','PT Shelter Indonesia Gemilang'],['GSU','PT Global Securindo Utama'],['SN','PT Shelter Nusantara'],['SNI','PT Shelter Nusa Indah'],['ION','PT Indah Optimal Nusantara'],['RCI','PT Rapi Chem Indonesia']];
   var TTD_PIL = ['ANDIKA','BAGAS','CANDRA','FARIZA','HIRU'];
   function apTahap(s){ s = String(s || ''); return /selesai/i.test(s) ? 3 : /proses/i.test(s) && !/belum/i.test(s) ? 2 : 1; }
@@ -2289,6 +2304,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
     apGambar();
     if(k === 'pesan'){ apMuatPesan(); return; }
     if(k === 'anonim'){ apMuatAnonim(); return; }
+    if(k === 'riwayat-ubah'){ apMuatAudit(); return; }
     if(k === 'perbaikan-npp'){ apMuatNpp(); return; }
     if(k === 'payment-ketenagakerjaan' || k === 'payment-kesehatan'){ apMuatPay(); return; }
     apMuatDaftar(k);
@@ -2567,6 +2583,38 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
     }, function(){ if(ref) ref.classList.remove('putar'); });
   }
 
+
+  // ----- Riwayat Perubahan (khusus Super Admin) -----
+  function apMuatAudit(){
+    var ref = $('apRef'); if(ref) ref.classList.add('putar');
+    apPanggil('run', { fn:'getAuditLog', args:[{ limit:400 }] }).then(function(r){
+      if(AP.k !== 'riwayat-ubah') return;
+      if(ref) ref.classList.remove('putar');
+      var d = r && r.success ? r.result : null;
+      if(!d || !d.success){ $('apIsi').innerHTML = '<div class="rw-empty"><b>Belum bisa dimuat</b>' + esc((d && d.error) || (r && r.error) || 'Coba lagi.') + '</div>'; return; }
+      AP.cache.audit = d.rows || [];
+      $('apSub').textContent = d.total + ' perubahan tercatat';
+      $('apIsi').innerHTML = '<div class="au-bar"><input id="auQ" type="search" placeholder="Cari nama admin, menu, atau data…"><select id="auF"><option value="">Semua hasil</option><option>Berhasil</option><option>Gagal</option><option>Ditolak</option></select></div><div id="auList"></div>';
+      apRenderAudit();
+      $('auQ').addEventListener('input', apRenderAudit); $('auF').addEventListener('change', apRenderAudit);
+    }).catch(function(){ if(ref) ref.classList.remove('putar'); if(AP.k === 'riwayat-ubah') $('apIsi').innerHTML = '<div class="rw-empty"><b>Koneksi bermasalah</b>Ketuk tombol perbarui di kanan atas.</div>'; });
+  }
+  function apRenderAudit(){
+    var q = String(($('auQ') || {}).value || '').toLowerCase(), f = ($('auF') || {}).value || '';
+    var rows = (AP.cache.audit || []).filter(function(x){
+      return (!f || x.hasil === f) && (!q || JSON.stringify([x.email, x.menu, x.aksi, x.ringkas, x.sebelum, x.sesudah]).toLowerCase().indexOf(q) >= 0);
+    });
+    $('auList').innerHTML = rows.length ? rows.map(function(x){
+      var w = String(x.waktu || '').split(' ');
+      var sb = x.sebelum || x.sesudah ? '<div class="au-ba"><div><small>SEBELUM</small>' + (esc(x.sebelum) || '—') + '</div><div><small>SESUDAH</small>' + (esc(x.sesudah) || '—') + '</div></div>' : '';
+      return '<div class="au-it"><div class="au-h"><b>' + esc(x.aksi) + '</b><span class="au-b ' + esc(x.hasil) + '">' + esc(x.hasil) + '</span></div>' +
+        '<div class="au-m">' + esc(x.menu) + '</div>' +
+        '<div class="au-w">' + esc(x.email) + ' · ' + esc(x.role) + '<br>' + esc(w[0] || '') + ' ' + esc(w[1] || '') + '</div>' +
+        (x.ringkas ? '<div class="au-r">' + esc(x.ringkas) + '</div>' : '') + sb +
+        (x.ket ? '<div class="au-e">' + esc(x.ket) + '</div>' : '') + '</div>';
+    }).join('') : '<div class="rw-empty"><b>Belum ada catatan</b>Setiap perubahan yang dilakukan admin akan muncul di sini.</div>';
+  }
+
   // ================= Koreksi, NPP, Payment, Hapus =================
   var KESALAHAN_LABEL = ['Nama tenaga kerja', 'Nama anggota keluarga (suami/istri/anak/ibu)', 'Tanggal lahir tenaga kerja', 'Tanggal lahir keluarga (suami/istri/anak)', 'Jenis kelamin tenaga kerja', 'Jenis kelamin keluarga (suami/istri/anak)', 'Alamat surat menyurat', 'Hilang Kartu Peserta', 'Belum menerima Kartu Peserta', 'Kartu Peserta rusak', 'Nomor KTP (NIK)'];
   function kopNama(k){ var p = KOP_PIL.filter(function(x){ return x[0] === k; })[0]; return p ? p[1].toUpperCase() : ''; }
@@ -2837,7 +2885,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
     var t = e.target;
     if(!$('adm') || $('adm').hidden) return;
     if(t.closest('#apBack')){ getar(); if(AP.chat){ apKerangka('Pesan Masuk', ''); $('apIsi').innerHTML = '<div class="rw-sk"></div>'; apMuatPesan(); } else admTampil(window.matchMedia('(min-width:900px)').matches ? 'beranda' : 'layanan'); return; }
-    if(t.closest('#apRef')){ getar(); if(AP.chat){ apBukaChat(AP.cache.pesan.indexOf(AP.chat)); } else if(AP.k === 'pesan') apMuatPesan(); else if(AP.k === 'anonim') apMuatAnonim(); else if(AP.k === 'perbaikan-npp') apMuatNpp(); else if(AP.k === 'payment-ketenagakerjaan' || AP.k === 'payment-kesehatan') apMuatPay(); else apMuatDaftar(AP.k); return; }
+    if(t.closest('#apRef')){ getar(); if(AP.chat){ apBukaChat(AP.cache.pesan.indexOf(AP.chat)); } else if(AP.k === 'pesan') apMuatPesan(); else if(AP.k === 'anonim') apMuatAnonim(); else if(AP.k === 'riwayat-ubah') apMuatAudit(); else if(AP.k === 'perbaikan-npp') apMuatNpp(); else if(AP.k === 'payment-ketenagakerjaan' || AP.k === 'payment-kesehatan') apMuatPay(); else apMuatDaftar(AP.k); return; }
     var f = t.closest('.ap-chip'); if(f){ AP.f = f.getAttribute('data-f'); apRenderDaftar(); return; }
     var ul = t.closest('[data-ulang]'); if(ul){
       var jn = ul.getAttribute('data-ulang'), rw = Number(ul.getAttribute('data-row') || (AP.sheet && AP.sheet.row)), lb = ul.innerHTML;
