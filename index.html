@@ -905,6 +905,8 @@
       <div class="pf-row"><i class="c-blue" data-ic="idc"></i><div class="c"><div class="k">NIK</div><div class="v" data-f="nik"></div></div><button class="copy" data-copy="nik">Salin</button></div>
       <div class="pf-row"><i class="c-blue" data-ic="kartu"></i><div class="c"><div class="k">Nomor KPJ (BPJS Ketenagakerjaan)</div><div class="v" data-f="noKpj"></div></div><button class="copy" data-copy="noKpj">Salin</button></div>
       <div class="pf-row"><i class="c-violet" data-ic="gedung"></i><div class="c"><div class="k">NPP</div><div class="v" data-f="npp"></div></div><button class="copy" data-copy="npp">Salin</button></div>
+      <div class="pf-row"><i class="c-blue" data-ic="gedung"></i><div class="c"><div class="k">Site Bisnis</div><div class="v" data-f="siteBisnis"></div></div></div>
+      <div class="pf-row"><i class="c-green" data-ic="pin"></i><div class="c"><div class="k">Site Penempatan</div><div class="v" data-f="penempatan"></div></div></div>
       <div class="pf-row"><i class="c-pink" data-ic="jantung"></i><div class="c"><div class="k">Nomor JKN (BPJS Kesehatan)</div><div class="v" data-f="noJkn"></div></div><button class="copy" data-copy="noJkn">Salin</button></div>
       <div class="pf-row"><i class="c-green" data-ic="kal"></i><div class="c"><div class="k">Tempat, tanggal lahir</div><div class="v" data-f="ttl"></div></div></div>
       <div class="pf-row"><i class="c-orange" data-ic="user"></i><div class="c"><div class="k">Jenis kelamin</div><div class="v" data-f="jenisKelamin"></div></div></div>
@@ -981,6 +983,7 @@
         <div class="fi"><label>Site Penempatan <em>*</em></label><input id="chSite" maxlength="120" placeholder="Contoh: PT Kobin Keramik Industri"></div>
         <div class="fi"><label>Bidang Jasa <em>*</em></label><input id="chBidang" maxlength="80" placeholder="Contoh: Kurir, OB"></div>
       </div>
+      <p class="ds" id="chAuto" hidden style="margin-top:10px">Badan usaha &amp; site penempatan diisi otomatis dari data BPJS Ketenagakerjaan.</p>
       <button class="btn btn-p" id="chSimpan" style="width:100%; margin-top:16px">Simpan</button>
     </div>
     <div class="err" id="chErr"></div>
@@ -1294,6 +1297,9 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
     F = { nama: nama, nik: v(p.nik), inisial: nama.charAt(0).toUpperCase(), noKpj: v(p.noKpj), npp: v(p.npp), noJkn: v(p.noJkn),
       ttl: v([p.tempatLahir, p.tanggalLahir].filter(function(x){ return x && String(x).trim(); }).join(', ')),
       jenisKelamin: v(p.jenisKelamin), agama: v(p.agama), alamat: v(p.alamat) };
+    var pen = (p.penempatan && p.penempatan.siteBisnis) ? p.penempatan : null;
+    F.pen = pen; F.siteBisnis = pen ? pen.siteBisnis : '-'; F.penempatan = pen ? (pen.site || '-') : '-';
+    if(pen && F.npp === '-' && pen.npp) F.npp = pen.npp;
     document.querySelectorAll('[data-f]').forEach(function(el){ el.textContent = F[el.getAttribute('data-f')] || '-'; });
     if(aktif) judul(aktif);
   }
@@ -1970,8 +1976,16 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   // ======================= REQUEST & QUESTION (ASLI) =======================
   var CH = S.get('chat'), CP = S.get('chprof'), chTimer = null, chSig = '', chAdmin = -1, chEdit = false, chJalan = false, chUlang = false, chAntre = [];
   function chLengkap(p){ return !!(p && p.nama && p.badan && p.site && p.bidang); }
+  // penempatan dari data Ketenagakerjaan (kalau NIK sudah ada di F2A SIPP)
+  function chPen(){ return (F && F.pen && F.pen.siteBisnis) ? F.pen : null; }
+  function chNormBadan(s){ return String(s || '').toUpperCase().replace(/\bPT\b\.?/g, '').replace(/[^A-Z]/g, ''); }
+  function chCocokBadan(b){
+    var nb = chNormBadan(b), opsi = (CH && CH.usaha) || [];
+    for(var i = 0; i < opsi.length; i++) if(chNormBadan(opsi[i]) === nb) return opsi[i];
+    return b;
+  }
   function chOpsi(){
-    var sel = $('chBadan'), cur = sel.value || (CP && CP.badan) || '', opsi = ((CH && CH.usaha) || []).slice();
+    var sel = $('chBadan'), pen = chPen(), cur = (pen && pen.badan ? chCocokBadan(pen.badan) : '') || sel.value || (CP && CP.badan) || '', opsi = ((CH && CH.usaha) || []).slice();
     if(cur && opsi.indexOf(cur) < 0) opsi.unshift(cur);
     sel.innerHTML = '<option value="">' + (opsi.length ? 'Pilih badan usaha…' : 'Memuat…') + '</option>'
       + opsi.map(function(u){ return '<option value="' + esc(u) + '">' + esc(u) + '</option>'; }).join('');
@@ -1980,7 +1994,13 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   function chIsiProf(){
     if(!chLengkap(CP) && CH && chLengkap({ nama: CH.prof.nama, badan: CH.prof.badan, site: CH.prof.site, bidang: CH.prof.bidang }))
       CP = { nama: CH.prof.nama, badan: CH.prof.badan, site: CH.prof.site, bidang: CH.prof.bidang };
-    var p = CP || {};
+    var p = CP || {}, pen = chPen();
+    if(pen && pen.badan){
+      var pb = chCocokBadan(pen.badan), ps = pen.site || pen.siteBisnis;
+      p = Object.assign({}, p, { badan: pb, site: ps });
+      if(CP && (CP.badan !== pb || CP.site !== ps)){ CP.badan = pb; CP.site = ps; S.set('chprof', CP); }
+    }
+    $('chBadan').disabled = !!(pen && pen.badan); $('chSite').readOnly = !!(pen && pen.badan); $('chAuto').hidden = !(pen && pen.badan);
     $('chNama').value = p.nama || (F.nama !== 'Karyawan' ? F.nama : '');
     $('chSite').value = p.site || ''; $('chBidang').value = p.bidang || '';
     $('chBadan').value = ''; chOpsi(); $('chBadan').value = p.badan || '';
