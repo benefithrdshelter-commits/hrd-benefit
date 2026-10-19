@@ -1,7 +1,7 @@
 {
-  "name": "HRD Benefit – SHELTER",
-  "short_name": "HRD Benefit",
-  "description": "Portal HRD Benefit SHELTER untuk karyawan dan admin.",
+  "name": "SHELCARE – SHELTER",
+  "short_name": "SHELCARE",
+  "description": "SHELCARE: portal BPJS & benefit karyawan SHELTER untuk karyawan dan admin.",
   "lang": "id",
   "start_url": "./",
   "scope": "./",
@@ -10,8 +10,8 @@
   "background_color": "#FFFFFF",
   "theme_color": "#1557D6",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icon-192.png?v=shelcare1", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png?v=shelcare1", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "maskable-512.png?v=shelcare1", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
