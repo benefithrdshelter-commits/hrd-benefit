@@ -2618,17 +2618,22 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
       $('auHari').addEventListener('click', function(){ AP.auTgl = auHariIni(); apMuatAudit(); });
       $('auList').addEventListener('click', function(e){
         var b = e.target.closest('[data-auhapus]'); if(!b) return;
-        if(!confirm('Hapus catatan ini? Penghapusan akan tercatat.')) return;
-        apPanggil('run', { fn:'hapusAuditLog', args:[{ tanggal: AP.auTgl, id: b.getAttribute('data-auhapus') }] }).then(function(r2){
-          var x = r2 && r2.success ? r2.result : null;
-          if(x && x.success) apMuatAudit(); else toast((x && x.error) || (r2 && r2.error) || 'Gagal menghapus.');
+        if(!confirm('Hapus catatan ini?')) return;
+        var id = b.getAttribute('data-auhapus'), cad = (AP.cache.audit || []).slice();
+        AP.cache.audit = cad.filter(function(r){ return r.id !== id; }); apRenderAudit();
+        if($('auHapusHari')) $('auHapusHari').hidden = !AP.cache.audit.length;
+        apPanggil('run', { fn:'hapusAuditLog', args:[{ tanggal: AP.auTgl, id: id }] }).then(function(r2){
+          var y = r2 && r2.success ? r2.result : null;
+          if(!(y && y.success)){ AP.cache.audit = cad; apRenderAudit(); if($('auHapusHari')) $('auHapusHari').hidden = !cad.length; toast((y && y.error) || (r2 && r2.error) || 'Gagal menghapus.'); }
         });
       });
       $('auHapusHari').addEventListener('click', function(){
-        if(!confirm('Hapus SEMUA ' + AP.cache.audit.length + ' catatan tanggal ' + auTglIndo(AP.auTgl) + '? Penghapusan akan tercatat.')) return;
+        if(!confirm('Hapus SEMUA ' + AP.cache.audit.length + ' catatan tanggal ' + auTglIndo(AP.auTgl) + '?')) return;
+        var cad = (AP.cache.audit || []).slice();
+        AP.cache.audit = []; apRenderAudit(); $('auHapusHari').hidden = true;
         apPanggil('run', { fn:'hapusAuditLog', args:[{ tanggal: AP.auTgl, semua: true }] }).then(function(r2){
-          var x = r2 && r2.success ? r2.result : null;
-          if(x && x.success) apMuatAudit(); else toast((x && x.error) || (r2 && r2.error) || 'Gagal menghapus.');
+          var y = r2 && r2.success ? r2.result : null;
+          if(!(y && y.success)){ AP.cache.audit = cad; apRenderAudit(); $('auHapusHari').hidden = false; toast((y && y.error) || (r2 && r2.error) || 'Gagal menghapus.'); }
         });
       });
     }).catch(function(){ if(ref) ref.classList.remove('putar'); if(AP.k === 'riwayat-ubah') $('apIsi').innerHTML = '<div class="rw-empty"><b>Koneksi bermasalah</b>Ketuk tombol perbarui di kanan atas.</div>'; });
