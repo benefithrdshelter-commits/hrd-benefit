@@ -2647,7 +2647,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
         '<div class="au-m">' + esc(x.menu) + '</div>' +
         '<div class="au-w">' + esc(x.email) + ' · ' + esc(x.role) + '<br>pukul ' + esc(w[1] || '') + '</div>' +
         (x.ringkas ? '<div class="au-r">' + esc(x.ringkas) + '</div>' : '') + sb +
-        (x.ket ? '<div class="au-e">' + esc(x.ket) + '</div>' : '') +
+        (x.ket ? '<div class="au-e"><b>' + (x.hasil === 'Ditolak' ? 'Alasan ditolak: ' : 'Alasan gagal: ') + '</b>' + esc(x.ket) + '</div>' : '') +
         '<button class="au-x" data-auhapus="' + esc(x.id) + '" type="button">Hapus catatan ini</button></div>';
     }).join('') : '<div class="rw-empty"><b>Tidak ada catatan</b>Tidak ada perubahan yang tercatat pada tanggal ini.</div>';
   }
