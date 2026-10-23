@@ -807,6 +807,137 @@
   .au-x{margin-top:10px; font:inherit; font-size:12px; font-weight:700; padding:7px 12px; border-radius:10px; border:1px solid #F5B8BF; background:#FFF6F7; color:#D8344B; cursor:pointer;}
   .au-del{display:block; width:100%; margin:6px 0 18px; padding:13px; font:inherit; font-size:14px; font-weight:800; border-radius:14px; border:1.5px solid #F5B8BF; background:#FFF6F7; color:#D8344B; cursor:pointer;}
 </style>
+<!-- ==================== TEMA KARYAWAN: GRADASI TEAL–PEACH + 3D (mulai) ====================
+     Hanya berlaku untuk aplikasi KARYAWAN (#app). Login dan aplikasi Admin tidak berubah.
+     Gambar 3D (taruh di folder yang sama dengan index.html di GitHub):
+       3d-hero.png, 3d-saldo.png, 3d-koreksi.png, 3d-keluarga.png,
+       3d-tanya.png, 3d-kritik.png, 3d-lainnya.png, 3d-kartu.png
+     Kalau gambar belum di-upload, ikon lama tetap tampil (tidak rusak). -->
+<style id="temaKaryawan3d">
+  #app{
+    --bg:#EEF8F5; --ink:#12302F; --muted:#557170; --line:rgba(255,255,255,.85);
+    --blue:#0D7C74; --blue-2:#14B8A6; --blue-tint:#DDF4F0; --navy:#0F5E58; --deep:#0B4A45;
+    --teal:#0D7C74; --teal-tint:#DDF4F0;
+    --green:#16956B; --green-tint:#DDF5EC;
+    --pink:#D9536B; --pink-tint:#FFE6E3;
+    --violet:#C2603A; --violet-tint:#FFE9DD;
+    --orange:#C9671F; --orange-tint:#FFEEDC;
+    --grey:#5F7B79; --grey-tint:#EEF5F4;
+    --t3-kaca:rgba(255,255,255,.72);
+    --t3-bayang:0 10px 28px rgba(13,124,116,.10), 0 2px 6px rgba(13,124,116,.05);
+    --t3-tombol:linear-gradient(135deg,#14B8A6 0%,#0D7C74 100%);
+    --t3-panel:radial-gradient(120% 140% at 100% 0%, rgba(253,186,154,.55) 0%, rgba(253,186,154,0) 55%), linear-gradient(120deg,#0D7C74 0%,#119C8E 60%,#14B8A6 100%);
+  }
+
+  /* ---------- Latar gradasi (seperti mockup) ---------- */
+  html:has(#app:not([hidden])), body:has(#app:not([hidden])){
+    background:
+      radial-gradient(60% 40% at 0% 0%, rgba(20,184,166,.20) 0%, rgba(20,184,166,0) 70%),
+      radial-gradient(55% 45% at 100% 100%, rgba(253,186,154,.38) 0%, rgba(253,186,154,0) 70%),
+      linear-gradient(165deg,#E3F6F2 0%,#F3FAF8 45%,#FFF1E9 100%) fixed !important;
+    background-attachment:fixed !important;
+  }
+  #app{color:var(--ink);}
+
+  /* ---------- Kartu kaca (glass) ---------- */
+  #app .g6, #app .sum, #app .ann-it, #app .svc, #app .tile, #app .rw, #app .rw-empty, #app .fm-sec, #app .fm-done,
+  #app .pf-card, #app .pf-row, #app .pf-kartu, #app .set, #app .ch-prof, #app .group, #app .quick, #app .bb.a{
+    background:var(--t3-kaca) !important;
+    -webkit-backdrop-filter:blur(14px) saturate(140%); backdrop-filter:blur(14px) saturate(140%);
+    border:1px solid rgba(255,255,255,.9) !important;
+    box-shadow:var(--t3-bayang) !important;
+  }
+  #app .g6, #app .sum, #app .svc, #app .rw, #app .fm-sec, #app .pf-card, #app .pf-kartu{border-radius:22px;}
+  #app .g6.pink{background:linear-gradient(160deg,rgba(255,236,228,.9),rgba(255,255,255,.75)) !important;}
+  #app .g6:hover, #app .sum:hover, #app .ann-it:hover{box-shadow:0 16px 34px rgba(13,124,116,.16) !important;}
+  #app .set-it, #app .fld, #app .rw-info{border-color:rgba(13,124,116,.08) !important;}
+  #app .set-it em, #app .sum .go, #app .tile .go{color:#8FB0AD;}
+
+  /* ---------- Kepala beranda ---------- */
+  #app .bar small{color:#3F6462;}
+  #app .bar .icb, #app .rw-head .icb{color:#0F4E4A;}
+  #app .bar .av{background:var(--t3-tombol); box-shadow:0 6px 16px rgba(13,124,116,.3);}
+
+  /* ---------- Hero beranda ---------- */
+  #app .hero-k{
+    background:linear-gradient(105deg,#D7F3EE 0%,#EAF8F5 45%,#FFE6D8 100%) !important;
+    box-shadow:0 16px 34px rgba(13,124,116,.16) !important; border:1px solid rgba(255,255,255,.9);
+  }
+  #app .hero-k p{color:#0F3E3B; text-shadow:none;}
+  #app .hero-k p::first-line{color:#0D7C74;}
+  body.t3-hero #app .hero-k .ilus{
+    background-image:var(--t3-hero) !important; background-size:cover !important; background-position:right center !important;
+    width:100% !important; -webkit-mask-image:none !important; mask-image:none !important;
+  }
+
+  /* ---------- Ikon menu: lembut + ada gambar 3D kalau tersedia ---------- */
+  #app .g6 i, #app .svc .hd i, #app .tile i, #app .pf-row i, #app .set-it i, #app .rw-ic, #app .pk-h i, #app .ann-it i{
+    box-shadow:inset 0 -3px 6px rgba(255,255,255,.6), 0 6px 14px rgba(13,124,116,.12);
+  }
+  #app .g6 i{width:58px; height:58px; border-radius:20px;}
+  #app i.t3{background:var(--t3-img) center/contain no-repeat !important; box-shadow:none !important; border-radius:0 !important;}
+  #app i.t3 > svg{display:none !important;}
+  #app .g6 i.t3{width:64px; height:64px; filter:drop-shadow(0 8px 10px rgba(13,124,116,.18));}
+  #app .svc .hd i.t3{width:66px; height:66px;}
+  #app .pk-h i.t3{width:48px; height:48px;}
+
+  /* ---------- Panel berwarna (kartu riwayat, banner) ---------- */
+  #app .rw-hero, #app .banner-k, #app .member, #app .help{background:var(--t3-panel) !important; box-shadow:0 16px 32px rgba(13,124,116,.26) !important;}
+  #app .hero-k .ilus, #app .rw-hero .ilus, #app .banner-k .ilus{opacity:.9;}
+  #app .pf-card::before{background:linear-gradient(100deg,#CDEFE9,#FFE3D4) !important;}
+  #app .pf-av{background:var(--t3-tombol) !important; box-shadow:0 10px 24px rgba(13,124,116,.3) !important;}
+
+  /* ---------- Tombol ---------- */
+  #app .btn-p, #app .rw-baru, #app .pf-btn, #app .fm-send, #app .segt button.on, #app .ch-comp button, #app .bb.k{
+    background:var(--t3-tombol) !important; color:#fff; box-shadow:0 10px 22px rgba(13,124,116,.28) !important;
+  }
+  #app .btn-s, #app .pk-act .pk-pdf{background:rgba(255,255,255,.8) !important; color:#0D7C74 !important; border:1px solid #BFE6DF !important;}
+  #app .segt{background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.9);}
+  #app .segt button{color:#4B6B69;}
+  #app .copy, #app .rw-pdf, #app .ket, #app .anon{background:#DDF4F0; color:#0D7C74;}
+  #app .anon{color:#0F4E4A;}
+  #app .rw-steps i.ok{background:linear-gradient(90deg,#14B8A6,#0D7C74);}
+  #app .sum .s-blue{background:linear-gradient(135deg,#2CCDB9,#0D7C74);}
+  #app .sum .s-orange{background:linear-gradient(135deg,#FFC09C,#E8875C);}
+
+  /* ---------- Isian formulir ---------- */
+  #app .fi input:not([type=checkbox]):not([type=radio]):not([type=file]), #app .fi select, #app .fi textarea, #app .ch-comp textarea{
+    background:rgba(255,255,255,.85) !important; border-color:#CFE7E3 !important;
+  }
+  #app .fi input:focus, #app .fi select:focus, #app .fi textarea:focus, #app .ch-comp textarea:focus{border-color:#14B8A6 !important; box-shadow:0 0 0 4px rgba(20,184,166,.15) !important;}
+  #app .chip-o span, #app .kes-r, #app .fi .up-box{background:rgba(255,255,255,.7); border-color:#CFE7E3;}
+  #app .fm-sec h3 i{background:#DDF4F0; color:#0D7C74;}
+  #app .ch-comp{background:rgba(238,248,245,.88); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);}
+  #app .ch-sep{background:rgba(255,255,255,.7);}
+
+  /* ---------- Navigasi bawah (HP) ---------- */
+  #app .nav{
+    background:rgba(255,255,255,.82) !important; -webkit-backdrop-filter:blur(18px) saturate(150%); backdrop-filter:blur(18px) saturate(150%);
+    box-shadow:0 -8px 26px rgba(13,124,116,.12) !important; border-top:1px solid rgba(255,255,255,.9);
+  }
+  #app .it{color:#7E9A97;}
+  #app .it.on{color:#0D7C74;}
+  #app .it.on .pl{background:#DDF4F0 !important; width:56px;}
+
+  /* ---------- Menu samping (drawer) ---------- */
+  body:has(#app:not([hidden])) .dw{background:linear-gradient(180deg,#0F6F68 0%,#0B4A45 100%) !important;}
+  body:has(#app:not([hidden])) .dw::after{content:""; position:absolute; right:-80px; bottom:-60px; width:260px; height:260px; border-radius:50%; background:radial-gradient(circle, rgba(253,186,154,.35), rgba(253,186,154,0) 70%); pointer-events:none;}
+  body:has(#app:not([hidden])) .dw-it.on{background:var(--t3-tombol, linear-gradient(135deg,#14B8A6,#0D7C74)) !important; box-shadow:0 8px 18px rgba(0,0,0,.18) !important;}
+
+  /* ---------- Laptop: sidebar teal ---------- */
+  @media (min-width:900px){
+    #app .nav{background:linear-gradient(180deg,#0F6F68 0%,#0B4A45 100%) !important; border:none; box-shadow:none !important;}
+    #app .nav::after{content:""; position:absolute; left:-70px; bottom:-90px; width:300px; height:300px; border-radius:50%; background:radial-gradient(circle, rgba(253,186,154,.30), rgba(253,186,154,0) 70%); pointer-events:none;}
+    #app .it{color:rgba(225,247,243,.82);}
+    #app .it:hover{background:rgba(255,255,255,.08); color:#fff;}
+    #app .it.on{color:#0B4A45; background:linear-gradient(135deg,#FFFFFF,#E3F7F3) !important; box-shadow:0 8px 18px rgba(0,0,0,.15) !important;}
+    #app .it.on .pl{background:none !important; width:auto;}
+    #app .nav-brand small{color:rgba(225,247,243,.75);}
+  }
+
+  @media (prefers-reduced-motion:reduce){ #app *{transition:none !important;} }
+</style>
+<!-- ==================== TEMA KARYAWAN (selesai bagian CSS) ==================== -->
 </head>
 <body>
 
@@ -3075,5 +3206,62 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
   if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(function(){}); }
 })();
 </script>
+<!-- ==================== TEMA KARYAWAN: GAMBAR 3D (mulai) ==================== -->
+<script id="temaKaryawan3dJs">
+(function(){
+  // Nama file gambar 3D (di folder yang sama dengan index.html). Ganti di sini kalau nama file beda.
+  var G = {
+    hero:     '3d-hero.png',
+    saldo:    '3d-saldo.png',
+    koreksi:  '3d-koreksi.png',
+    keluarga: '3d-keluarga.png',
+    tanya:    '3d-tanya.png',
+    kritik:   '3d-kritik.png',
+    lainnya:  '3d-lainnya.png',
+    kartu:    '3d-kartu.png'
+  };
+  // Ikon mana memakai gambar apa
+  var PASANG = [
+    ['#app .g6[data-riwayat="saldo"] > i',    'saldo'],
+    ['#app .g6[data-riwayat="koreksi"] > i',  'koreksi'],
+    ['#app .g6[data-riwayat="keluarga"] > i', 'keluarga'],
+    ['#app .g6[data-go="pesan"] > i',         'tanya'],
+    ['#app .g6[data-go="kritik"] > i',        'kritik'],
+    ['#app .g6[data-drawer] > i',             'lainnya'],
+    ['#app .svc .hd > i[data-ic="saldo"]',    'saldo'],
+    ['#app .svc .hd > i[data-ic="koreksi"]',  'koreksi'],
+    ['#app .svc .hd > i[data-ic="keluarga"]', 'keluarga'],
+    ['#app .pf-kartu .pk-h > i',              'kartu']
+  ];
+  var V = '?v=1'; // naikkan angkanya kalau gambar diganti, supaya HP tidak pakai gambar lama
+
+  function ada(src, cb){ var im = new Image(); im.onload = function(){ cb(src + V); }; im.src = src + V; }
+
+  ada(G.hero, function(u){
+    document.documentElement.style.setProperty('--t3-hero', 'url("' + u + '")');
+    document.body.classList.add('t3-hero');
+  });
+  var siap = {};
+  Object.keys(G).forEach(function(k){
+    if(k === 'hero') return;
+    ada(G[k], function(u){ siap[k] = u; pasang(); });
+  });
+  function pasang(){
+    PASANG.forEach(function(p){
+      var u = siap[p[1]]; if(!u) return;
+      document.querySelectorAll(p[0]).forEach(function(el){
+        el.classList.add('t3'); el.style.setProperty('--t3-img', 'url("' + u + '")');
+      });
+    });
+  }
+
+  // Warna bilah status HP ikut tema saat aplikasi karyawan terbuka
+  var app = document.getElementById('app'), meta = document.querySelector('meta[name="theme-color"]');
+  function warna(){ if(app && !app.hidden && meta) meta.content = '#E3F6F2'; }
+  if(app && window.MutationObserver){ new MutationObserver(warna).observe(app, { attributes: true, attributeFilter: ['hidden'] }); }
+  warna();
+})();
+</script>
+<!-- ==================== TEMA KARYAWAN (selesai) ==================== -->
 </body>
 </html>
