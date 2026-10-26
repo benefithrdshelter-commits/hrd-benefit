@@ -2077,6 +2077,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
       if(pos.value === 'Non Security' && !fv('keluarga', 'posisiLain')) return { salah: { el: fk('keluarga', 'posisiLain'), pesan: 'Mohon isi Posisi Non Security.' } };
       var anggota = Array.prototype.map.call(f.querySelectorAll('[data-anggota] input:checked'), function(i){ return i.value; });
       if(!anggota.length) return { salah: { el: f.querySelector('[data-anggota]'), pesan: 'Pilih minimal 1 anggota keluarga yang ingin ditambahkan.' } };
+      if(window.KLG_NIK){ var kn = KLG_NIK.kumpul(f, fv('keluarga', 'nikKtp')); if(kn.salah) return kn; anggota = kn.anggota; }
       var wajib = [['kk', 'Kartu Keluarga'], ['ktp', 'Foto KTP'], ['akta', 'Akta Kelahiran'], ['bukuNikah', 'Buku Nikah']];
       for(var i = 0; i < wajib.length; i++){
         if(!dataUp('keluarga', wajib[i][0]).length) return { salah: { el: boxUp('keluarga', wajib[i][0]), pesan: wajib[i][1] + ' wajib diupload.' } };
@@ -2620,7 +2621,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
       h += '<div class="ap-sec">Lampiran</div><div id="apLamp"><button class="ap-btn" id="apLampBtn">Tampilkan lampiran</button></div>';
       if(!ro) h += apFormKoreksi(r);
     } else if(k === 'keluarga'){
-      var ang = (r.anggotaKeluarga || []).map(function(a){ return esc(a.nama || a.namaLengkap || a.name || '-') + ' <small style="color:var(--muted)">(' + esc(a.hubungan || a.status || '') + ')</small>'; }).join('<br>');
+      var ang = (r.anggotaKeluarga || []).map(function(a){ if(typeof a === 'string') return esc(a); return esc(a.nama || a.namaLengkap || a.name || '-') + ' <small style="color:var(--muted)">(' + esc(a.hubungan || a.status || '') + ')</small>'; }).join('<br>');
       h += '<div class="ap-kv">' + kv('Nama TK', esc(r.namaTk)) + kv('NIK KTP', esc(r.nikKtp)) + kv('WhatsApp', esc(r.noWhatsapp)) + kv('Email', esc(r.email)) +
         kv('Badan usaha', esc(r.badanUsaha)) + kv('Perusahaan', esc(r.namaPerusahaan)) + kv('Site', esc(r.site)) + kv('Posisi / Bidang', esc(r.posisiBidang)) +
         kv('Anggota keluarga (' + (r.anggotaKeluarga || []).length + ')', ang, 1) + kv('Diajukan', tgl(r.timestamp)) + '</div>';
@@ -3287,5 +3288,74 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbxROyuznQz1mks4tsh9B5yGY-
 })();
 </script>
 <!-- ==================== TEMA KARYAWAN (selesai) ==================== -->
+<!-- ==================== NIK ANGGOTA KELUARGA (wajib) ==================== -->
+<style>
+  .klg-nik{margin-top:12px; display:grid; gap:2px;}
+  .klg-nik:empty{display:none;}
+  .klg-nik .fi{margin-top:10px;}
+  .klg-nik .klg-h{font-size:13.5px; font-weight:800; margin-top:12px;}
+  .klg-nik .klg-h small{font-weight:600; color:var(--muted);}
+  .klg-nik input.salah{border-color:#D64545 !important; background:#FFF6F6 !important;}
+</style>
+<script>
+/* Setiap anggota keluarga yang dicentang WAJIB diisi NIK (16 digit).
+   NIK ikut tersimpan di teks anggota, contoh "Istri — NIK 3507…", jadi langsung tampil di admin. */
+(function(){
+  var SATU = ['Anak 4', 'Ibu Kandung', 'Ayah Kandung'], nilai = {};
+  function esc(x){ return String(x).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); }
+  function f(){ return document.getElementById('fm-keluarga'); }
+  function kotak(){
+    var fm = f(); if(!fm) return null;
+    var c = fm.querySelector('.klg-nik');
+    if(!c){ var a = fm.querySelector('[data-anggota]'); if(!a) return null; c = document.createElement('div'); c.className = 'klg-nik'; a.parentNode.insertBefore(c, a.nextSibling); }
+    return c;
+  }
+  function kolom(key, lbl, wajib){
+    return '<div class="fi"><label>' + esc(lbl) + (wajib ? ' <em>*</em>' : '') + '</label><input class="klg-in" data-key="' + esc(key) + '" inputmode="numeric" maxlength="16" placeholder="16 digit NIK" value="' + esc(nilai[key] || '') + '"></div>';
+  }
+  function render(){
+    var c = kotak(); if(!c) return;
+    var html = '';
+    f().querySelectorAll('[data-anggota] input:checked').forEach(function(i){
+      if(/Tambahan 1%/.test(i.value)){
+        html += '<div class="klg-h">NIK Anggota Tambahan 1% <small>(isi minimal 1)</small></div>';
+        SATU.forEach(function(n){ html += kolom('1%|' + n, 'NIK ' + n, false); });
+      } else html += kolom(i.value, 'NIK ' + i.value, true);
+    });
+    c.innerHTML = html;
+  }
+  document.addEventListener('change', function(e){ if(e.target.closest && e.target.closest('#fm-keluarga [data-anggota]')) render(); });
+  document.addEventListener('input', function(e){
+    var i = e.target; if(!i.classList || !i.classList.contains('klg-in')) return;
+    i.value = i.value.replace(/\D/g, '').slice(0, 16); i.classList.remove('salah'); nilai[i.getAttribute('data-key')] = i.value;
+  });
+  document.addEventListener('reset', function(e){ if(e.target && e.target.id === 'fm-keluarga'){ nilai = {}; setTimeout(render, 0); } }, true);
+  window.KLG_NIK = {
+    kumpul: function(fm, nikTk){
+      render();
+      var hasil = [], dipakai = {}, salah = null;
+      fm.querySelectorAll('[data-anggota] input:checked').forEach(function(i){
+        if(salah) return;
+        var satu = /Tambahan 1%/.test(i.value), daftar = [];
+        var ins = Array.prototype.filter.call(fm.querySelectorAll('.klg-in'), function(x){ var k = x.getAttribute('data-key'); return satu ? k.indexOf('1%|') === 0 : k === i.value; });
+        var isi = ins.filter(function(x){ return x.value; });
+        if(satu && !isi.length){ salah = { el: ins[0], pesan: 'Isi minimal 1 NIK untuk Anggota Keluarga Tambahan 1%.' }; return; }
+        (satu ? isi : ins).forEach(function(x){
+          if(salah) return;
+          var siapa = satu ? x.getAttribute('data-key').split('|')[1] : i.value, v = x.value;
+          if(!/^\d{16}$/.test(v)) salah = { el: x, pesan: 'NIK ' + siapa + ' wajib diisi 16 digit angka.' };
+          else if(nikTk && v === nikTk) salah = { el: x, pesan: 'NIK ' + siapa + ' tidak boleh sama dengan NIK tenaga kerja.' };
+          else if(dipakai[v]) salah = { el: x, pesan: 'NIK ' + siapa + ' sama dengan NIK ' + dipakai[v] + '. Periksa lagi.' };
+          else { dipakai[v] = siapa; daftar.push(satu ? siapa + ' NIK ' + v : 'NIK ' + v); }
+        });
+        if(!salah) hasil.push(i.value + ' — ' + daftar.join(' / '));
+      });
+      if(salah){ if(salah.el && salah.el.classList) salah.el.classList.add('salah'); return { salah: salah }; }
+      return { anggota: hasil };
+    }
+  };
+})();
+</script>
+<!-- ==================== NIK ANGGOTA KELUARGA (selesai) ==================== -->
 </body>
 </html>
