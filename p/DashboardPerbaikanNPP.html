@@ -616,7 +616,15 @@ function generate(){
       btn.disabled = false; btn.textContent = 'Generate PDF';
       if(res.success){
         document.getElementById('okName').textContent = res.fileName + ' · ' + res.sizeKb + ' KB';
-        document.getElementById('okLink').href = res.url;
+        var okL = document.getElementById('okLink');
+        if (res.pdfBase64) {   // PDF tidak disimpan di Drive: dibuat jadi file unduhan langsung di browser
+          var bin = atob(res.pdfBase64), u8 = new Uint8Array(bin.length);
+          for (var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+          if (okL._bu) URL.revokeObjectURL(okL._bu);
+          okL._bu = URL.createObjectURL(new Blob([u8], { type: 'application/pdf' }));
+          okL.href = okL._bu; okL.removeAttribute('target'); okL.setAttribute('download', res.fileName || 'surat.pdf');
+          setTimeout(function(){ okL.click(); }, 50);   // langsung terunduh
+        } else { okL.href = res.url; }
         document.getElementById('okBox').classList.add('show');
         btn.style.display = 'none';
       } else {
